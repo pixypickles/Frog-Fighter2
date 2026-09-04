@@ -303,55 +303,63 @@
 
   const selectCardCommands={
     green:[
-      'バーニングアッパー：↑ ＋ パンチ',
+      'バーニングアッパー：上 ＋ パンチ',
       'バーニングキック：前 ＋ キック',
-      'バーニングショット：後ろ ＋ パンチ<br>バーニングサイクロン：↓ → 後ろ ＋ キック'
+      'バーニングショット：後ろ ＋ パンチ',
+      'バーニングサイクロン：下 → 後ろ ＋ キック'
     ],
     blue:[
       'アクアトルネード：上 ＋ パンチ',
       'アクアストリーム：下 ＋ キック',
-      'アクアボルテックス：後ろ ＋ パンチ'
-    ],
-    black:[
-      'ヘルクラッシュ：→ → ＋ パンチ',
-      'アビスチャージ：後ろ＋パンチ長押し → 離す'
-    ],
-    purple:[
-      'リボンラッシュ：舌 ×3',
-      'ナマズさん突進：後ろ ＋ ガード ×2',
-      'バックスピンキック：後ろ ＋ キック（追加入力で追加回転）'
+      'アクアボルテックス：後ろ ＋ パンチ',
+      'アクアショット：前 ＋ パンチ'
     ],
     yellow:[
-      '水圧カッター：前 ＋ パンチ',
-      '水圧カッター：前 ＋ キック',
+      '水圧カッター（正面）：前 ＋ パンチ',
+      '水圧カッター（下15度）：前 ＋ キック',
+      'カープ水圧カッター（上から弧）：後ろ ＋ パンチ',
+      'カープ水圧カッター（下から弧）：後ろ ＋ キック',
       'ヒーリングバブル：ガード ×2',
-      '高速バブル移動：↑ ＋ ガード'
+      '高速バブル移動：後ろ → 下 ＋ ガード'
     ],
     orange:[
-      'ホワイトカウンター：ガード ×2',
+      'ホワイトカウンター：下 → 後ろ ＋ ガード',
       'ガーディアンタックル：後ろ → 前 ＋ ガード',
-      'ホワイトオーラ：ガード長押し → 離す',
-      '白い長リーチ攻撃：オーラ中 パンチ / キック'
+      'ホワイトオーラ：ガード長押し',
+      '白い長リーチ攻撃：オーラ中 パンチ / キック',
+      'ホワイトショット：ガード ＋ パンチ'
     ],
-    piranha:[
-      '高速突進噛みつき：← → ＋ 舌',
-      '急降下①：↓ ↑ ＋ パンチ',
-      '急降下②：↓ ↑ ＋ キック'
+    black:[
+      'ヘルクラッシュ：前 ＋ パンチ',
+      'アビスチャージ：後ろ ＋ パンチ長押し → 離す',
+      'パワーショット：前 ＋ キック',
+      'パワーチャージショット：後ろ ＋ キック長押し → 離す'
     ],
-    crayfish:[
-      'クローラッシュ：パンチ ×3',
-      'ボトムスマッシュ：← ↓ ＋ キック',
-      'クロー・カウンター：↓ ＋ ガード ×2'
+    purple:[
+      '舌ラッシュ：舌連打',
+      'バブルショット：後ろ ＋ 舌',
+      'バックスピンキック：後ろ ＋ キック（追加入力で追加回転）'
     ],
     beelzebub:[
       'ヴェノム・ウォーター：方向キー1回転 ＋ ガード',
-      'フィッシュ・レイド：↓ → ＋ パンチ',
-      'アビスショック：↓ → ＋ キック'
+      'アビスショック（上弧）：上 ＋ パンチ',
+      'アビスショック（下弧）：下 ＋ キック',
+      'ベノムショット：前 ＋ パンチ'
     ],
     kawazu:[
-      '水圧ラッシュ：パンチ ×2',
+      '水圧ラッシュ：パンチ連打',
       'ミラージュキック：前 ＋ キック',
-      'ハイスピードサイクロン：↓ → 後ろ ＋ キック'
+      'スピンキックカッター：後ろ ＋ キック（カッター3連発）'
+    ],
+    piranha:[
+      '高速突進噛みつき：後ろ → 前 ＋ 舌',
+      '急降下①：下 → 上 ＋ パンチ',
+      '急降下②：下 → 上 ＋ キック'
+    ],
+    crayfish:[
+      'クローラッシュ：パンチ ×3',
+      'ボトムスマッシュ：後ろ → 下 ＋ キック',
+      'クロー・カウンター：下 ＋ ガード ×2'
     ]
   };
   function applySelectCardCommands(card){
@@ -2655,10 +2663,14 @@
 
   function practiceSpecialText(type){
     const map={
-      green:['↑ ＋ パンチ：バーニングアッパー','前 ＋ キック：バーニングキック','後ろ ＋ パンチ：バーニングショット','下 → 後ろ ＋ キック：バーニングサイクロン'],
-      blue:['↑ ＋ パンチ：アクアトルネード','↓ ＋ キック：アクアストリーム','後ろ ＋ パンチ：アクアボルテックス（HP少量吸収）','前 ＋ パンチ：アクアショット'],
-      yellow:['前 ＋ パンチ：水圧カッター（正面）','前 ＋ キック：水圧カッター（斜め下）','後ろ ＋ パンチ/キック：カープ水圧カッター','ガード ×2：ヒーリングバブル'],
-      orange:['ガード ×2：ホワイトカウンター','後ろ → 前 ＋ ガード：ガーディアンタックル','ガード長押し → 離す：ホワイトオーラ','ホワイトオーラ中：HPが少しずつ回復＋白いリーチ攻撃']
+      green:['上 ＋ パンチ：バーニングアッパー','前 ＋ キック：バーニングキック','後ろ ＋ パンチ：バーニングショット','下 → 後ろ ＋ キック：バーニングサイクロン'],
+      blue:['上 ＋ パンチ：アクアトルネード','下 ＋ キック：アクアストリーム','後ろ ＋ パンチ：アクアボルテックス','前 ＋ パンチ：アクアショット'],
+      yellow:['前 ＋ パンチ：水圧カッター（正面）','前 ＋ キック：水圧カッター（下15度）','後ろ ＋ パンチ：カープ水圧カッター（上から弧）','後ろ ＋ キック：カープ水圧カッター（下から弧）','ガード ×2：ヒーリングバブル','後ろ → 下 ＋ ガード：高速バブル移動'],
+      orange:['下 → 後ろ ＋ ガード：ホワイトカウンター','後ろ → 前 ＋ ガード：ガーディアンタックル','ガード長押し：ホワイトオーラ','オーラ中 パンチ / キック：白い長リーチ攻撃','ガード ＋ パンチ：ホワイトショット'],
+      black:['前 ＋ パンチ：ヘルクラッシュ','後ろ ＋ パンチ長押し → 離す：アビスチャージ','前 ＋ キック：パワーショット','後ろ ＋ キック長押し → 離す：パワーチャージショット'],
+      purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
+      beelzebub:['方向キー1回転 ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
+      kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
     return map[type] || ['専用必殺技：練習対象外'];
   }
@@ -3583,7 +3595,8 @@
       life:1.25,
       hit:false,
       size:1.0,
-      angle:rad
+      angle:rad,
+      reflected:0
     });
 
     comboEl.textContent='水圧カッター!';
@@ -4657,6 +4670,20 @@
   });
   addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key==='i'&&player)player.guard=false});
 
+  function incomingReflectableThreat(f){
+    if(!f) return false;
+    const threats=[];
+    water2Shots.forEach(q=>{ if(q.owner && q.owner!==f && !q.hit) threats.push({x:q.x,y:q.y,vx:q.vx||0,vy:q.vy||0,r:q.r||14}); });
+    pressureBlades.forEach(q=>{ if(q.owner && q.owner!==f && !q.hit) threats.push({x:q.x,y:q.y,vx:q.vx||0,vy:q.vy||0,r:30}); });
+    return threats.some(q=>{
+      const dx=f.x-q.x, dy=f.y-q.y;
+      const d=Math.hypot(dx,dy);
+      if(d>250 || Math.abs(dy)>95) return false;
+      // 弾の速度ベクトルがキャラ方向を向いているか。
+      return dx*q.vx + dy*q.vy > 0;
+    });
+  }
+
   function enemyAI(dt){
     const diff=difficultyProfile();
     if(gameMode==='practice' || gameMode==='raceMini' || gameMode==='basketMini') return;
@@ -4670,6 +4697,16 @@
 
     if(enemy.stun>0)return;
     const dx=player.x-enemy.x,dy=player.y-enemy.y,dist=Math.hypot(dx,dy);
+
+    // 水中格闘2：CPUは反射可能な飛び道具を見たらシャボンガードを優先。
+    if(incomingReflectableThreat(enemy)){
+      enemy.guard=true;
+      enemy.guardStartT=.28;
+      enemy.vx*=.82; enemy.vy*=.82;
+      return;
+    }
+    enemy.guard=false;
+
     if(enemy.attackT<=0){
       if(enemy.type==='beelzebub' && enemy.specialT<=0 && enemy.bossSpecialCooldown<=0){
         const roll=Math.random();
@@ -4685,7 +4722,7 @@
       } else if(dist>120&&dist<enemy.tongueRange&&Math.random()<dt*.28*diff.tongue) {
         attack(enemy,'tongue');
       }
-      enemy.guard = dist<90 && Math.random()<dt*.25*diff.guard;
+      if(dist<90 && Math.random()<dt*.25*diff.guard) enemy.guard=true;
     }
   }
 
@@ -5355,16 +5392,26 @@ function drawBackground(dt){
         if(!p.hit && target){
           const d=Math.hypot(target.x-p.x,target.y-p.y);
           if(d<target.radius+28){
-            p.hit=true;
-            // ウリエルのカウンター構えは飛び道具を無効化。反撃は発生させない。
-            if(projectileImmuneByBubble(target)){
-              spawnImpact(p.x,p.y,'guard');
-            }else if(target.type==='orange' && target.counterReady){
-              spawnImpact(p.x,p.y,'guard');
+            // 水中格闘2：水圧カッターもシャボンガードで反射できる。
+            if(target.guard){
+              spawnImpact(p.x,p.y,'guard'); playSfx('guard');
+              p.owner=target;
+              p.vx=-p.vx*1.10; p.vy=-(p.vy||0)*.92;
+              p.size=Math.min(1.45,(p.size||1)*1.06);
+              p.reflected=(p.reflected||0)+1;
+              p.x=target.x+target.face*(target.radius+38);
+              comboEl.textContent=p.reflected>1?'REFLECT x'+p.reflected+'!':'REFLECT!';
             }else{
-              p.owner._projectileHit=true;
-              damageHit(p.owner,target,5.2*p.owner.damageMul,105*p.owner.face,-18);
-              p.owner._projectileHit=false;
+              p.hit=true;
+              if(projectileImmuneByBubble(target)){
+                spawnImpact(p.x,p.y,'guard');
+              }else if(target.type==='orange' && target.counterReady){
+                spawnImpact(p.x,p.y,'guard');
+              }else{
+                p.owner._projectileHit=true;
+                damageHit(p.owner,target,5.2*p.owner.damageMul,105*Math.sign(p.vx||p.owner.face),-18);
+                p.owner._projectileHit=false;
+              }
             }
           }
         }
