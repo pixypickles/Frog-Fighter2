@@ -1,0 +1,469 @@
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:#0c2927;color:#fff}body{min-height:100svh;background:radial-gradient(circle at 50% 0,#38634e,#0c2927 70%)}button{font:inherit}.mix{width:min(900px,100%);margin:auto;padding:10px 12px 24px}header{display:flex;align-items:center;gap:10px}.frog{font-size:38px}h1{font-size:clamp(22px,5vw,38px);margin:0;line-height:1}header p{font-size:11px;margin:4px 0 0;opacity:.8}.ver{margin-left:auto;font-weight:900;font-size:12px}.turnbar{margin:8px 0;padding:8px 11px;border-radius:14px;background:#ffffff16;border:1px solid #ffffff2d;display:flex;justify-content:space-between;align-items:center}.turnbar div:first-child b,.turnbar div:first-child span{display:block}.turnbar span,.bases{font-size:11px}.kawazu-dot,.beel-dot{display:inline-block;width:9px;height:9px;border-radius:50%}.kawazu-dot{background:#66e8ff}.beel-dot{background:#d177ff}.board{position:relative;height:min(72svh,650px);min-height:500px;border:3px solid #ffffff38;border-radius:25px;overflow:hidden;background:linear-gradient(#7cab54,#679844);box-shadow:0 15px 36px #0019}.board:before,.board:after{content:"";position:absolute;border-radius:50%;background:radial-gradient(ellipse at 40% 35%,#52bfd0,#1c809d 70%);border:8px solid #a4c96a;box-shadow:inset 0 0 0 3px #ffffff21;z-index:0}.board:before{width:37%;height:31%;left:31%;top:18%;transform:rotate(-8deg)}.board:after{width:21%;height:19%;right:8%;top:15%;transform:rotate(9deg)}.water-zone{position:absolute;left:44%;top:25%;font-size:40px;font-weight:1000;opacity:.11;z-index:1}.land-zone{position:absolute;left:5%;top:44%;font-size:48px;font-weight:1000;opacity:.08;z-index:1}#roads{position:absolute;inset:0;width:100%;height:100%;z-index:2}.road{stroke:#dfc489;stroke-width:18;stroke-linecap:round;opacity:.93}.road.water{stroke:#a3e8f2}.road.active{stroke:#fff;stroke-width:25;filter:drop-shadow(0 0 5px #fff)}.node{position:absolute;transform:translate(-50%,-50%);width:76px;height:56px;border-radius:18px;border:3px solid #fff9;background:#375d3a;color:#fff;z-index:4;box-shadow:0 5px 0 #0004;text-shadow:0 1px 2px #0008}.node b,.node small{display:block}.node b{font-size:12px}.node small{font-size:8px}.node.water{background:#176f89}.node.base{width:88px;height:63px}.node.kawazu-owned{box-shadow:0 0 0 5px #66e8ff88,0 5px 0 #0004}.node.beel-owned{box-shadow:0 0 0 5px #d177ff88,0 5px 0 #0004}.node.reachable{animation:pulse .7s infinite alternate;cursor:pointer}@keyframes pulse{to{filter:brightness(1.5);box-shadow:0 0 0 7px #fff7}}.unit{position:absolute;z-index:8;transform:translate(-50%,-50%);width:39px;height:39px;border-radius:50%;border:3px solid #fff;background:#163d36;display:grid;place-items:center;font-size:18px;box-shadow:0 4px 7px #0007;transition:left .25s ease,top .25s ease}.unit.kawazu{outline:4px solid #66e8ff88}.unit.beel{outline:4px solid #d177ff88}.unit.selected{transform:translate(-50%,-50%) scale(1.22);filter:brightness(1.35)}.unit.waiting{opacity:.38;filter:grayscale(1)}.hp-mini{position:absolute;left:3px;right:3px;bottom:-7px;height:5px;background:#281e1e;border-radius:5px;overflow:hidden}.hp-mini i{display:block;height:100%;background:#7df08d}.panel{display:flex;gap:7px;align-items:center;margin-top:8px}.panel #message{flex:1;min-width:0;padding:8px 10px;border-radius:12px;background:#ffffff12}.panel #message b,.panel #message span{display:block}.panel #message span{font-size:9px;opacity:.78;margin-top:2px}.panel button{border:1px solid #fff8;border-radius:12px;background:#ffffff1b;color:#fff;padding:9px 10px;font-weight:900;font-size:10px}.rules{margin-top:8px;padding:9px 11px;border-radius:13px;background:#0002;font-size:9px}.rules b,.rules span{display:block}.rules span{opacity:.76;margin-top:2px}#mixRotateOverlay{display:none;position:fixed;inset:0;z-index:100000;background:rgba(2,18,22,.94);place-items:center;padding:20px;text-align:center}#mixRotateOverlay.show{display:grid}.rotate-card{width:min(360px,92vw);padding:26px 20px;border:2px solid #ffffff66;border-radius:25px;background:#173d3b;box-shadow:0 20px 50px #0008}.rotate-icon{font-size:58px}.rotate-card b,.rotate-card span,.rotate-card small{display:block}.rotate-card b{font-size:22px;margin-top:7px}.rotate-card span{font-size:13px;margin-top:9px}.rotate-card small{font-size:11px;opacity:.72;margin-top:4px}.rotate-card button{margin-top:18px;border:2px solid #fff9;border-radius:999px;background:#ffffff20;color:#fff;padding:11px 18px;font-weight:900}#endTurn:disabled{opacity:.4}@media(max-width:520px){.board{min-height:500px}.node{width:67px;height:52px}.node.base{width:78px}.unit{width:36px;height:36px}.panel{flex-wrap:wrap}.panel #message{flex-basis:100%}}
+.ver-stack{
+  margin-left:auto;
+  text-align:right;
+  line-height:1.1;
+}
+.ver-stack .ver{
+  display:block;
+  font-weight:1000;
+  font-size:12px;
+}
+.ver-stack small{
+  display:block;
+  margin-top:3px;
+  font-size:9px;
+  opacity:.72;
+  white-space:nowrap;
+}
+.node.both{
+  background:linear-gradient(135deg,#3e6c3d 0 50%,#176f89 50% 100%) !important;
+}
+
+.node.base{border-color:#ffd5df;box-shadow:0 0 0 3px #ff8fab66,0 5px 0 #0004}
+.node.base b{font-size:12px}
+
+/* v0.10 マップ駒：カエルをキャラクターごとの色で識別 */
+.map-frog{display:block;font-size:20px;line-height:1;filter:var(--frog-filter,none)}
+.frog-kawazu{--frog-filter:hue-rotate(18deg) saturate(1.25) brightness(1.04)}
+.frog-green{--frog-filter:hue-rotate(0deg) saturate(1.15)}
+.frog-blue{--frog-filter:hue-rotate(120deg) saturate(1.65) brightness(.98)}
+.frog-yellow{--frog-filter:hue-rotate(300deg) saturate(1.8) brightness(1.18)}
+.frog-orange{--frog-filter:hue-rotate(325deg) saturate(2.2) brightness(1.08)}
+.frog-beelzebub{--frog-filter:grayscale(.85) sepia(.35) saturate(2.2) brightness(.68)}
+.frog-black{--frog-filter:grayscale(1) brightness(.38)}
+.frog-purple{--frog-filter:hue-rotate(205deg) saturate(1.9) brightness(.9)}
+
+/* v0.11 マップ配分：陸地主ルート＋上側に池の水中ルート */
+.board{
+  background:
+    radial-gradient(ellipse at 50% 25%,rgba(33,145,170,.16) 0 22%,transparent 23%),
+    linear-gradient(#7cab54,#679844) !important;
+}
+.board:before{
+  width:48% !important;
+  height:26% !important;
+  left:27% !important;
+  top:17% !important;
+  transform:rotate(-3deg) !important;
+}
+.board:after{
+  width:18% !important;
+  height:16% !important;
+  right:6% !important;
+  top:15% !important;
+}
+
+/* ネイティブ絵文字の色変換は端末依存なので廃止。
+   CSSだけで小さなカエル顔を描き、キャラ色を確実に反映する。 */
+.frog-piece .map-frog{
+  --frog:#39cb4d;
+  --frog-light:#75e46f;
+  position:relative;
+  display:block;
+  width:29px;
+  height:23px;
+  border-radius:48% 48% 52% 52%;
+  background:var(--frog);
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.10);
+}
+.frog-piece .map-frog:before,
+.frog-piece .map-frog:after{
+  content:"";
+  position:absolute;
+  top:-7px;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:var(--frog-light);
+}
+.frog-piece .map-frog:before{left:1px}
+.frog-piece .map-frog:after{right:1px}
+.frog-piece .map-frog .eye{
+  position:absolute;
+  top:-3px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#fff;
+  z-index:2;
+}
+.frog-piece .map-frog .eye:after{
+  content:"";
+  position:absolute;
+  width:3px;
+  height:3px;
+  left:2px;
+  top:2px;
+  border-radius:50%;
+  background:#17221d;
+}
+.frog-piece .map-frog .e1{left:5px}
+.frog-piece .map-frog .e2{right:5px}
+.frog-piece .map-frog .mouth{
+  position:absolute;
+  left:9px;
+  top:13px;
+  width:12px;
+  height:6px;
+  border-bottom:2px solid rgba(20,55,43,.85);
+  border-radius:0 0 50% 50%;
+}
+
+/* キャラクター別の駒色 */
+.frog-kawazu .map-frog{--frog:#49b85a;--frog-light:#67cf6b}
+.frog-green .map-frog{--frog:#36cf4d;--frog-light:#72eb71}
+.frog-blue .map-frog{--frog:#28aee8;--frog-light:#71d7ff}
+.frog-yellow .map-frog{--frog:#e3ce35;--frog-light:#f5e56c}
+.frog-orange .map-frog{--frog:#ef8a32;--frog-light:#ffb05b}
+.frog-beelzebub .map-frog{--frog:#111814;--frog-light:#6eff22}
+.frog-black .map-frog{--frog:#353b43;--frog-light:#59616d}
+.frog-purple .map-frog{--frog:#ed5a9d;--frog-light:#ff8fc0}
+
+/* 古いemoji filter指定を無効化 */
+.map-frog{filter:none !important}
+
+/* v0.12 タイトル */
+.mix-title{
+  min-height:100svh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:22px 14px;
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 22%,rgba(70,190,220,.30),transparent 31%),
+    linear-gradient(#0e5c68,#123b38 58%,#173126);
+}
+.mix-title[hidden]{display:none !important}
+.title-frogs{display:flex;align-items:center;gap:18px;margin-bottom:8px}
+.title-frogs .tf{display:block}
+.title-frogs .kawazu{font-size:70px;filter:hue-rotate(16deg) saturate(1.15)}
+.title-frogs .beel{font-size:70px;filter:grayscale(.85) brightness(.55) saturate(1.4)}
+.title-frogs .versus{font-size:24px;font-weight:1000;color:#fff6aa;text-shadow:0 3px 0 #0005}
+.mix-title h1{margin:4px 0 7px;font-size:clamp(34px,8vw,58px);line-height:1}
+.title-copy{margin:0 0 18px;font-size:clamp(16px,4vw,24px);font-weight:900;color:#f7ffc8}
+.difficulty-title{
+  width:min(540px,94vw);
+  padding:14px;
+  border-radius:20px;
+  background:#ffffff15;
+  border:1px solid #ffffff35;
+}
+.difficulty-title b{display:block;margin-bottom:10px}
+.difficulty-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.difficulty-buttons button{
+  border:2px solid #ffffff75;border-radius:14px;background:#ffffff18;color:#fff;
+  padding:11px 6px;font-weight:1000;
+}
+.difficulty-buttons button.selected{
+  background:#ffe76a;color:#473d08;border-color:#fff5b1;box-shadow:0 0 0 3px #ffe76a44;
+}
+.difficulty-title small{display:block;margin-top:9px;opacity:.72;font-size:10px}
+.mix-start-button{
+  margin-top:17px;border:2px solid #fff6b2;border-radius:999px;
+  background:#f5c537;color:#362b05;font-weight:1000;font-size:18px;
+  padding:13px 30px;box-shadow:0 6px 0 #9f7720;
+}
+.mix-start-button:active{transform:translateY(4px);box-shadow:0 2px 0 #9f7720}
+.title-version{margin-top:14px;font-size:9px;opacity:.62}
+
+/* 総大将 */
+.unit.leader{
+  width:46px !important;height:46px !important;
+  box-shadow:0 0 0 4px #ffd86a,0 5px 10px #0008 !important;
+}
+.unit.leader:after{
+  content:"👑";position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  font-size:17px;filter:none;
+}
+
+/* 勝敗画面 */
+.mix-result-overlay{
+  position:fixed;inset:0;z-index:200000;display:grid;place-items:center;
+  background:rgba(3,19,21,.94);padding:20px;text-align:center;
+}
+.mix-result-overlay[hidden]{display:none !important}
+.result-card{
+  width:min(430px,94vw);padding:28px 20px;border-radius:26px;
+  border:2px solid #ffffff55;background:#174540;box-shadow:0 20px 60px #000b;
+}
+.result-icon{font-size:72px}
+.result-card h2{margin:5px 0;font-size:36px;color:#fff6a7}
+.result-card p{white-space:pre-line;line-height:1.7}
+.result-card button{
+  margin-top:13px;border:2px solid #fff;border-radius:999px;padding:11px 22px;
+  background:#ffffff1b;color:#fff;font-weight:1000;
+}
+
+/* v0.13 本拠地防衛側の地形選択 */
+.hq-terrain-overlay{
+  position:fixed;inset:0;z-index:190000;display:grid;place-items:center;
+  background:rgba(2,18,22,.94);padding:20px;text-align:center;
+}
+.hq-terrain-overlay[hidden]{display:none !important}
+.hq-terrain-card{
+  width:min(420px,94vw);padding:26px 20px;border-radius:25px;
+  background:#174540;border:2px solid #ffffff66;box-shadow:0 20px 60px #000b;
+}
+.hq-shield{font-size:52px}
+.hq-terrain-card h2{margin:5px 0 9px}
+.hq-terrain-card p{margin:0 0 13px;font-size:13px}
+.hq-terrain-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hq-terrain-buttons button{
+  border:2px solid #fff9;border-radius:16px;padding:14px 8px;
+  color:#fff;font-weight:1000;font-size:16px;background:#ffffff1b;
+}
+#hqLandChoice{background:#557a35}
+#hqWaterChoice{background:#176f89}
+.hq-terrain-card small{display:block;margin-top:11px;font-size:10px;opacity:.72}
+
+.landscape-recommend{
+  margin:-8px 0 14px;
+  padding:7px 14px;
+  border-radius:999px;
+  background:#ffffff18;
+  border:1px solid #ffffff40;
+  font-weight:900;
+  font-size:12px;
+}
+
+/* マップ選択 */
+.map-select-overlay,.defender-select-overlay{
+  position:fixed;inset:0;z-index:180000;display:grid;place-items:center;
+  padding:18px;background:rgba(2,18,22,.94);text-align:center;
+}
+.map-select-overlay[hidden],.defender-select-overlay[hidden]{display:none !important}
+.map-select-card,.defender-select-card{
+  width:min(560px,95vw);padding:22px 18px;border-radius:24px;
+  background:#174540;border:2px solid #ffffff66;box-shadow:0 20px 60px #000b;
+}
+.map-select-card h2,.defender-select-card h2{margin:0 0 7px}
+.map-select-card p,.defender-select-card p{font-size:12px;opacity:.8}
+.map-select-buttons{display:grid;grid-template-columns:1fr;gap:9px;margin-top:13px}
+.map-select-buttons button{
+  border:2px solid #ffffff80;border-radius:17px;background:#ffffff18;color:#fff;
+  padding:13px 15px;text-align:left;font-weight:900;
+}
+.map-select-buttons b,.map-select-buttons small{display:block}
+.map-select-buttons b{font-size:16px}
+.map-select-buttons small{font-size:10px;opacity:.73;margin-top:3px}
+
+/* 複数敵が同じ地点にいるとき、攻撃側が相手を選択 */
+.defender-choices{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:13px}
+.defender-choice{
+  position:relative;border:2px solid #ffffff75;border-radius:16px;background:#ffffff16;
+  color:#fff;padding:12px 9px;font-weight:900;
+}
+.defender-choice strong,.defender-choice small{display:block}
+.defender-choice strong{font-size:14px}
+.defender-choice small{margin-top:4px;font-size:9px;opacity:.76}
+.defender-choice .mini-hp{height:6px;background:#2b2525;border-radius:9px;margin-top:7px;overflow:hidden}
+.defender-choice .mini-hp i{display:block;height:100%;background:#78ef88}
+.defender-cancel{
+  margin-top:11px;border:1px solid #fff7;border-radius:999px;background:#ffffff12;
+  color:#fff;padding:8px 18px;font-weight:900;
+}
+@media(max-width:480px){.defender-choices{grid-template-columns:1fr}}
+
+/* v0.18 工作兵 */
+.frog-pascal .map-frog{--frog:#71d85e;--frog-light:#a4f18a}
+.frog-malphas .map-frog{--frog:#744a8f;--frog-light:#b17ad0}
+.unit.frog-pascal,.unit.frog-malphas{transform:translate(-50%,-50%) scale(.78)}
+.trap-mark{position:absolute;z-index:17;transform:translate(-50%,-50%);font-size:17px;
+  width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:#101b1dcc;border:1px solid #fff8}
+.trap-mark.kawazu{box-shadow:0 0 0 2px #65df7d88}
+.trap-mark.beel{box-shadow:0 0 0 2px #d36a9d88}
+.trap-action{border:1px solid #fff7;border-radius:8px;background:#ffffff18;color:#fff;padding:3px 7px;font-weight:900}
+
+/* v0.27 MIXタイトルの地上/水中練習 */
+.mix-practice-row{
+  width:min(540px,94vw);display:grid;grid-template-columns:1fr 1fr;
+  gap:9px;margin-top:14px;
+}
+.mix-practice-button{
+  border:2px solid #ffffff80;border-radius:16px;background:#ffffff16;color:#fff;
+  padding:11px 8px;font-weight:1000;font-size:14px;
+}
+.mix-practice-button:active{transform:translateY(2px)}
+
+.mix-practice-overlay,.kawazu-briefing-overlay{
+  position:fixed;inset:0;z-index:195000;display:grid;place-items:center;
+  background:rgba(2,18,22,.95);padding:16px;text-align:center;
+}
+.mix-practice-overlay[hidden],.kawazu-briefing-overlay[hidden]{display:none!important}
+.mix-practice-card,.kawazu-briefing-card{
+  width:min(610px,96vw);max-height:92svh;overflow:auto;
+  padding:20px 18px;border-radius:24px;background:#174540;
+  border:2px solid #ffffff66;box-shadow:0 20px 60px #000b;
+}
+.mix-practice-card h2,.kawazu-briefing-card h2{margin:0 0 7px}
+.mix-practice-card>p{margin:0 0 12px;font-size:12px;opacity:.78}
+.mix-practice-fighters{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.mix-practice-fighter{
+  border:2px solid #ffffff55;border-radius:14px;background:#ffffff12;color:#fff;
+  padding:10px 4px;font-weight:900;font-size:11px;
+}
+.mix-practice-fighter.selected{border-color:#fff6a2;background:#ffe259;color:#483b08}
+.mix-practice-moves{
+  margin-top:11px;padding:12px;border-radius:15px;background:#071d1c55;text-align:left;
+}
+.mix-practice-moves>b{display:block;text-align:center;color:#fff4a8;margin-bottom:7px}
+#mixPracticeMoveList{display:grid;gap:5px;font-size:12px}
+#mixPracticeMoveList span{display:block;padding:5px 7px;border-radius:8px;background:#ffffff0d}
+.mix-practice-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+.mix-practice-actions button,#kawazuBriefingNext{
+  border:2px solid #ffffff80;border-radius:999px;padding:11px 12px;
+  font-weight:1000;background:#ffffff16;color:#fff;
+}
+#mixPracticeGo,#kawazuBriefingNext{background:#f3c942;color:#3e3104;border-color:#fff1a0}
+
+.kawazu-briefing-icon{font-size:46px}
+.kawazu-warning{display:grid;gap:7px;margin:12px 0}
+.kawazu-warning b{
+  display:block;padding:9px;border-radius:11px;background:#8e2727;color:#fff4df;
+}
+.kawazu-command-list{
+  display:grid;gap:6px;text-align:left;padding:12px;border-radius:14px;background:#061b1b88;
+}
+.kawazu-command-list strong{text-align:center;color:#fff2a0;margin-bottom:3px}
+.kawazu-command-list span{padding:6px 8px;border-radius:8px;background:#ffffff0d}
+#kawazuBriefingNext{margin-top:13px;min-width:180px}
+@media(max-width:520px){
+  .mix-practice-fighters{grid-template-columns:repeat(2,1fr)}
+}
+
+.map-select-buttons button.locked{
+  opacity:.42;
+  filter:grayscale(.55);
+  position:relative;
+}
+.map-select-buttons button.locked:after{
+  content:"🔒";
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-size:20px;
+}
+.map-select-buttons button.cleared{
+  box-shadow:0 0 0 2px #7af58a88 inset;
+}
+
+/* v0.35: 敵本拠地へ攻め込んでいる駒を埋もれさせない */
+.unit.sieging{
+  box-shadow:0 0 0 4px #fff6a0,0 0 18px #ffd84d,0 5px 10px #0008 !important;
+}
+.unit.sieging:before{
+  content:"⚔";
+  position:absolute;
+  left:-8px;
+  top:-16px;
+  font-size:15px;
+  filter:none;
+}
+.unit.waiting{opacity:.48}
+
+/* v0.36 浅瀬マス */
+.node.shallow{
+  background:linear-gradient(#8bd7d4 0 42%,#2f90a2 43% 100%) !important;
+  border-color:#bdf8ef !important;
+}
+.road.shallow{stroke:#72d5d1 !important}
+
+.mix-practice-row-3{
+  grid-template-columns:repeat(3,1fr);
+}
+@media(max-width:560px){
+  .mix-practice-row-3{grid-template-columns:1fr}
+}
+
+/* v0.39 盤面全体を水域として表現 */
+.board:before{
+  content:"";
+  position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse at 14% 22%,rgba(255,255,255,.12),transparent 16%),
+    radial-gradient(ellipse at 67% 48%,rgba(255,255,255,.08),transparent 20%),
+    linear-gradient(rgba(52,150,171,.10),rgba(19,101,137,.16));
+}
+.node.land{
+  background:
+    radial-gradient(ellipse at 28% 35%,#68b866 0 22%,transparent 23%),
+    radial-gradient(ellipse at 63% 30%,#4fa658 0 24%,transparent 25%),
+    radial-gradient(ellipse at 50% 68%,#5cad5b 0 25%,transparent 26%),
+    #237f97 !important;
+  border-color:#b8f2b6 !important;
+}
+.node.shallow{
+  background:
+    radial-gradient(ellipse at 43% 43%,#61b361 0 22%,transparent 23%),
+    radial-gradient(ellipse at 66% 62%,#55a75b 0 14%,transparent 15%),
+    #3b9fb0 !important;
+}
+.node.water{background:#287f9f !important}
+.hq-terrain-buttons-3{grid-template-columns:repeat(3,1fr)!important}
+@media(max-width:520px){.hq-terrain-buttons-3{grid-template-columns:1fr!important}}
+
+/* v0.40: 水面が見えている池は、陸地色ではなく明確な青に */
+.board .pond,
+.board .water-area,
+.board .lake,
+.board .pond-bg{
+  background:linear-gradient(180deg,#16bdd4 0%,#078dad 58%,#087b9d 100%) !important;
+  box-shadow:inset 0 0 28px rgba(0,70,110,.28) !important;
+}
+.node.shallow{
+  background:
+    radial-gradient(ellipse at 40% 42%,#69bb67 0 20%,transparent 21%),
+    radial-gradient(ellipse at 67% 63%,#5aad61 0 13%,transparent 14%),
+    #35a8bd !important;
+  border-color:#b8f0dd !important;
+}
+
+/* v0.43: 勝敗画面の戻る導線を常に見えるように */
+.result-card{
+  max-height:calc(100svh - 24px);
+  overflow:auto;
+  box-sizing:border-box;
+}
+.mix-result-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:13px;
+  position:sticky;
+  bottom:0;
+  padding-top:8px;
+  background:linear-gradient(transparent,#174540 28%);
+}
+.mix-result-actions button{
+  margin-top:0 !important;
+  min-height:44px;
+}
+#mixResultMapSelect{
+  background:#f2cf48 !important;
+  color:#392f08 !important;
+  border-color:#fff0a0 !important;
+}
+@media(max-height:520px){
+  .mix-result-overlay{padding:8px}
+  .result-card{padding:14px 16px}
+  .result-icon{font-size:44px}
+  .result-card h2{font-size:26px}
+  .result-card p{line-height:1.4;margin:6px 0}
+}
+
+/* v0.44 工作員：小型＋工具ゴーグルで明確に識別 */
+.unit.frog-pascal .map-frog:after,
+.unit.frog-malphas .map-frog:after{
+  box-shadow:0 0 0 2px #ffe45c, -13px 0 0 -2px #ffe45c;
+}
+.unit.frog-pascal .map-frog,
+.unit.frog-malphas .map-frog{
+  outline:2px dashed #ffe45c;
+  outline-offset:2px;
+}
+.unit.frog-pascal:after,.unit.frog-malphas:after{
+  content:"🔧";
+  position:absolute;right:-8px;bottom:-8px;font-size:12px;
+  filter:drop-shadow(0 1px 1px #000);
+}
