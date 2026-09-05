@@ -3156,3 +3156,79 @@ body.portrait-play #portraitOverlay{
   box-shadow:none !important;
   cursor:not-allowed !important;
 }
+
+
+/* v1.7.1 roster: keep names clear of the frog portrait */
+#selectScreen .select-right-panel .fighter-card{
+  padding:4px 8px 4px 98px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  text-align:left !important;
+  overflow:visible !important;
+}
+
+#selectScreen .select-right-panel .fighter-card .fighter-emoji{
+  left:8px !important;
+  top:50% !important;
+  width:78px !important;
+  height:62px !important;
+  transform:translateY(-50%) scale(.72) !important;
+  transform-origin:left center !important;
+}
+
+#selectScreen .select-right-panel .fighter-card > strong{
+  position:relative !important;
+  z-index:2 !important;
+  display:block !important;
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  font-size:11px !important;
+  line-height:1.15 !important;
+  text-align:left !important;
+  white-space:normal !important;
+  word-break:keep-all !important;
+  writing-mode:horizontal-tb !important;
+}
+
+/* Outside-pond emoji characters use the same left image / right name layout. */
+#selectScreen .select-right-panel .fighter-card[data-fighter="piranha"],
+#selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"]{
+  padding:4px 8px 4px 82px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  text-align:left !important;
+}
+#selectScreen .select-right-panel .fighter-card[data-fighter="piranha"] .fighter-emoji,
+#selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"] .fighter-emoji{
+  left:13px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  font-size:46px !important;
+}
+#selectScreen .select-right-panel .fighter-card[data-fighter="piranha"] > strong,
+#selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"] > strong{
+  text-align:left !important;
+}
+
+/* On very narrow cards, shrink the portrait slightly rather than letting it cover the name. */
+@media (orientation:landscape) and (max-height:600px){
+  #selectScreen .select-right-panel .fighter-card{
+    padding-left:88px !important;
+  }
+  #selectScreen .select-right-panel .fighter-card .fighter-emoji{
+    left:6px !important;
+    width:72px !important;
+    height:57px !important;
+    transform:translateY(-50%) scale(.66) !important;
+  }
+  #selectScreen .select-right-panel .fighter-card > strong{
+    font-size:10px !important;
+  }
+  #selectScreen .select-right-panel .fighter-card[data-fighter="piranha"],
+  #selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"]{
+    padding-left:72px !important;
+  }
+}
