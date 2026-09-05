@@ -1651,27 +1651,39 @@
       if(this.type==='remiel'){
         const mir=remielMirages.find(m=>m.owner===this&&m.t>0);
         if(mir){
-          ctx.save();ctx.translate(0,mir.offsetY);
-          ctx.globalAlpha=.78*Math.min(1,mir.t/.22);ctx.shadowColor='#bcefff';ctx.shadowBlur=7;
-          ctx.fillStyle=pal.body;ctx.beginPath();ctx.ellipse(0,28,34,43,0,0,Math.PI*2);ctx.fill();
-          ctx.beginPath();ctx.ellipse(0,-6,35,30,0,0,Math.PI*2);ctx.fill();
-          ctx.fillStyle=pal.belly;ctx.beginPath();ctx.ellipse(0,34,22,29,0,0,Math.PI*2);ctx.fill();
-          ctx.fillStyle=pal.eyeBump;ctx.beginPath();ctx.arc(-19,-29,16,0,Math.PI*2);ctx.arc(19,-29,16,0,Math.PI*2);ctx.fill();
-          ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-19,-30,10,0,Math.PI*2);ctx.arc(19,-30,10,0,Math.PI*2);ctx.fill();
-          ctx.fillStyle='#182a2a';ctx.beginPath();ctx.arc(-14,-29,4,0,Math.PI*2);ctx.arc(24,-29,4,0,Math.PI*2);ctx.fill();
-          ctx.strokeStyle='#39767b';ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,5,15,.18,Math.PI-.18);ctx.stroke();
-          ctx.fillStyle='rgba(235,150,170,.55)';ctx.beginPath();ctx.arc(-25,7,5,0,Math.PI*2);ctx.arc(25,7,5,0,Math.PI*2);ctx.fill();
-          ctx.strokeStyle=pal.limb;ctx.lineWidth=11;ctx.lineCap='round';ctx.beginPath();
-          ctx.moveTo(-25,24);ctx.lineTo(-39,42);
-          if(this.attack==='punch'){ctx.moveTo(24,22);ctx.lineTo(60,-1);}else{ctx.moveTo(25,24);ctx.lineTo(39,42);}
-          ctx.moveTo(-17,58);ctx.lineTo(-31,72);
-          if(this.attack==='kick'){ctx.moveTo(17,58);ctx.lineTo(67,51);}else{ctx.moveTo(17,58);ctx.lineTo(31,72);}
-          ctx.stroke();
-          ctx.globalAlpha=.20*Math.min(1,mir.t/.22);ctx.strokeStyle='#d9fbff';ctx.lineWidth=2;
-          ctx.beginPath();ctx.ellipse(0,4,39,68,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+          const drawRemielGhost=(gy,ga)=>{
+            ctx.save();ctx.translate(0,gy);
+            ctx.globalAlpha=ga;ctx.shadowColor='#bcefff';ctx.shadowBlur=5;
+            ctx.fillStyle=pal.body;ctx.beginPath();ctx.ellipse(0,28,34,43,0,0,Math.PI*2);ctx.fill();
+            ctx.beginPath();ctx.ellipse(0,-6,35,30,0,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle=pal.belly;ctx.beginPath();ctx.ellipse(0,34,22,29,0,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle=pal.eyeBump;ctx.beginPath();ctx.arc(-19,-29,16,0,Math.PI*2);ctx.arc(19,-29,16,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-19,-30,10,0,Math.PI*2);ctx.arc(19,-30,10,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle='#182a2a';ctx.beginPath();ctx.arc(-14,-29,4,0,Math.PI*2);ctx.arc(24,-29,4,0,Math.PI*2);ctx.fill();
+            ctx.strokeStyle='#39767b';ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,5,15,.18,Math.PI-.18);ctx.stroke();
+            ctx.fillStyle='rgba(235,150,170,.55)';ctx.beginPath();ctx.arc(-25,7,5,0,Math.PI*2);ctx.arc(25,7,5,0,Math.PI*2);ctx.fill();
+            ctx.strokeStyle=pal.limb;ctx.lineWidth=11;ctx.lineCap='round';ctx.beginPath();
+            ctx.moveTo(-25,24);ctx.lineTo(-39,42);
+            if(this.attack==='punch'){ctx.moveTo(24,22);ctx.lineTo(60,-1);}else{ctx.moveTo(25,24);ctx.lineTo(39,42);}
+            ctx.moveTo(-17,58);ctx.lineTo(-31,72);
+            if(this.attack==='kick'){ctx.moveTo(17,58);ctx.lineTo(67,51);}else{ctx.moveTo(17,58);ctx.lineTo(31,72);}
+            ctx.stroke();ctx.restore();
+          };
+
+          const splitTime=.24;
+          if((mir.age||0)<splitTime){
+            const p=Math.max(0,Math.min(1,(mir.age||0)/splitTime));
+            const e=p*p*(3-2*p);
+            const yy=92*e;
+            const a=.72*(.35+.65*p);
+            drawRemielGhost(-yy,a);
+            drawRemielGhost( yy,a);
+          }else{
+            const settle=Math.min(1,((mir.age||0)-splitTime)/.10);
+            drawRemielGhost(mir.offsetY,.78*settle*Math.min(1,mir.t/.22));
+          }
         }
       }
-
       // 頭
       ctx.fillStyle=pal.body;
       ctx.beginPath();
@@ -4005,7 +4017,7 @@
   function remielMakeMirage(f,where){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
     remielMirages=remielMirages.filter(m=>m.owner!==f);
-    remielMirages.push({owner:f,offsetY:where==='up'?-92:92,t:4.2,life:4.2,alpha:.78});
+    remielMirages.push({owner:f,side:where,offsetY:where==='up'?-92:92,t:4.2,life:4.2,alpha:.78,age:0});
     f.specialType='remielMirage';f.specialT=.34;
     comboEl.textContent=where==='up'?'ミラージュ（上）!':'ミラージュ（下）!'; return true;
   }
@@ -5607,7 +5619,7 @@ function drawBackground(dt){
       });
       iceWalls=iceWalls.filter(w=>w.t>0);
 
-      remielMirages.forEach(m=>{m.t-=dt;const foe=m.owner.isPlayer?enemy:player;if(foe&&foe.attackT>0&&Math.abs(foe.x-m.owner.x)<105&&Math.abs(foe.y-(m.owner.y+m.offsetY))<72){m.t=0;spawnImpact(m.owner.x,m.owner.y+m.offsetY,'guard');}for(const q of water2Shots){if(q.owner!==m.owner&&Math.abs(q.x-m.owner.x)<48&&Math.abs(q.y-(m.owner.y+m.offsetY))<58){m.t=0;q.t=0;spawnImpact(q.x,q.y,'guard');break;}}});
+      remielMirages.forEach(m=>{m.t-=dt;m.age=(m.age||0)+dt;const foe=m.owner.isPlayer?enemy:player;if(foe&&foe.attackT>0&&Math.abs(foe.x-m.owner.x)<105&&Math.abs(foe.y-(m.owner.y+m.offsetY))<72){m.t=0;spawnImpact(m.owner.x,m.owner.y+m.offsetY,'guard');}for(const q of water2Shots){if(q.owner!==m.owner&&Math.abs(q.x-m.owner.x)<48&&Math.abs(q.y-(m.owner.y+m.offsetY))<58){m.t=0;q.t=0;spawnImpact(q.x,q.y,'guard');break;}}});
       remielMirages=remielMirages.filter(m=>m.t>0);
       remielFakeShots.forEach(q=>{q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;});
       remielFakeShots=remielFakeShots.filter(q=>q.t>0&&q.x>-50&&q.x<innerWidth+50&&q.y>-50&&q.y<innerHeight+50);
