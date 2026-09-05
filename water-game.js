@@ -1827,7 +1827,7 @@
           intensity=.4+.6*Math.min(1,held/1150);
         }
         if(this.specialType==='hellCrashFinish'){
-          drawIceAura(30,50,28,16,intensity);
+          drawIceAura(70,48,26,14,intensity);
         }else if(this.specialType==='abyssCharge'){
           // 曲げた腕の拳に赤い力を溜める。
           drawIceAura(26,8,19,16,intensity);
@@ -3952,7 +3952,7 @@
     if(gameOver || !f || f.type!=='black' || f.stun>0 || f.specialT>0) return false;
     f.guard=false;
     f.specialType='iceWall'; f.specialT=.42; f.attack=null; f.attackT=.18;
-    const x=Math.max(58,Math.min(innerWidth-58,f.x-f.face*54));
+    const x=Math.max(58,Math.min(innerWidth-58,f.x+f.face*60));
     const y=Math.max(90,Math.min(innerHeight-85,f.y+5));
     // 同じルシファーの古い壁は消し、1枚だけ設置できる。
     iceWalls=iceWalls.filter(w=>w.owner!==f);
@@ -4513,6 +4513,18 @@
       e.preventDefault();btn.classList.add('pressed');
       if(action==='guard'){
         if(player){
+          // ルシファー：後ろ＋ガードは通常ガードより優先してアイスウォール。
+          const luciferBackHeld = player.type==='black' &&
+            ((player.face>0 && input.x<-.35) || (player.face<0 && input.x>.35));
+          if(luciferBackHeld && !player.throwState){
+            player.guard=false;
+            player.attackT=0; player.attack=null;
+            if(specialIceWall(player)){
+              btn.classList.remove('pressed');
+              return;
+            }
+          }
+
           // MIX簡易コマンド：ガード入力を共通タイマーで記録。
           const simpleNow=performance.now();
           input.simpleGuardTapTimes=(input.simpleGuardTapTimes||[]).filter(t=>simpleNow-t<=650);
@@ -4759,7 +4771,7 @@
   });
   addEventListener('keyup',e=>{
     const key=e.key.toLowerCase(); keys[key]=false;
-    if(e.key==='i'&&player)player.guard=false;
+    if(e.key==='i'&&player && player.specialType!=='iceWall')player.guard=false;
   });
 
   function incomingReflectableThreat(f){
