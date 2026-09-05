@@ -4319,7 +4319,7 @@
   }
   function specialMoonSaltKick(f){
     if(gameOver||!f||f.type!=='sariel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
-    f.specialType='moonSalt';f.specialT=.76;f.attack='kick';f.attackT=.76;f.moonSaltHits=0;f.moonSaltHitCd=0;f.moonSaltSpin=0;f.vy=-405;f.vx=f.face*105;
+    f.specialType='moonSalt';f.specialT=.82;f.attack='kick';f.attackT=.82;f.moonSaltHits=0;f.moonSaltHitCd=0;f.moonSaltSpin=0;f.vy=-145;f.vx=f.face*78;
     comboEl.textContent='ムーンサルトキック!';return true;
   }
 
@@ -6082,14 +6082,15 @@ function drawBackground(dt){
           }
         }
         if(f.specialType==='moonSalt'&&f.specialT>0){
-          f.vy=Math.min(f.vy,-250);
+          // 上昇を抑え、相手の高さに長く留まる回転多段技にする。
+          f.vy=Math.min(f.vy,-72);
           f.moonSaltSpin=(f.moonSaltSpin||0)+dt*34;
           f.moonSaltHitCd=Math.max(0,(f.moonSaltHitCd||0)-dt);
           // 回転そのものが攻撃。最大6ヒット、約0.09秒ごとに再ヒット可能。
           if((f.moonSaltHits||0)<6&&f.moonSaltHitCd<=0&&Math.abs(o.x-f.x)<82&&Math.abs(o.y-f.y)<88){
             f.moonSaltHits=(f.moonSaltHits||0)+1;f.moonSaltHitCd=.09;
             const last=f.moonSaltHits>=6;
-            damageHit(f,o,(last?3.8:1.45)*f.damageMul,(last?150:42)*f.face,last?-245:-65);
+            damageHit(f,o,(last?3.8:1.45)*f.damageMul,(last?145:24)*f.face,last?-210:-22);
             spawnImpact(o.x,o.y,'hit');
           }
         }
