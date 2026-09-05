@@ -1651,36 +1651,90 @@
       if(this.type==='remiel'){
         const mir=remielMirages.find(m=>m.owner===this&&m.t>0);
         if(mir){
-          const drawRemielGhost=(gy,ga)=>{
+          const drawRemielCopy=(gy,ga)=>{
             ctx.save();ctx.translate(0,gy);
-            ctx.globalAlpha=ga;ctx.shadowColor='#bcefff';ctx.shadowBlur=5;
-            ctx.fillStyle=pal.body;ctx.beginPath();ctx.ellipse(0,28,34,43,0,0,Math.PI*2);ctx.fill();
-            ctx.beginPath();ctx.ellipse(0,-6,35,30,0,0,Math.PI*2);ctx.fill();
-            ctx.fillStyle=pal.belly;ctx.beginPath();ctx.ellipse(0,34,22,29,0,0,Math.PI*2);ctx.fill();
-            ctx.fillStyle=pal.eyeBump;ctx.beginPath();ctx.arc(-19,-29,16,0,Math.PI*2);ctx.arc(19,-29,16,0,Math.PI*2);ctx.fill();
-            ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-19,-30,10,0,Math.PI*2);ctx.arc(19,-30,10,0,Math.PI*2);ctx.fill();
-            ctx.fillStyle='#182a2a';ctx.beginPath();ctx.arc(-14,-29,4,0,Math.PI*2);ctx.arc(24,-29,4,0,Math.PI*2);ctx.fill();
-            ctx.strokeStyle='#39767b';ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,5,15,.18,Math.PI-.18);ctx.stroke();
-            ctx.fillStyle='rgba(235,150,170,.55)';ctx.beginPath();ctx.arc(-25,7,5,0,Math.PI*2);ctx.arc(25,7,5,0,Math.PI*2);ctx.fill();
-            ctx.strokeStyle=pal.limb;ctx.lineWidth=11;ctx.lineCap='round';ctx.beginPath();
-            ctx.moveTo(-25,24);ctx.lineTo(-39,42);
-            if(this.attack==='punch'){ctx.moveTo(24,22);ctx.lineTo(60,-1);}else{ctx.moveTo(25,24);ctx.lineTo(39,42);}
-            ctx.moveTo(-17,58);ctx.lineTo(-31,72);
-            if(this.attack==='kick'){ctx.moveTo(17,58);ctx.lineTo(67,51);}else{ctx.moveTo(17,58);ctx.lineTo(31,72);}
-            ctx.stroke();ctx.restore();
+            ctx.globalAlpha=ga;
+            ctx.shadowColor='#c9f6ff';ctx.shadowBlur=3;
+
+            // 本体と同じ寸法で胴体・腹。
+            ctx.fillStyle=pal.limb;
+            ctx.beginPath();ctx.ellipse(0,31,30,34,0,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle=pal.belly;
+            ctx.beginPath();ctx.ellipse(2,36,19,23,0,0,Math.PI*2);ctx.fill();
+
+            // 脚。
+            ctx.strokeStyle=pal.limb;ctx.lineWidth=12;ctx.lineCap='round';ctx.lineJoin='round';
+            ctx.beginPath();
+            ctx.moveTo(-15,48);ctx.lineTo(-19,62);ctx.lineTo(-28,67);
+            if(this.attack!=='kick'){
+              ctx.moveTo(15,48);ctx.lineTo(19,62);ctx.lineTo(28,67);
+            }
+            ctx.stroke();
+
+            // 腕。
+            if(!this.guard && this.attack!=='wave'){
+              ctx.strokeStyle=pal.limb;ctx.lineWidth=10;ctx.beginPath();
+              ctx.moveTo(-23,22);ctx.lineTo(-32,35);
+              if(this.attack!=='punch'){ctx.moveTo(23,22);ctx.lineTo(32,35);}
+              ctx.stroke();
+            }
+
+            // 頭。
+            ctx.fillStyle=pal.body;ctx.beginPath();ctx.ellipse(0,-6,35,30,0,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle=pal.eyeBump;ctx.beginPath();
+            ctx.arc(-19,-29,16,0,Math.PI*2);ctx.arc(19,-29,16,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle='#fff';ctx.beginPath();
+            ctx.arc(-19,-30,10,0,Math.PI*2);ctx.arc(19,-30,10,0,Math.PI*2);ctx.fill();
+
+            // 本体と同じ方向へ視線。
+            const target=this.isPlayer?enemy:player;
+            let eyeShift=5;
+            if(target && target.x<this.x) eyeShift=-5;
+            ctx.fillStyle='#182a2a';ctx.beginPath();
+            ctx.arc(-19+eyeShift,-29,4,0,Math.PI*2);
+            ctx.arc( 19+eyeShift,-29,4,0,Math.PI*2);ctx.fill();
+
+            ctx.fillStyle='rgba(255,130,150,.42)';ctx.beginPath();
+            ctx.arc(-24,2,5,0,Math.PI*2);ctx.arc(24,2,5,0,Math.PI*2);ctx.fill();
+
+            ctx.strokeStyle='#255c31';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();
+            ctx.arc(0,-3,14,.15*Math.PI,.85*Math.PI);ctx.stroke();
+
+            // 攻撃時の伸ばした手足もコピー。
+            if(this.attack==='punch'){
+              ctx.strokeStyle=pal.limb;ctx.lineWidth=12;ctx.beginPath();
+              ctx.moveTo(22,22);
+              if(this.attackVariant==='up')ctx.lineTo(48,-22);
+              else ctx.lineTo(59,8);
+              ctx.stroke();
+            }
+            if(this.attack==='kick'){
+              ctx.strokeStyle=pal.limb;ctx.lineWidth=13;ctx.beginPath();
+              ctx.moveTo(15,48);ctx.lineTo(67,49);ctx.stroke();
+            }
+            ctx.restore();
           };
 
-          const splitTime=.24;
+          const splitTime=.28;
           if((mir.age||0)<splitTime){
             const p=Math.max(0,Math.min(1,(mir.age||0)/splitTime));
             const e=p*p*(3-2*p);
-            const yy=92*e;
-            const a=.72*(.35+.65*p);
-            drawRemielGhost(-yy,a);
-            drawRemielGhost( yy,a);
+
+            // 実体と幻影の2体だけを、同じ中心点から反対方向へ広げる。
+            const bodyAbs =mir.originY+(mir.bodyTargetY -mir.originY)*e;
+            const ghostAbs=mir.originY+(mir.ghostTargetY-mir.originY)*e;
+            const bodyRel =bodyAbs-this.y;
+            const ghostRel=ghostAbs-this.y;
+
+            drawRemielCopy(bodyRel,.90);
+            drawRemielCopy(ghostRel,.90);
+
+            // この間は後で描かれる実体を隠し、3体に見えないようにする。
+            ctx.globalAlpha=0;
           }else{
+            // 分裂後は実体を通常描画し、幻影だけ追加。
             const settle=Math.min(1,((mir.age||0)-splitTime)/.10);
-            drawRemielGhost(mir.offsetY,.78*settle*Math.min(1,mir.t/.22));
+            drawRemielCopy(mir.offsetY,.82*settle*Math.min(1,mir.t/.22));
           }
         }
       }
@@ -4017,9 +4071,24 @@
   function remielMakeMirage(f,where){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
     remielMirages=remielMirages.filter(m=>m.owner!==f);
-    remielMirages.push({owner:f,side:where,offsetY:where==='up'?-92:92,t:4.2,life:4.2,alpha:.78,age:0});
+
+    const originY=f.y;
+    // 幻影側は大きく、本体側も反対方向へ少し移動。
+    const ghostDelta=where==='up'?-108:108;
+    const bodyDelta =where==='up'?  48:-48;
+    const bodyTargetY=Math.max(74,Math.min(innerHeight-74,originY+bodyDelta));
+    const ghostTargetY=Math.max(74,Math.min(innerHeight-74,originY+ghostDelta));
+
+    remielMirages.push({
+      owner:f,side:where,t:4.2,life:4.2,alpha:.82,age:0,
+      originY,bodyTargetY,ghostTargetY,
+      offsetY:ghostTargetY-bodyTargetY
+    });
+
+    f.vy=0;
     f.specialType='remielMirage';f.specialT=.34;
-    comboEl.textContent=where==='up'?'ミラージュ（上）!':'ミラージュ（下）!'; return true;
+    comboEl.textContent=where==='up'?'ミラージュ（上）!':'ミラージュ（下）!';
+    return true;
   }
   function specialMirageCounter(f){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
@@ -5619,7 +5688,16 @@ function drawBackground(dt){
       });
       iceWalls=iceWalls.filter(w=>w.t>0);
 
-      remielMirages.forEach(m=>{m.t-=dt;m.age=(m.age||0)+dt;const foe=m.owner.isPlayer?enemy:player;if(foe&&foe.attackT>0&&Math.abs(foe.x-m.owner.x)<105&&Math.abs(foe.y-(m.owner.y+m.offsetY))<72){m.t=0;spawnImpact(m.owner.x,m.owner.y+m.offsetY,'guard');}for(const q of water2Shots){if(q.owner!==m.owner&&Math.abs(q.x-m.owner.x)<48&&Math.abs(q.y-(m.owner.y+m.offsetY))<58){m.t=0;q.t=0;spawnImpact(q.x,q.y,'guard');break;}}});
+      remielMirages.forEach(m=>{
+        m.t-=dt;m.age=(m.age||0)+dt;
+        const splitTime=.28;
+        if(m.owner && m.age<=splitTime && m.originY!=null){
+          const p=Math.max(0,Math.min(1,m.age/splitTime));
+          const e=p*p*(3-2*p);
+          m.owner.y=m.originY+(m.bodyTargetY-m.originY)*e;
+          m.owner.vy=0;
+        }
+        const foe=m.owner.isPlayer?enemy:player;if(foe&&foe.attackT>0&&Math.abs(foe.x-m.owner.x)<105&&Math.abs(foe.y-((m.age||0)<.28 ? (m.originY+(m.ghostTargetY-m.originY)*Math.max(0,Math.min(1,(m.age||0)/.28))) : (m.owner.y+m.offsetY)))<72){m.t=0;spawnImpact(m.owner.x,(m.age||0)<.28 ? (m.originY+(m.ghostTargetY-m.originY)*Math.max(0,Math.min(1,(m.age||0)/.28))) : m.owner.y+m.offsetY,'guard');}for(const q of water2Shots){if(q.owner!==m.owner&&Math.abs(q.x-m.owner.x)<48&&Math.abs(q.y-((m.age||0)<.28 ? (m.originY+(m.ghostTargetY-m.originY)*Math.max(0,Math.min(1,(m.age||0)/.28))) : (m.owner.y+m.offsetY)))<58){m.t=0;q.t=0;spawnImpact(q.x,q.y,'guard');break;}}});
       remielMirages=remielMirages.filter(m=>m.t>0);
       remielFakeShots.forEach(q=>{q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;});
       remielFakeShots=remielFakeShots.filter(q=>q.t>0&&q.x>-50&&q.x<innerWidth+50&&q.y>-50&&q.y<innerHeight+50);
