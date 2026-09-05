@@ -2775,3 +2775,324 @@ body.portrait-play #portraitOverlay{
     flex:1 1 auto !important;
   }
 }
+
+
+/* v1.6.3 clean select DOM layout */
+#selectScreen.screen.active.split-select-screen{
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  max-width:none !important;
+  max-height:none !important;
+  margin:0 !important;
+  padding:6px !important;
+  box-sizing:border-box !important;
+
+  display:grid !important;
+  grid-template-columns:30% 70% !important;
+  grid-template-rows:100% !important;
+  gap:7px !important;
+  overflow:hidden !important;
+}
+
+#selectScreen.screen.active.split-select-screen > .select-left-panel{
+  grid-column:1 !important;
+  grid-row:1 !important;
+  width:100% !important;
+  height:100% !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:7px !important;
+  box-sizing:border-box !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  border-radius:15px !important;
+}
+
+#selectScreen.screen.active.split-select-screen > .select-right-panel{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  width:100% !important;
+  height:100% !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+
+#selectScreen .select-left-title{
+  font-size:18px !important;
+  margin:0 0 7px !important;
+}
+
+#selectScreen .select-left-panel > .opponent-pick{
+  display:block !important;
+  width:100% !important;
+  padding:7px !important;
+  margin:0 0 5px !important;
+  box-sizing:border-box !important;
+}
+#selectScreen .select-left-panel > .opponent-pick label{
+  display:block !important;
+  margin:0 0 4px !important;
+  font-size:11px !important;
+}
+#selectScreen .select-left-panel > .opponent-pick select{
+  width:100% !important;
+  height:38px !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  font-size:12px !important;
+}
+
+#selectScreen .select-left-panel > .story-rule{
+  display:block !important;
+  width:100% !important;
+  margin:0 0 7px !important;
+  padding:5px !important;
+  box-sizing:border-box !important;
+  font-size:9px !important;
+  text-align:center !important;
+}
+
+#selectScreen .select-left-panel > .mode-menu{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  grid-template-rows:auto auto !important;
+  gap:6px !important;
+  width:100% !important;
+  margin:0 0 8px !important;
+  padding:0 !important;
+}
+#selectScreen .select-left-panel > .mode-menu > .primary-btn,
+#selectScreen .select-left-panel > .mode-menu > .practice-entry-wrap,
+#selectScreen .select-left-panel > .mode-menu .practice-btn{
+  width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+}
+#selectScreen .select-left-panel > .mode-menu > .primary-btn,
+#selectScreen .select-left-panel > .mode-menu .practice-btn{
+  height:43px !important;
+  min-height:43px !important;
+  padding:4px 5px !important;
+  font-size:12px !important;
+  border-radius:11px !important;
+}
+#selectScreen .select-left-panel .practice-beginner-badge{
+  display:none !important;
+}
+
+#selectScreen .select-left-panel > .left-settings{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:6px !important;
+  width:100% !important;
+  margin:0 !important;
+}
+#selectScreen .select-left-panel .difficulty-panel,
+#selectScreen .select-left-panel .sound-panel{
+  width:100% !important;
+  margin:0 !important;
+  padding:5px !important;
+  box-sizing:border-box !important;
+}
+#selectScreen .select-left-panel .difficulty-buttons{
+  display:grid !important;
+  grid-template-columns:repeat(3,1fr) !important;
+  gap:4px !important;
+}
+#selectScreen .select-left-panel .difficulty-btn{
+  min-width:0 !important;
+  min-height:30px !important;
+  padding:2px !important;
+  font-size:9px !important;
+}
+#selectScreen .select-left-panel .sound-panel{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+}
+#selectScreen .select-left-panel .sound-toggle{
+  min-height:30px !important;
+  padding:2px 9px !important;
+}
+#selectScreen .select-left-panel .auto-attack-note{
+  margin:7px 0 0 !important;
+  font-size:8px !important;
+}
+#selectScreen .select-left-panel .boss-teaser{
+  margin:6px 0 0 !important;
+  font-size:8px !important;
+}
+
+#selectScreen .select-right-panel > .roster-title{
+  flex:0 0 auto !important;
+  font-size:18px !important;
+  padding:4px 0 7px !important;
+}
+#selectScreen .select-right-panel > .fighter-scroll-area{
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  padding:0 3px 14px !important;
+  box-sizing:border-box !important;
+  touch-action:pan-y !important;
+}
+#selectScreen .select-right-panel .fighter-grid{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:6px !important;
+  width:100% !important;
+  max-width:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:visible !important;
+  box-sizing:border-box !important;
+}
+#selectScreen .select-right-panel .fighter-card{
+  display:block !important;
+  position:relative !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:none !important;
+  height:92px !important;
+  min-height:92px !important;
+  max-height:92px !important;
+  margin:0 !important;
+  padding:61px 4px 4px !important;
+  box-sizing:border-box !important;
+  overflow:visible !important;
+  text-align:center !important;
+}
+#selectScreen .select-right-panel .fighter-card .fighter-emoji{
+  position:absolute !important;
+  left:50% !important;
+  top:2px !important;
+  width:70px !important;
+  height:55px !important;
+  margin:0 !important;
+  transform:translateX(-50%) scale(.72) !important;
+  transform-origin:top center !important;
+}
+#selectScreen .select-right-panel .fighter-card[data-fighter="piranha"] .fighter-emoji,
+#selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"] .fighter-emoji{
+  width:auto !important;
+  height:auto !important;
+  font-size:48px !important;
+  line-height:1 !important;
+}
+#selectScreen .select-right-panel .fighter-card > strong{
+  display:block !important;
+  width:100% !important;
+  font-size:10px !important;
+  line-height:1.05 !important;
+  white-space:normal !important;
+  word-break:keep-all !important;
+  writing-mode:horizontal-tb !important;
+  text-orientation:mixed !important;
+  text-align:center !important;
+}
+#selectScreen .select-right-panel .fighter-card .special-hint{
+  display:none !important;
+}
+#selectScreen .select-right-panel .fighter-card:hover .special-hint,
+#selectScreen .select-right-panel .fighter-card:focus .special-hint,
+#selectScreen .select-right-panel .fighter-card.selected .special-hint{
+  display:block !important;
+  position:absolute !important;
+  z-index:300 !important;
+  left:3px !important;
+  right:3px !important;
+  top:calc(100% + 3px) !important;
+  width:auto !important;
+  padding:6px !important;
+  background:rgba(3,32,43,.98) !important;
+  border-radius:8px !important;
+  font-size:8px !important;
+  line-height:1.3 !important;
+  text-align:left !important;
+  white-space:normal !important;
+}
+
+/* Landscape phones: two fully visible panes */
+@media (orientation:landscape) and (max-height:600px){
+  #selectScreen.screen.active.split-select-screen{
+    grid-template-columns:31% 69% !important;
+  }
+  #selectScreen .select-left-title,
+  #selectScreen .select-right-panel > .roster-title{
+    font-size:14px !important;
+  }
+  #selectScreen .select-left-panel > .mode-menu > .primary-btn,
+  #selectScreen .select-left-panel > .mode-menu .practice-btn{
+    height:34px !important;
+    min-height:34px !important;
+    font-size:9px !important;
+  }
+  #selectScreen .select-left-panel > .left-settings{
+    grid-template-columns:1fr 1fr !important;
+  }
+  #selectScreen .select-left-panel .auto-attack-note,
+  #selectScreen .select-left-panel .boss-teaser{
+    display:none !important;
+  }
+  #selectScreen .select-right-panel .fighter-card{
+    height:82px !important;
+    min-height:82px !important;
+    max-height:82px !important;
+    padding-top:54px !important;
+  }
+  #selectScreen .select-right-panel .fighter-card .fighter-emoji{
+    width:62px !important;
+    height:49px !important;
+    transform:translateX(-50%) scale(.66) !important;
+  }
+}
+
+/* Portrait: top controls + bottom roster, each gets its own space. */
+@media (orientation:portrait){
+  #selectScreen.screen.active.split-select-screen{
+    display:grid !important;
+    grid-template-columns:100% !important;
+    grid-template-rows:42% 58% !important;
+    gap:6px !important;
+  }
+  #selectScreen.screen.active.split-select-screen > .select-left-panel{
+    grid-column:1 !important;
+    grid-row:1 !important;
+  }
+  #selectScreen.screen.active.split-select-screen > .select-right-panel{
+    grid-column:1 !important;
+    grid-row:2 !important;
+  }
+  #selectScreen .select-left-panel > .mode-menu{
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  }
+  #selectScreen .select-left-panel > .mode-menu > .primary-btn,
+  #selectScreen .select-left-panel > .mode-menu .practice-btn{
+    font-size:9px !important;
+    height:34px !important;
+    min-height:34px !important;
+  }
+  #selectScreen .select-left-panel > .left-settings{
+    grid-template-columns:1fr 1fr !important;
+  }
+  #selectScreen .select-left-panel .auto-attack-note,
+  #selectScreen .select-left-panel .boss-teaser,
+  #selectScreen .select-left-panel > .story-rule{
+    display:none !important;
+  }
+}
