@@ -1243,7 +1243,12 @@
     draw() {
       ctx.save();
       ctx.translate(this.x,this.y);
-      if(this.type==='remiel'&&this.specialType==='mirageKick'&&this.specialT>0&&Math.floor(this.specialT*24)%2===0)ctx.globalAlpha=.10;
+      if(this.type==='remiel'&&this.specialType==='mirageKick'&&this.specialT>0&&this.remielKickStartX!=null){
+        const elapsed=Math.max(0,.72-this.specialT),step=Math.min(4,Math.floor(elapsed/.14));
+        const jumps=[0,58,122,190,255],visualX=this.remielKickStartX+this.face*jumps[step];
+        ctx.translate(visualX-this.x,0);
+        if(elapsed%.14<.025)ctx.globalAlpha=.38;
+      }
       const pal=fighterPalette(this.type);
 
       if(this.specialType==='burningCyclone'){
@@ -1645,7 +1650,26 @@
 
       if(this.type==='remiel'){
         const mir=remielMirages.find(m=>m.owner===this&&m.t>0);
-        if(mir){ctx.save();ctx.translate(0,mir.offsetY);ctx.globalAlpha=mir.alpha*Math.min(1,mir.t/.28);ctx.globalCompositeOperation='lighter';ctx.shadowColor='#bfefff';ctx.shadowBlur=13;ctx.fillStyle='rgba(150,215,230,.55)';ctx.beginPath();ctx.ellipse(0,18,39,51,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(-18,-23,16,0,Math.PI*2);ctx.arc(18,-23,16,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(210,250,255,.7)';ctx.lineWidth=10;ctx.lineCap='round';if(this.attack==='punch'){ctx.beginPath();ctx.moveTo(22,10);ctx.lineTo(57,-2);ctx.stroke();}if(this.attack==='kick'){ctx.beginPath();ctx.moveTo(15,46);ctx.lineTo(66,49);ctx.stroke();}ctx.restore();}
+        if(mir){
+          ctx.save();ctx.translate(0,mir.offsetY);
+          ctx.globalAlpha=.78*Math.min(1,mir.t/.22);ctx.shadowColor='#bcefff';ctx.shadowBlur=7;
+          ctx.fillStyle=pal.body;ctx.beginPath();ctx.ellipse(0,28,34,43,0,0,Math.PI*2);ctx.fill();
+          ctx.beginPath();ctx.ellipse(0,-6,35,30,0,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle=pal.belly;ctx.beginPath();ctx.ellipse(0,34,22,29,0,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle=pal.eyeBump;ctx.beginPath();ctx.arc(-19,-29,16,0,Math.PI*2);ctx.arc(19,-29,16,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-19,-30,10,0,Math.PI*2);ctx.arc(19,-30,10,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle='#182a2a';ctx.beginPath();ctx.arc(-14,-29,4,0,Math.PI*2);ctx.arc(24,-29,4,0,Math.PI*2);ctx.fill();
+          ctx.strokeStyle='#39767b';ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,5,15,.18,Math.PI-.18);ctx.stroke();
+          ctx.fillStyle='rgba(235,150,170,.55)';ctx.beginPath();ctx.arc(-25,7,5,0,Math.PI*2);ctx.arc(25,7,5,0,Math.PI*2);ctx.fill();
+          ctx.strokeStyle=pal.limb;ctx.lineWidth=11;ctx.lineCap='round';ctx.beginPath();
+          ctx.moveTo(-25,24);ctx.lineTo(-39,42);
+          if(this.attack==='punch'){ctx.moveTo(24,22);ctx.lineTo(60,-1);}else{ctx.moveTo(25,24);ctx.lineTo(39,42);}
+          ctx.moveTo(-17,58);ctx.lineTo(-31,72);
+          if(this.attack==='kick'){ctx.moveTo(17,58);ctx.lineTo(67,51);}else{ctx.moveTo(17,58);ctx.lineTo(31,72);}
+          ctx.stroke();
+          ctx.globalAlpha=.20*Math.min(1,mir.t/.22);ctx.strokeStyle='#d9fbff';ctx.lineWidth=2;
+          ctx.beginPath();ctx.ellipse(0,4,39,68,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+        }
       }
 
       // 頭
@@ -3981,7 +4005,7 @@
   function remielMakeMirage(f,where){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
     remielMirages=remielMirages.filter(m=>m.owner!==f);
-    remielMirages.push({owner:f,offsetY:where==='up'?-105:105,t:4.2,life:4.2,alpha:.48});
+    remielMirages.push({owner:f,offsetY:where==='up'?-92:92,t:4.2,life:4.2,alpha:.78});
     f.specialType='remielMirage';f.specialT=.34;
     comboEl.textContent=where==='up'?'ミラージュ（上）!':'ミラージュ（下）!'; return true;
   }
@@ -4001,7 +4025,7 @@
   }
   function specialMirageKick(f){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
-    f.specialType='mirageKick';f.specialT=.66;f.attack='kick';f.attackT=.66;f.vx=f.face*335;
+    f.specialType='mirageKick';f.specialT=.72;f.attack='kick';f.attackT=.72;f.remielKickStartX=f.x;f.vx=f.face*360;
     const other=f.isPlayer?enemy:player,dir=f.face;setTimeout(()=>{if(other&&Math.abs(other.x-f.x)<132&&Math.abs(other.y-f.y)<82){damageHit(f,other,9.8*f.damageMul,315*dir,-50);spawnImpact(other.x,other.y,'hit');}},180);comboEl.textContent='ミラージュキック!';return true;
   }
 
