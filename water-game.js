@@ -1444,8 +1444,16 @@
           ctx.beginPath();ctx.arc(-19,-29,6,0,Math.PI*2);ctx.arc(19,-29,6,0,Math.PI*2);ctx.fill();ctx.restore();
         }
         if(this.specialType==='moonSalt'&&this.specialT>0){
-          ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.38;ctx.strokeStyle='#e8ecff';ctx.lineWidth=6;ctx.shadowColor='#cbd4ff';ctx.shadowBlur=14;
-          ctx.beginPath();ctx.arc(0,20,55,0,Math.PI*1.7);ctx.stroke();ctx.restore();
+          ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(0,20);
+          ctx.rotate(this.moonSaltSpin||0);
+          ctx.globalAlpha=.52;ctx.strokeStyle='#e8ecff';ctx.lineWidth=7;ctx.lineCap='round';ctx.shadowColor='#cbd4ff';ctx.shadowBlur=16;
+          // 3本の回転残像で高速回転を明確に見せる。
+          for(let i=0;i<3;i++){
+            ctx.rotate(Math.PI*2/3);
+            ctx.beginPath();ctx.arc(0,0,55,-.15,1.45);ctx.stroke();
+            ctx.beginPath();ctx.moveTo(30,0);ctx.lineTo(62,0);ctx.stroke();
+          }
+          ctx.restore();
         }
       }
       if((this.sarielParalyzeT||0)>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#ff465b';ctx.lineWidth=3;ctx.globalAlpha=.45;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(0,10,43+i*7,i,Math.PI+i);ctx.stroke();}ctx.restore();}
@@ -4172,7 +4180,7 @@
   }
   function specialMoonSaltKick(f){
     if(gameOver||!f||f.type!=='sariel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
-    f.specialType='moonSalt';f.specialT=.62;f.attack='kick';f.attackT=.62;f.moonSaltHit=false;f.vy=-390;f.vx=f.face*95;
+    f.specialType='moonSalt';f.specialT=.76;f.attack='kick';f.attackT=.76;f.moonSaltHits=0;f.moonSaltHitCd=0;f.moonSaltSpin=0;f.vy=-405;f.vx=f.face*105;
     comboEl.textContent='ムーンサルトキック!';return true;
   }
 
@@ -5932,14 +5940,22 @@ function drawBackground(dt){
             f.evilEyeHit=true;o.sarielParalyzeT=3;o.vx=0;o.vy=0;comboEl.textContent='イーブルアイ：3秒麻痺!';
           }
         }
-        if(f.specialType==='moonSalt'&&f.specialT>0&&!f.moonSaltHit){
-          f.vy=Math.min(f.vy,-245);
-          if(Math.abs(o.x-f.x)<78&&Math.abs(o.y-f.y)<82){f.moonSaltHit=true;damageHit(f,o,8*f.damageMul,145*f.face,-250);spawnImpact(o.x,o.y,'hit');}
+        if(f.specialType==='moonSalt'&&f.specialT>0){
+          f.vy=Math.min(f.vy,-250);
+          f.moonSaltSpin=(f.moonSaltSpin||0)+dt*34;
+          f.moonSaltHitCd=Math.max(0,(f.moonSaltHitCd||0)-dt);
+          // 回転そのものが攻撃。最大6ヒット、約0.09秒ごとに再ヒット可能。
+          if((f.moonSaltHits||0)<6&&f.moonSaltHitCd<=0&&Math.abs(o.x-f.x)<82&&Math.abs(o.y-f.y)<88){
+            f.moonSaltHits=(f.moonSaltHits||0)+1;f.moonSaltHitCd=.09;
+            const last=f.moonSaltHits>=6;
+            damageHit(f,o,(last?3.8:1.45)*f.damageMul,(last?150:42)*f.face,last?-245:-65);
+            spawnImpact(o.x,o.y,'hit');
+          }
         }
       });
       lunarSlashes.forEach(q=>{
         q.t-=dt;q.age+=dt;const p=Math.min(1,q.age/1.45),a=Math.PI*p;
-        q.x=q.baseX+Math.sin(a)*q.dir*255;q.y=q.baseY+(q.arc==='up'?-1:1)*Math.sin(a)*150;
+        q.x=q.baseX+Math.sin(a)*q.dir*285;q.y=q.baseY+(q.arc==='up'?-1:1)*Math.sin(a)*92;
         const t=q.owner.isPlayer?enemy:player;
         if(t&&!q.hit&&Math.abs(q.x-t.x)<t.radius+30&&Math.abs(q.y-t.y)<t.radius+30){
           if(t.guard){q.owner=t;q.baseX=t.x;q.baseY=t.y;q.dir=t.face;q.arc=q.arc==='up'?'down':'up';q.age=0;spawnImpact(t.x,t.y,'guard');}
