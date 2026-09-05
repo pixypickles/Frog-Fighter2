@@ -65,6 +65,10 @@
   let storyPhase='tournament';
   let storyTournament=[];
   let storyDay=1;
+  let allBattleQueue=[];
+  let allBattleIndex=0;
+  let allBattleWins=0;
+
 
   let running = false;
   let last = performance.now();
@@ -544,6 +548,16 @@
     startGame('free');
   };
 
+  const allBattleButton=document.getElementById('allBattleButton');
+  if(allBattleButton){
+    const openAllBattle=e=>{
+      if(e){e.preventDefault();e.stopPropagation();}
+      playSfx('menu');startAllBattleMode();
+    };
+    allBattleButton.addEventListener('pointerup',openAllBattle);
+    allBattleButton.addEventListener('click',e=>{if(window.PointerEvent)return;openAllBattle(e);});
+  }
+
   const storyButton=document.getElementById('storyButton');
   if(storyButton){
     const openStory=(e)=>{
@@ -667,6 +681,11 @@
     else if(gameMode==='guardMini') startGuardMiniGame();
     else if(gameMode==='raceMini') startRaceMiniGame();
     else if(gameMode==='basketMini') startBasketMiniGame();
+    else if(gameMode==='allbattle'){
+      if(allBattleIndex>=allBattleQueue.length){
+        gameMode='battle';restartButton.hidden=true;restartButton.textContent='もう一度';show('select');
+      }else continueAllBattle();
+    }
     else if(gameMode==='story'){
       if(storyFinished){
         if(storyHud) storyHud.hidden=true;
@@ -3058,7 +3077,12 @@
     }));
     resetBattleEffects();
 
-    if(gameMode==='story'){
+    if(gameMode==='allbattle'){
+      if(storyHud){
+        storyHud.hidden=false;
+        storyHud.textContent=`ALL CHARACTERS ${allBattleIndex+1}/${allBattleQueue.length}　VS ${fighterDisplayName(rivalType)}`;
+      }
+    }else if(gameMode==='story'){
       if(storyHud){
         storyHud.hidden=false;
         const roundNames=['1回戦','2回戦','3回戦','池の騒動','4回戦','5回戦','池の騒動','決勝戦','SPECIAL'];
@@ -3071,6 +3095,31 @@
 
     running=true; last=performance.now();
     updateHud();
+  }
+
+  function startAllBattleMode(){
+    allBattleQueue=playableTypes.filter(t=>t!==selectedFighter && t!=='seraphiel');
+    // ボスクラスは後半へ。セラフィエルは最後。
+    const bosses=['beelzebub','samael'];
+    const normal=allBattleQueue.filter(t=>!bosses.includes(t));
+    const late=allBattleQueue.filter(t=>bosses.includes(t));
+    allBattleQueue=normal.concat(late);
+    if(selectedFighter!=='seraphiel')allBattleQueue.push('seraphiel');
+    allBattleIndex=0;allBattleWins=0;
+    show('game');resize();
+    startGame('allbattle',allBattleQueue[0]);
+  }
+
+  function continueAllBattle(){
+    allBattleIndex++;
+    if(allBattleIndex>=allBattleQueue.length){
+      gameOver=true;
+      comboEl.textContent=`ALL CHARACTERS CLEAR!　${allBattleWins}勝`;
+      restartButton.hidden=false;
+      restartButton.textContent='キャラ選択へ';
+      return;
+    }
+    startGame('allbattle',allBattleQueue[allBattleIndex]);
   }
 
   function shuffleStory(a){
@@ -5078,6 +5127,27 @@
     if(mixBattleMode){
       finishMixBattle(playerWon);
       comboEl.textContent=playerWon?'YOU WIN!':'YOU LOSE';
+      return;
+    }
+
+    if(gameMode==='allbattle'){
+      if(playerWon){
+        allBattleWins++;
+        if(allBattleIndex>=allBattleQueue.length-1){
+          allBattleIndex=allBattleQueue.length;
+          comboEl.textContent=`ALL CHARACTERS CLEAR!　${allBattleWins}勝`;
+          restartButton.textContent='キャラ選択へ';
+        }else{
+          comboEl.textContent=`YOU WIN!　${allBattleIndex+1}/${allBattleQueue.length}`;
+          restartButton.textContent='次の相手';
+        }
+      }else{
+        comboEl.textContent=`YOU LOSE　${allBattleWins}勝で終了`;
+        allBattleIndex=allBattleQueue.length;
+        restartButton.textContent='キャラ選択へ';
+      }
+      restartButton.hidden=false;
+      if(storyHud)storyHud.hidden=true;
       return;
     }
 

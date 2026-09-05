@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <meta name="theme-color" content="#0b6f7a" />
-  <title>水中格闘2 Prototype v1.4.1</title>
+  <title>水中格闘2 Prototype v1.5</title>
   <link rel="stylesheet" href="water-style.css" />
 </head>
 <body>
@@ -15,7 +15,7 @@
       <h1>水中格闘2</h1>
       <p class="subtitle">見て、守って、返せる。スロー水中格闘</p>
       <p class="rotate-note">スマホを横持ちすると自動で始まります</p>
-      <div class="start-version">WATER FIGHTER 2　PROTOTYPE v1.4.1</div>
+      <div class="start-version">WATER FIGHTER 2　PROTOTYPE v1.5</div>
       <div class="title-start-actions">
         <button id="portraitStart" class="soft-btn portrait-start-btn">縦画面のまま始める</button>
         <button id="desktopStart" class="soft-btn">PCで試す</button>
@@ -24,8 +24,67 @@
     </section>
 
     <section id="selectScreen" class="screen">
-      <h2>ファイターをえらぶ</h2>
-      <div class="fighter-grid">
+      <div class="select-fixed-panel">
+        <div class="select-topline">
+          <h2>ファイターをえらぶ</h2>
+          <div class="battle-mode-panel battle-mode-panel-compact">
+        <div class="opponent-pick">
+          <label for="opponentSelect">フリー対戦：対戦相手</label>
+          <select id="opponentSelect">
+            <option value="blue">ガブリエルさん</option>
+            <option value="green">ミカエルさん</option>
+            <option value="black">ルシファーさん</option>
+            <option value="purple">リリスさん</option>
+            <option value="yellow">ラファエルさん</option>
+            <option value="orange">ウリエルさん</option>
+            <option value="piranha">リヴァイアさん</option>
+            <option value="crayfish">アスモデウスさん</option>
+            <option id="beelzebubOpponent" value="beelzebub" hidden>ベルゼブブさん</option>
+            <option value="sariel">サリエルさん</option>
+            <option value="kokabiel">コカビエルさん</option>
+            <option value="jihal">ジィハルさん</option>
+            <option value="remiel">レミエルさん</option>
+            <option value="seraphiel">セラフィエルさん</option>
+            <option value="samael">サマエルさん</option>
+          </select>
+        </div>
+        <div class="story-rule">
+          ストーリー：水中格闘大会トーナメント／3敗までOK
+        </div>
+      </div>
+        </div>
+
+        <div class="select-settings-row">
+          <div class="difficulty-panel">
+        <span class="difficulty-label">難易度</span>
+        <div class="difficulty-buttons">
+          <button type="button" class="difficulty-btn" data-difficulty="easy">イージー</button>
+          <button type="button" class="difficulty-btn selected" data-difficulty="normal">ノーマル</button>
+          <button type="button" class="difficulty-btn" data-difficulty="hard">ハード</button>
+        </div>
+      </div>
+          <div class="sound-panel">
+        <span>効果音</span>
+        <button id="soundToggle" type="button" class="sound-toggle">SE ON</button>
+      </div>
+        </div>
+
+        <div class="mode-menu">
+        <button id="fightButton" class="primary-btn">フリー対戦</button>
+        <button id="storyButton" class="primary-btn story-btn">ストーリー</button>
+        <button id="allBattleButton" class="primary-btn all-battle-btn">全キャラ対戦</button>
+        <div class="practice-entry-wrap">
+          <button id="practiceBtn" class="practice-btn">操作練習</button>
+          <span class="practice-beginner-badge">← 初めての方はココ</span>
+        </div>
+        <p class="auto-attack-note">自動補正：相手が上ならパンチが上向き / 相手が下ならキックが下向き</p>
+        <div id="bossTeaser" class="boss-teaser" hidden>
+        STORY：決勝 サマエルさん → SPECIAL セラフィエルさん
+      </div>
+      </div>
+
+      <div class="fighter-scroll-area">
+        <div class="fighter-grid">
 <button class="fighter-card selected" data-fighter="green">
           <span class="fighter-emoji" style="--frog-body:#35d851;--frog-eye-bump:#69e86e;--frog-iris:#173126;--frog-mouth:#146030;--frog-cheek:#d7b774;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
           <strong>ミカエルさん</strong>
@@ -105,59 +164,6 @@
           <span class="special-hint move-names">クローラッシュ / ボトムスマッシュ / クロー・カウンター</span>
         </button>
 </div>
-
-      <div class="battle-mode-panel battle-mode-panel-compact">
-        <div class="opponent-pick">
-          <label for="opponentSelect">フリー対戦：対戦相手</label>
-          <select id="opponentSelect">
-            <option value="blue">ガブリエルさん</option>
-            <option value="green">ミカエルさん</option>
-            <option value="black">ルシファーさん</option>
-            <option value="purple">リリスさん</option>
-            <option value="yellow">ラファエルさん</option>
-            <option value="orange">ウリエルさん</option>
-            <option value="piranha">リヴァイアさん</option>
-            <option value="crayfish">アスモデウスさん</option>
-            <option id="beelzebubOpponent" value="beelzebub" hidden>ベルゼブブさん</option>
-            <option value="sariel">サリエルさん</option>
-            <option value="kokabiel">コカビエルさん</option>
-            <option value="jihal">ジィハルさん</option>
-            <option value="remiel">レミエルさん</option>
-            <option value="seraphiel">セラフィエルさん</option>
-            <option value="samael">サマエルさん</option>
-          </select>
-        </div>
-        <div class="story-rule">
-          ストーリー：水中格闘大会トーナメント／3敗までOK
-        </div>
-      </div>
-
-      <div class="difficulty-panel">
-        <span class="difficulty-label">難易度</span>
-        <div class="difficulty-buttons">
-          <button type="button" class="difficulty-btn" data-difficulty="easy">イージー</button>
-          <button type="button" class="difficulty-btn selected" data-difficulty="normal">ノーマル</button>
-          <button type="button" class="difficulty-btn" data-difficulty="hard">ハード</button>
-        </div>
-      </div>
-
-      <div class="sound-panel">
-        <span>効果音</span>
-        <button id="soundToggle" type="button" class="sound-toggle">SE ON</button>
-      </div>
-
-      <div class="mode-menu">
-        <button id="fightButton" class="primary-btn">フリー対戦</button>
-        <button id="storyButton" class="primary-btn story-btn">ストーリー</button>
-        <div class="practice-entry-wrap">
-          <button id="practiceBtn" class="practice-btn">操作練習</button>
-          <span class="practice-beginner-badge">← 初めての方はココ</span>
-        </div>
-      </div>
-
-      <p class="auto-attack-note">自動補正：相手が上ならパンチが上向き / 相手が下ならキックが下向き</p>
-      <div id="bossTeaser" class="boss-teaser" hidden>
-        STORY：決勝 サマエルさん → SPECIAL セラフィエルさん
       </div>
     </section>
 
@@ -237,7 +243,7 @@
       <strong>スマホを横持ちすると自動で始まります</strong>
       <button id="portraitOverlayStart" class="soft-btn portrait-overlay-start">縦画面のまま始める</button>
       <small class="portrait-overlay-note">横画面にできない端末はこちら</small>
-      <span class="portrait-version">WATER FIGHTER 2　v1.4.1</span>
+      <span class="portrait-version">WATER FIGHTER 2　v1.5</span>
     </div>
   </div>
   <script src="water-game.js"></script>
