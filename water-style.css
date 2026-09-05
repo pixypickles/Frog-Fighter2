@@ -3096,3 +3096,53 @@ body.portrait-play #portraitOverlay{
     display:none !important;
   }
 }
+
+
+/* v1.6.4 roster character fixes */
+#selectScreen .select-right-panel .fighter-card[data-fighter="piranha"],
+#selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"]{
+  display:block !important;
+  position:relative !important;
+  overflow:hidden !important;
+  padding:61px 5px 5px !important;
+  text-align:center !important;
+}
+
+#selectScreen .select-right-panel .fighter-card[data-fighter="piranha"] .fighter-emoji,
+#selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"] .fighter-emoji{
+  position:absolute !important;
+  left:50% !important;
+  top:5px !important;
+  width:auto !important;
+  height:auto !important;
+  transform:translateX(-50%) !important;
+  transform-origin:center center !important;
+  font-size:48px !important;
+  line-height:1 !important;
+  margin:0 !important;
+  white-space:nowrap !important;
+}
+
+#selectScreen .select-right-panel .fighter-card[data-fighter="piranha"] > strong,
+#selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"] > strong{
+  position:relative !important;
+  display:block !important;
+  width:100% !important;
+  margin:0 !important;
+  font-size:10px !important;
+  line-height:1.05 !important;
+  text-align:center !important;
+  writing-mode:horizontal-tb !important;
+  white-space:normal !important;
+}
+
+@media (orientation:landscape) and (max-height:600px){
+  #selectScreen .select-right-panel .fighter-card[data-fighter="piranha"],
+  #selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"]{
+    padding-top:55px !important;
+  }
+  #selectScreen .select-right-panel .fighter-card[data-fighter="piranha"] .fighter-emoji,
+  #selectScreen .select-right-panel .fighter-card[data-fighter="crayfish"] .fighter-emoji{
+    font-size:43px !important;
+  }
+}
