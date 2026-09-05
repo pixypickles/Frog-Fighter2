@@ -73,6 +73,7 @@
   let engineerShots = [];
   let michaelAuraShots = [];
   let water2Shots = [];
+  let iceWalls = [];
   let toxicWaters=[];
   let bossFish=[];
   let abyssShocks=[];
@@ -330,10 +331,10 @@
       'ホワイトショット：ガード ＋ パンチ'
     ],
     black:[
-      'ヘルクラッシュ：前 ＋ パンチ',
+      'ヘルクラッシュ：前 ＋ キック',
       'アビスチャージ：後ろ ＋ パンチ長押し → 離す',
-      'アイスショット：前 ＋ キック',
-      'アイスチャージショット：後ろ ＋ キック長押し → 離す'
+      'アイスショット：前 ＋ パンチ',
+      'アイスウォール：後ろ ＋ ガード'
     ],
     purple:[
       '舌ラッシュ：舌連打',
@@ -708,11 +709,11 @@
     }
     if(type==='black'){
       return {
-        body:'#3b4048',
-        limb:'#3b4048',
-        light:'#59616d',
-        belly:'#707984',
-        eyeBump:'#4b525c'
+        body:'#333b46',
+        limb:'#333b46',
+        light:'#7fdff2',
+        belly:'#bdeff7',
+        eyeBump:'#8de9f7'
       };
     }
     if(type==='purple'){
@@ -726,11 +727,11 @@
     }
     if(type==='beelzebub'){
       return {
-        body:'#111714',
-        limb:'#141b16',
-        light:'#7dff28',
-        belly:'#b5ff48',
-        eyeBump:'#6eff20'
+        body:'#17121d',
+        limb:'#1d1625',
+        light:'#6f587d',
+        belly:'#b8ff68',
+        eyeBump:'#72ff2d'
       };
     }
     if(type==='yellow'){
@@ -1826,7 +1827,7 @@
           intensity=.4+.6*Math.min(1,held/1150);
         }
         if(this.specialType==='hellCrashFinish'){
-          drawIceAura(48,-38,22,19,intensity);
+          drawIceAura(30,50,28,16,intensity);
         }else if(this.specialType==='abyssCharge'){
           // 曲げた腕の拳に赤い力を溜める。
           drawIceAura(26,8,19,16,intensity);
@@ -1880,12 +1881,6 @@
         ctx.arc(-15,-27,5.5,0,Math.PI*2);
         ctx.arc(15,-27,5.5,0,Math.PI*2);
         ctx.fill();
-        ctx.globalAlpha=.22;
-        ctx.strokeStyle='#84ff25';
-        ctx.lineWidth=3;
-        ctx.beginPath();
-        ctx.ellipse(0,18,43,56,0,0,Math.PI*2);
-        ctx.stroke();
         ctx.restore();
       }
 
@@ -2689,7 +2684,7 @@
       blue:['上 ＋ パンチ：アクアトルネード','下 ＋ キック：アクアストリーム','後ろ ＋ パンチ：アクアボルテックス','前 ＋ パンチ：アクアショット'],
       yellow:['前 ＋ パンチ：水圧カッター（正面）','前 ＋ キック：水圧カッター（下15度）','後ろ ＋ パンチ：カープ水圧カッター（上から弧）','後ろ ＋ キック：カープ水圧カッター（下から弧）','ガード ×2：ヒーリングバブル','後ろ → 下 ＋ ガード：高速バブル移動'],
       orange:['下 → 後ろ ＋ ガード：ホワイトカウンター','後ろ → 前 ＋ ガード：ガーディアンタックル','ガード長押し：ホワイトオーラ','オーラ中 パンチ / キック：白い長リーチ攻撃','ガード ＋ パンチ：ホワイトショット'],
-      black:['前 ＋ パンチ：ヘルクラッシュ（拳に氷オーラ）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ キック：アイスショット','後ろ ＋ キック長押し → 離す：アイスチャージショット'],
+      black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['方向キー1回転 ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
@@ -3095,7 +3090,7 @@
     const dir=f.face;
     f.specialType='hellCrash';
     f.specialT=.95;
-    f.attack='punch';
+    f.attack='kick';
     f.attackT=.95;
     f.specialHitDone=false;
 
@@ -3126,11 +3121,11 @@
         other.vy*=.12;
         other.stun=Math.max(other.stun,.38);
 
-        // 接触後、赤オーラのアッパーへ
+        // 接触後、氷をまとった蹴りで大きく吹き飛ばす
         f.specialType='hellCrashFinish';
         f.specialT=.5;
-        f.attack='punch';
-        f.attackVariant='up';
+        f.attack='kick';
+        f.attackVariant='mid';
         f.attackT=.5;
 
         setTimeout(()=>{
@@ -3140,17 +3135,7 @@
           other.hurtFaceT=.72;
 
           // 斜め上へ強く飛ばし、やられ顔で回転させる
-          damageHit(f,other,12.0*f.damageMul,245*dir,-315);
-
-          // Fighterの既存回転処理を使う。文字列ではなく安全なthrowStateオブジェクト。
-          other.throwState=null;
-          other.spinAngle=0;
-          other.throwState={
-            owner:f,
-            spinSpeed:dir*13.5,
-            endT:.82,
-            noWallDamage:true
-          };
+          damageHit(f,other,12.0*f.damageMul,465*dir,-45);
 
           burstWaves.push({
             x:other.x,
@@ -3856,8 +3841,8 @@
         const speed=330+i*18;
         water2Shots.push({
           owner:f,x:f.x+dir*58,y:f.y+(-18+i*18),vx:dir*speed,vy:(i-1)*36,
-          r:13,t:1.55,life:1.55,damage:2.0,name:'スピンキックカッター',color:'blade',
-          reflected:0,hit:false,spin:0,style:'carpBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:4
+          r:10,t:1.55,life:1.55,damage:2.0,name:'スピンキックカッター',color:'blade',
+          reflected:0,hit:false,spin:0,style:'pressureBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:4
         });
       },delay);
     });
@@ -3963,6 +3948,20 @@
     return true;
   }
 
+  function specialIceWall(f){
+    if(gameOver || !f || f.type!=='black' || f.stun>0 || f.specialT>0) return false;
+    f.guard=false;
+    f.specialType='iceWall'; f.specialT=.42; f.attack=null; f.attackT=.18;
+    const x=Math.max(58,Math.min(innerWidth-58,f.x-f.face*54));
+    const y=Math.max(90,Math.min(innerHeight-85,f.y+5));
+    // 同じルシファーの古い壁は消し、1枚だけ設置できる。
+    iceWalls=iceWalls.filter(w=>w.owner!==f);
+    iceWalls.push({owner:f,x,y,w:25,h:112,t:3.0,life:3.0,hitCd:0});
+    comboEl.textContent='アイスウォール!';
+    setTimeout(()=>{if(comboEl.textContent==='アイスウォール!')comboEl.textContent='';},650);
+    return true;
+  }
+
   function startIceChargeShot(f){
     if(gameOver || !f || f.type!=='black' || f.stun>0 || f.guard || f.specialT>0) return false;
     f.specialType='iceCharge'; f.specialT=20; f.attack='kick'; f.attackT=20;
@@ -4043,9 +4042,9 @@
     }
 
     if(f.type==='black'){
-      if(kind==='punch' && hasForwardForwardTap(f,780)){
-        input.forwardTapTimes=[]; clearCommand(); f.attackT=0; f.attack=null;
-        return specialHellCrash(f);
+      if(kind==='kick' && water2HeldDir(f,'forward')){ clearCommand(); f.attackT=0; f.attack=null; return specialHellCrash(f); }
+      if(kind==='punch' && water2HeldDir(f,'forward')){
+        clearCommand(); return specialWater2Shot(f,{name:'アイスショット',attack:'punch',color:'ice',style:'iceOrb',speed:255,damage:5.2,r:17,charge:.44,maxReflect:5});
       }
     }
 
@@ -4077,10 +4076,6 @@
     if(f.type==='orange' && kind==='punch'){
       const justGuarded=performance.now()-(input.lastSimpleGuardTapTime||0)<=650;
       if(justGuarded){ input.lastSimpleGuardTapTime=0; clearCommand(); return specialWater2Shot(f,{name:'ホワイトショット',attack:'punch',color:'white',style:'whiteOrb',speed:250,damage:3.7,r:17,charge:.38,maxReflect:5}); }
-    }
-    // ルシファー：前＋キックでアイスショット。
-    if(f.type==='black' && kind==='kick' && water2HeldDir(f,'forward')){
-      clearCommand(); return specialWater2Shot(f,{name:'アイスショット',attack:'kick',color:'ice',style:'iceOrb',speed:255,damage:5.2,r:17,charge:.44,maxReflect:5});
     }
     // リリス：後ろ＋舌で遅いバブルショット。
     if(f.type==='purple' && kind==='tongue' && hasCommand([back],560)){
@@ -4696,14 +4691,6 @@
           }
         }
       }
-      else if(action==='kick' && player && player.type==='black'){
-        const backHeld=(player.face>0 && input.x<-.35) || (player.face<0 && input.x>.35);
-        if(backHeld && !player.throwState){
-          player.attackT=0; player.attack=null;
-          if(startIceChargeShot(player)){btn.dataset.iceCharging='1';return;}
-        }
-        attack(player,action);
-      }
       else if(action==='punch' && player && player.type==='black'){
         const backHeld=(player.face>0 && input.x<-.35) || (player.face<0 && input.x>.35);
         if(backHeld && !player.throwState){
@@ -4716,9 +4703,6 @@
     };
     const up=e=>{
       e.preventDefault(); btn.classList.remove('pressed');
-      if(action==='kick' && player && btn.dataset.iceCharging==='1'){
-        btn.dataset.iceCharging=''; releaseIceChargeShot(player);
-      }
       if(action==='punch' && player && btn.dataset.charging==='1'){
         btn.dataset.charging=''; releaseAbyssCharge(player);
       }
@@ -4760,22 +4744,21 @@
       }
     }
     if(e.key==='j')attack(player,'punch');
-    if(e.key==='k'){
-      const backHeld=player&&((player.face>0&&keys['a'])||(player.face<0&&keys['d']));
-      if(player&&player.type==='black'&&backHeld){ if(startIceChargeShot(player)) input._kbIceCharging=true; }
-      else attack(player,'kick');
-    }
+    if(e.key==='k') attack(player,'kick');
     if(e.key==='l')attack(player,'tongue');
     if(e.key==='i'&&player){
-      if(player.type==='orange'&&!player.urielGuardHoldStart)player.urielGuardHoldStart=performance.now();
-      player.guard=true;
-      player.guardStartT=.28;
-      if(guardMiniActive) guardMiniGuardTapTime=performance.now();
+      const backHeld=player.type==='black'&&((player.face>0&&keys['a'])||(player.face<0&&keys['d']));
+      if(backHeld){ specialIceWall(player); }
+      else{
+        if(player.type==='orange'&&!player.urielGuardHoldStart)player.urielGuardHoldStart=performance.now();
+        player.guard=true;
+        player.guardStartT=.28;
+        if(guardMiniActive) guardMiniGuardTapTime=performance.now();
+      }
     }
   });
   addEventListener('keyup',e=>{
     const key=e.key.toLowerCase(); keys[key]=false;
-    if(key==='k'&&player&&input._kbIceCharging){input._kbIceCharging=false;releaseIceChargeShot(player);}
     if(e.key==='i'&&player)player.guard=false;
   });
 
@@ -5273,6 +5256,19 @@ function drawBackground(dt){
       });
       michaelAuraShots=michaelAuraShots.filter(s=>s.t>0&&s.x>-80&&s.x<innerWidth+80);
 
+
+      // ルシファー：設置型アイスウォール。約3秒残り、接触した相手を押し返す。
+      iceWalls.forEach(w=>{
+        w.t-=dt; w.hitCd=Math.max(0,(w.hitCd||0)-dt);
+        const target=w.owner&&w.owner.isPlayer?enemy:player;
+        if(target && w.hitCd<=0 && Math.abs(target.x-w.x)<target.radius+w.w*.65 && Math.abs(target.y-w.y)<target.radius+w.h*.45){
+          w.hitCd=.55;
+          const dir=Math.sign(target.x-w.x)||w.owner.face;
+          damageHit(w.owner,target,1.8*w.owner.damageMul,150*dir,-18);
+          spawnImpact(target.x,target.y,'guard');
+        }
+      });
+      iceWalls=iceWalls.filter(w=>w.t>0);
 
       // 水中格闘2 共通飛び道具：シャボンガードに触れると自動反射。
       water2Shots.forEach(q=>{
@@ -6054,6 +6050,17 @@ function drawBackground(dt){
       ctx.beginPath();
       ctx.arc(0,0,p.r+5,0,Math.PI*2);
       ctx.stroke();
+      ctx.restore();
+    });
+
+    iceWalls.forEach(w=>{
+      const a=Math.max(0,Math.min(1,w.t/.25,w.t));
+      ctx.save(); ctx.translate(w.x,w.y); ctx.globalAlpha=.82*Math.min(1,w.t/.18); ctx.globalCompositeOperation='lighter';
+      ctx.shadowColor='#9feeff';ctx.shadowBlur=20;
+      const g=ctx.createLinearGradient(-14,-55,14,55);g.addColorStop(0,'rgba(238,255,255,.92)');g.addColorStop(.45,'rgba(126,225,246,.78)');g.addColorStop(1,'rgba(70,155,205,.72)');
+      ctx.fillStyle=g;ctx.strokeStyle='#efffff';ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(-10,-56);ctx.lineTo(14,-48);ctx.lineTo(11,-18);ctx.lineTo(18,7);ctx.lineTo(9,55);ctx.lineTo(-15,49);ctx.lineTo(-12,15);ctx.lineTo(-19,-8);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.globalAlpha=.65;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-8,-40);ctx.lineTo(7,-18);ctx.lineTo(-5,4);ctx.lineTo(10,27);ctx.stroke();
       ctx.restore();
     });
 
