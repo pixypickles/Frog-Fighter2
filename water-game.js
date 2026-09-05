@@ -351,7 +351,8 @@
     ],
     samael:[
       'ポイズンゲート：方向 ＋ パンチ（指定方向に発生点 → 相手へ毒弾）',
-      'ヴェノムタン：舌（舌先から毒弾）'
+      'ヴェノムタン：舌（舌先から毒弾）',
+      'デッドリー・アクア：下 → 前 → 後ろ ＋ パンチ＋キック'
     ],
     kawazu:[
       '水圧ラッシュ：パンチ連打',
@@ -2702,7 +2703,7 @@
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
-      samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）'],
+      samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','下 → 前 → 後ろ ＋ パンチ＋キック：デッドリー・アクア'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
     return map[type] || ['専用必殺技：練習対象外'];
@@ -3925,6 +3926,27 @@
     return true;
   }
 
+  function specialDeadlyAqua(f){
+    if(gameOver || !f || f.type!=='samael' || f.stun>0 || f.guard || f.specialT>0 || f.attackT>0) return false;
+    const target=f.isPlayer?enemy:player;
+    if(!target) return false;
+    f.specialType='deadlyAqua'; f.specialT=1.18; f.attack=null; f.attackT=.25;
+    // 反則級だが予告は明確。水槽内の4点に毒水の渦が順番に生まれる。
+    const W=innerWidth,H=innerHeight;
+    const pts=[
+      [Math.max(78,target.x-185),Math.max(88,target.y-125)],
+      [Math.min(W-78,target.x+185),Math.min(H-88,target.y+125)],
+      [Math.min(W-78,target.x+175),Math.max(88,target.y-135)],
+      [Math.max(78,target.x-175),Math.min(H-88,target.y+135)]
+    ];
+    pts.forEach((pt,i)=>{
+      samaelGates.push({owner:f,target,side:'deadly',x:pt[0],y:pt[1],t:.62+i*.15,life:.62+i*.15,fired:false,deadly:true});
+    });
+    comboEl.textContent='デッドリー・アクア…!';
+    setTimeout(()=>{if(comboEl.textContent==='デッドリー・アクア…!')comboEl.textContent='';},900);
+    return true;
+  }
+
   function specialSamaelGate(f,side){
     if(gameOver || !f || f.type!=='samael' || f.stun>0 || f.guard || f.specialT>0 || f.attackT>0) return false;
     const target=f.isPlayer?enemy:player;
@@ -4177,6 +4199,18 @@
   }
 
   function attack(f, kind) {
+    if(f && f.type==='samael' && (kind==='punch'||kind==='kick')){
+      const now=performance.now();
+      const other=(kind==='punch'?'kick':'punch');
+      const seq=commandDirs.slice(-3);
+      const hasDeadlySeq=seq.length>=3 && seq[0]==='down' && seq[1]==='forward' && seq[2]==='back';
+      if(hasDeadlySeq && samaelComboButton===other && now-samaelComboButtonAt<300){
+        samaelComboButton=null; samaelComboButtonAt=0; clearCommand();
+        f.attack=null; f.attackT=0;
+        if(specialDeadlyAqua(f)) return;
+      }
+      samaelComboButton=kind; samaelComboButtonAt=now;
+    }
     if(basketMiniActive){
       hockeyStrike(f,kind);
     }
@@ -4893,6 +4927,7 @@
       }
       if(enemy.type==='samael' && enemy.specialT<=0){
         const roll=Math.random();
+        if(enemy.hp<enemy.maxHp*.55 && roll<dt*.10){ specialDeadlyAqua(enemy); return; }
         if(roll<dt*.40){
           const sides=['up','down','forward','back'];
           specialSamaelGate(enemy,sides[Math.floor(Math.random()*sides.length)]);
@@ -5372,12 +5407,12 @@ function drawBackground(dt){
           const target=g.target && g.target.hp>0 ? g.target : (g.owner.isPlayer?enemy:player);
           if(target){
             const dx=target.x-g.x,dy=target.y-g.y,d=Math.hypot(dx,dy)||1;
-            const speed=252;
+            const speed=g.deadly?225:252;
             water2Shots.push({
-              owner:g.owner,x:g.x,y:g.y,vx:dx/d*speed,vy:dy/d*speed,r:16,
-              age:0,maxAge:18,t:1,life:1,damage:4.7,name:'ポイズンゲート',
+              owner:g.owner,x:g.x,y:g.y,vx:dx/d*speed,vy:dy/d*speed,r:g.deadly?19:16,
+              age:0,maxAge:18,t:1,life:1,damage:g.deadly?5.6:4.7,name:g.deadly?'デッドリー・アクア':'ポイズンゲート',
               color:'samaelVenom',reflected:0,hit:false,spin:0,style:'samaelVenom',
-              poisonDuration:2.2,curve:0,arcFlip:1,wobble:.04,baseVy:dy/d*speed,maxReflect:4
+              poisonDuration:g.deadly?2.8:2.2,curve:0,arcFlip:1,wobble:g.deadly?.08:.04,baseVy:dy/d*speed,maxReflect:g.deadly?3:4
             });
             comboEl.textContent='ポイズンゲート!';
             setTimeout(()=>{if(comboEl.textContent==='ポイズンゲート!')comboEl.textContent='';},480);
@@ -6184,8 +6219,8 @@ function drawBackground(dt){
       const p=Math.max(0,Math.min(1,1-g.t/g.life));
       ctx.save(); ctx.translate(g.x,g.y); ctx.globalCompositeOperation='lighter';
       ctx.rotate(performance.now()/230);
-      ctx.globalAlpha=.35+.45*p;
-      ctx.shadowColor='#c5f7ff';ctx.shadowBlur=20;
+      ctx.globalAlpha=(g.deadly?.48:.35)+.45*p;
+      ctx.shadowColor=g.deadly?'#e6b8ff':'#c5f7ff';ctx.shadowBlur=g.deadly?28:20;
       for(let i=0;i<3;i++){
         ctx.strokeStyle=i===0?'#7b42c6':(i===1?'#b976ff':'#dffcff');
         ctx.lineWidth=8-i*2.2;
