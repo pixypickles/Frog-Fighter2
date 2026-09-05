@@ -332,8 +332,8 @@
     black:[
       'ヘルクラッシュ：前 ＋ パンチ',
       'アビスチャージ：後ろ ＋ パンチ長押し → 離す',
-      'パワーショット：前 ＋ キック',
-      'パワーチャージショット：後ろ ＋ キック長押し → 離す'
+      'アイスショット：前 ＋ キック',
+      'アイスチャージショット：後ろ ＋ キック長押し → 離す'
     ],
     purple:[
       '舌ラッシュ：舌連打',
@@ -1819,20 +1819,23 @@
         ctx.restore();
       }
 
-      if(this.type==='black' && (this.specialType==='hellCrashFinish' || this.specialType==='abyssCharge' || this.specialType==='abyssBurst')){
+      if(this.type==='black' && (this.specialType==='hellCrashFinish' || this.specialType==='abyssCharge' || this.specialType==='abyssBurst' || this.specialType==='iceCharge' || this.specialType==='iceChargeRelease')){
         let intensity=1;
         if(this.specialType==='abyssCharge'){
           const held=Math.max(0,performance.now()-(this.chargeStartTime||performance.now()));
           intensity=.4+.6*Math.min(1,held/1150);
         }
         if(this.specialType==='hellCrashFinish'){
-          drawRedAura(48,-38,22,19,intensity);
+          drawIceAura(48,-38,22,19,intensity);
         }else if(this.specialType==='abyssCharge'){
           // 曲げた腕の拳に赤い力を溜める。
-          drawRedAura(26,8,16,14,intensity);
+          drawIceAura(26,8,19,16,intensity);
+        }else if(this.specialType==='abyssBurst'){
+          // アビスチャージ解放：拳の周囲が一瞬凍りつく。
+          drawIceAura(64,7,24,20,intensity);
         }else{
-          // パンチが伸びた先で炸裂。
-          drawRedAura(64,7,23,19,intensity);
+          // アイスチャージ中は蹴り足側に冷気を集める。
+          drawIceAura(18,48,this.specialType==='iceCharge'?20:28,this.specialType==='iceCharge'?14:19,intensity);
         }
       }
 
@@ -2686,7 +2689,7 @@
       blue:['上 ＋ パンチ：アクアトルネード','下 ＋ キック：アクアストリーム','後ろ ＋ パンチ：アクアボルテックス','前 ＋ パンチ：アクアショット'],
       yellow:['前 ＋ パンチ：水圧カッター（正面）','前 ＋ キック：水圧カッター（下15度）','後ろ ＋ パンチ：カープ水圧カッター（上から弧）','後ろ ＋ キック：カープ水圧カッター（下から弧）','ガード ×2：ヒーリングバブル','後ろ → 下 ＋ ガード：高速バブル移動'],
       orange:['下 → 後ろ ＋ ガード：ホワイトカウンター','後ろ → 前 ＋ ガード：ガーディアンタックル','ガード長押し：ホワイトオーラ','オーラ中 パンチ / キック：白い長リーチ攻撃','ガード ＋ パンチ：ホワイトショット'],
-      black:['前 ＋ パンチ：ヘルクラッシュ','後ろ ＋ パンチ長押し → 離す：アビスチャージ','前 ＋ キック：パワーショット','後ろ ＋ キック長押し → 離す：パワーチャージショット'],
+      black:['前 ＋ パンチ：ヘルクラッシュ（拳に氷オーラ）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ キック：アイスショット','後ろ ＋ キック長押し → 離す：アイスチャージショット'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['方向キー1回転 ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
@@ -3073,6 +3076,16 @@
     return true;
   }
 
+  function drawIceAura(x,y,rx,ry,intensity=1){
+    ctx.save(); ctx.translate(x,y); ctx.globalCompositeOperation='lighter';
+    ctx.shadowColor='#bff7ff'; ctx.shadowBlur=20*intensity;
+    ctx.fillStyle='rgba(170,238,255,'+(0.24+0.22*intensity)+')';
+    ctx.beginPath(); ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(235,255,255,'+(0.55+0.3*intensity)+')'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(-rx*.8,0); ctx.lineTo(-rx*.2,-ry*.8); ctx.lineTo(rx*.15,-ry*.25); ctx.lineTo(rx*.75,-ry*.65); ctx.stroke();
+    ctx.restore();
+  }
+
   function specialHellCrash(f){
     if(gameOver || f.stun>0 || f.guard || f.specialT>0) return false;
 
@@ -3171,7 +3184,9 @@
     f.specialType='abyssBurst'; f.specialT=.5; f.attack='punch'; f.attackVariant='mid'; f.attackT=.5; f.chargePower=power;
     // 溜め姿勢から拳を出す瞬間に、身体もわずかに前へ乗せる。
     f.vx+=f.face*(38+42*power);
-    comboEl.textContent='アビスチャージ!';setTimeout(()=>{if(comboEl.textContent==='アビスチャージ!')comboEl.textContent='';},720);
+    comboEl.textContent='アビスチャージ!';
+    burstWaves.push({x:f.x+f.face*42,y:f.y+7,t:.34,life:.34,radius:18,max:115,power:1.25,ice:true});
+    setTimeout(()=>{if(comboEl.textContent==='アビスチャージ!')comboEl.textContent='';},720);
     setTimeout(()=>{
       if(gameOver)return; const other=f.isPlayer?enemy:player; if(!other)return;
       const hx=f.x+f.face*67, hy=f.y+7, dist=Math.hypot(other.x-hx,other.y-hy);
@@ -3842,7 +3857,7 @@
         water2Shots.push({
           owner:f,x:f.x+dir*58,y:f.y+(-18+i*18),vx:dir*speed,vy:(i-1)*36,
           r:13,t:1.55,life:1.55,damage:2.0,name:'スピンキックカッター',color:'blade',
-          reflected:0,hit:false,spin:0,style:'spinBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:4
+          reflected:0,hit:false,spin:0,style:'carpBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:4
         });
       },delay);
     });
@@ -3948,6 +3963,25 @@
     return true;
   }
 
+  function startIceChargeShot(f){
+    if(gameOver || !f || f.type!=='black' || f.stun>0 || f.guard || f.specialT>0) return false;
+    f.specialType='iceCharge'; f.specialT=20; f.attack='kick'; f.attackT=20;
+    f.iceChargeStart=performance.now(); f.vx*=.3; f.vy*=.3;
+    comboEl.textContent='ICE CHARGE...'; return true;
+  }
+
+  function releaseIceChargeShot(f){
+    if(!f || f.specialType!=='iceCharge') return false;
+    const held=Math.max(0,performance.now()-(f.iceChargeStart||performance.now()));
+    const power=Math.max(.25,Math.min(1,held/1200));
+    f.specialType='iceChargeRelease'; f.specialT=.42; f.attack='kick'; f.attackT=.42;
+    const r=20+12*power, speed=225+65*power;
+    water2Shots.push({owner:f,x:f.x+f.face*62,y:f.y+22,vx:f.face*speed,vy:0,r,age:0,maxAge:18,damage:6.0+5.0*power,name:'アイスチャージショット',color:'ice',reflected:0,hit:false,spin:0,style:'iceChargeOrb',poisonDuration:0,curve:0,wobble:0,baseVy:0,maxReflect:5,trail:[]});
+    comboEl.textContent='アイスチャージショット!';
+    setTimeout(()=>{if(comboEl.textContent==='アイスチャージショット!')comboEl.textContent='';},650);
+    return true;
+  }
+
   function water2HeldDir(f, dir){
     if(!f) return false;
     const kx=(keys['d']?1:0)-(keys['a']?1:0);
@@ -4044,9 +4078,9 @@
       const justGuarded=performance.now()-(input.lastSimpleGuardTapTime||0)<=650;
       if(justGuarded){ input.lastSimpleGuardTapTime=0; clearCommand(); return specialWater2Shot(f,{name:'ホワイトショット',attack:'punch',color:'white',style:'whiteOrb',speed:250,damage:3.7,r:17,charge:.38,maxReflect:5}); }
     }
-    // ルシファー：前＋キックでパワーショット。
-    if(f.type==='black' && kind==='kick' && hasCommand([forward],560)){
-      clearCommand(); return specialWater2Shot(f,{name:'パワーショット',attack:'kick',color:'dark',style:'powerOrb',speed:245,damage:5.5,r:19,charge:.48,maxReflect:5});
+    // ルシファー：前＋キックでアイスショット。
+    if(f.type==='black' && kind==='kick' && water2HeldDir(f,'forward')){
+      clearCommand(); return specialWater2Shot(f,{name:'アイスショット',attack:'kick',color:'ice',style:'iceOrb',speed:255,damage:5.2,r:17,charge:.44,maxReflect:5});
     }
     // リリス：後ろ＋舌で遅いバブルショット。
     if(f.type==='purple' && kind==='tongue' && hasCommand([back],560)){
@@ -4662,6 +4696,14 @@
           }
         }
       }
+      else if(action==='kick' && player && player.type==='black'){
+        const backHeld=(player.face>0 && input.x<-.35) || (player.face<0 && input.x>.35);
+        if(backHeld && !player.throwState){
+          player.attackT=0; player.attack=null;
+          if(startIceChargeShot(player)){btn.dataset.iceCharging='1';return;}
+        }
+        attack(player,action);
+      }
       else if(action==='punch' && player && player.type==='black'){
         const backHeld=(player.face>0 && input.x<-.35) || (player.face<0 && input.x>.35);
         if(backHeld && !player.throwState){
@@ -4674,6 +4716,9 @@
     };
     const up=e=>{
       e.preventDefault(); btn.classList.remove('pressed');
+      if(action==='kick' && player && btn.dataset.iceCharging==='1'){
+        btn.dataset.iceCharging=''; releaseIceChargeShot(player);
+      }
       if(action==='punch' && player && btn.dataset.charging==='1'){
         btn.dataset.charging=''; releaseAbyssCharge(player);
       }
@@ -4715,7 +4760,11 @@
       }
     }
     if(e.key==='j')attack(player,'punch');
-    if(e.key==='k')attack(player,'kick');
+    if(e.key==='k'){
+      const backHeld=player&&((player.face>0&&keys['a'])||(player.face<0&&keys['d']));
+      if(player&&player.type==='black'&&backHeld){ if(startIceChargeShot(player)) input._kbIceCharging=true; }
+      else attack(player,'kick');
+    }
     if(e.key==='l')attack(player,'tongue');
     if(e.key==='i'&&player){
       if(player.type==='orange'&&!player.urielGuardHoldStart)player.urielGuardHoldStart=performance.now();
@@ -4724,7 +4773,11 @@
       if(guardMiniActive) guardMiniGuardTapTime=performance.now();
     }
   });
-  addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key==='i'&&player)player.guard=false});
+  addEventListener('keyup',e=>{
+    const key=e.key.toLowerCase(); keys[key]=false;
+    if(key==='k'&&player&&input._kbIceCharging){input._kbIceCharging=false;releaseIceChargeShot(player);}
+    if(e.key==='i'&&player)player.guard=false;
+  });
 
   function incomingReflectableThreat(f){
     if(!f) return false;
@@ -5226,6 +5279,7 @@ function drawBackground(dt){
         q.age=(q.age||0)+dt;
         q.spin=(q.spin||0)+dt*(q.style==='aquaSpin'?10:4);
         if(q.curve){ q.vy += q.curve*dt; }
+        if(q.style==='iceChargeOrb'){ q.trail=q.trail||[]; q.trail.push({x:q.x,y:q.y,t:.75}); if(q.trail.length>22)q.trail.shift(); q.trail.forEach(v=>v.t-=dt); q.trail=q.trail.filter(v=>v.t>0); }
         q.x+=q.vx*dt;
         q.y+=q.vy*dt + Math.sin((q.spin||0)*2)*(q.wobble||0)*18*dt;
         const target=q.owner&&q.owner.isPlayer?enemy:player;
@@ -6005,6 +6059,9 @@ function drawBackground(dt){
 
     water2Shots.forEach(q=>{
       const a=1;
+      if(q.style==='iceChargeOrb'&&q.trail){
+        q.trail.forEach((v,i)=>{ctx.save();ctx.globalAlpha=Math.max(0,v.t/.75)*.42;ctx.fillStyle='#c8f7ff';ctx.strokeStyle='#efffff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(v.x,v.y,10+q.r*.28,4+q.r*.10,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();});
+      }
       ctx.save(); ctx.translate(q.x,q.y); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.9;
       const sp=Math.hypot(q.vx,q.vy)||1;
       const ang=Math.atan2(q.vy,q.vx);
@@ -6027,6 +6084,11 @@ function drawBackground(dt){
       }else if(q.style==='whiteOrb'){
         ctx.shadowColor='#ffffff';ctx.shadowBlur=24;ctx.fillStyle='#f8ffff';ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
         ctx.strokeStyle='rgba(210,245,255,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,q.r+4,0,Math.PI*2);ctx.stroke();
+      }else if(q.style==='iceOrb' || q.style==='iceChargeOrb'){
+        const rr=q.r; ctx.shadowColor='#bdf7ff';ctx.shadowBlur=q.style==='iceChargeOrb'?28:20;
+        const rg=ctx.createRadialGradient(-rr*.3,-rr*.35,2,0,0,rr*1.1);rg.addColorStop(0,'#ffffff');rg.addColorStop(.28,'#c9f7ff');rg.addColorStop(.72,'#69cfee');rg.addColorStop(1,'#277da5');
+        ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,rr,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#efffff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-rr*.65,0);ctx.lineTo(-rr*.15,-rr*.55);ctx.lineTo(rr*.18,-rr*.12);ctx.lineTo(rr*.62,-rr*.48);ctx.stroke();
       }else if(q.style==='powerOrb'){
         const rg=ctx.createRadialGradient(-q.r*.25,-q.r*.25,2,0,0,q.r*1.2);
         rg.addColorStop(0,'#ff5b4b');rg.addColorStop(.45,'#751728');rg.addColorStop(1,'#140b12');
