@@ -355,7 +355,7 @@
       'セラフィックアッパー：上 ＋ パンチ',
       'セラフィックキック：前 ＋ キック',
       'セラフィックショット：後ろ ＋ パンチ',
-      'セラフィックサイクロン：下 → 前 → 後ろ ＋ キック',
+      'セラフィックサイクロン：下 → 後ろ ＋ キック',
       'セラフィックレイ：下 → 前 ＋ パンチ（セラフィエル独自技）'
     ],
     samael:[
@@ -1918,6 +1918,23 @@
         ctx.restore();
       }
 
+      if(this.type==='seraphiel' && (this.specialType==='seraphicUpper'||this.specialType==='seraphicKick') && this.specialT>0){
+        const ap=Math.max(0,Math.min(1,this.specialT/.16));
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        ctx.shadowColor='#fff3a6';ctx.shadowBlur=28;
+        const hand=this.specialType==='seraphicUpper';
+        const ax=hand?54:72, ay=hand?-40:50, rr=hand?31:36;
+        const g=ctx.createRadialGradient(ax,ay,2,ax,ay,rr);
+        g.addColorStop(0,'rgba(255,255,255,.98)');
+        g.addColorStop(.38,'rgba(255,247,170,.92)');
+        g.addColorStop(.75,'rgba(255,211,72,.5)');
+        g.addColorStop(1,'rgba(255,200,60,0)');
+        ctx.globalAlpha=.94*ap;ctx.fillStyle=g;ctx.beginPath();ctx.arc(ax,ay,rr,0,Math.PI*2);ctx.fill();
+        ctx.globalAlpha=.46*ap;ctx.strokeStyle='#fff0a0';ctx.lineWidth=hand?12:16;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(ax-46,ay+4);ctx.lineTo(ax+12,ay-2);ctx.stroke();
+        ctx.restore();
+      }
+
       // ラファエルさん：回復中は小さな泡が身体の周囲を上昇
       if(this.type==='yellow' && this.healT>0){
         ctx.save();
@@ -2721,7 +2738,7 @@
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
-      seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 前 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
+      seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
       samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
@@ -3947,10 +3964,12 @@
 
   function specialSeraphicUpper(f){
     if(gameOver||!f||f.type!=='seraphiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
-    f.specialType='seraphicUpper';f.specialT=.62;f.attack='punch';f.attackVariant='up';f.attackT=.62;
+    f.specialType='seraphicUpper';f.specialT=.68;f.attack='punch';f.attackVariant='up';f.attackT=.68;
+    f.seraphicAura='hand'; f.seraphicAuraT=.68;
+    f.vx=f.face*105; f.vy=-235;
     const other=f.isPlayer?enemy:player,dir=f.face;
     setTimeout(()=>{if(other&&Math.abs(other.x-f.x)<112&&Math.abs(other.y-f.y)<105){
-      damageHit(f,other,13.2*f.damageMul,165*dir,-290);spawnImpact(other.x,other.y,'hit');
+      damageHit(f,other,13.2*f.damageMul,175*dir,-315);spawnImpact(other.x,other.y,'hit');
     }},150);
     comboEl.textContent='セラフィックアッパー!';
     return true;
@@ -3958,11 +3977,12 @@
 
   function specialSeraphicKick(f){
     if(gameOver||!f||f.type!=='seraphiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
-    f.specialType='seraphicKick';f.specialT=.58;f.attack='kick';f.attackT=.58;
-    f.vx=f.face*305;
+    f.specialType='seraphicKick';f.specialT=.64;f.attack='kick';f.attackVariant='mid';f.attackT=.64;
+    f.seraphicAura='foot'; f.seraphicAuraT=.64;
+    f.vx=f.face*355;
     const other=f.isPlayer?enemy:player,dir=f.face;
     setTimeout(()=>{if(other&&Math.abs(other.x-f.x)<128&&Math.abs(other.y-f.y)<82){
-      damageHit(f,other,11.8*f.damageMul,330*dir,-65);spawnImpact(other.x,other.y,'hit');
+      damageHit(f,other,11.8*f.damageMul,365*dir,-55);spawnImpact(other.x,other.y,'hit');
     }},145);
     comboEl.textContent='セラフィックキック!';
     return true;
@@ -4158,7 +4178,7 @@
     if(f.type==='seraphiel'){
       if(kind==='kick'){
         if(water2HeldDir(f,'forward')){clearCommand();return specialSeraphicKick(f);}
-        if(water2HeldDir(f,'back') && hasCommand([forward,'down'],1500)){
+        if(water2HeldDir(f,'back') && hasCommand(['down'],1200)){
           clearCommand();return specialSeraphicCyclone(f);
         }
       }
