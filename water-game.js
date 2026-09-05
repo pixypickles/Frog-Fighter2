@@ -76,6 +76,8 @@
   let iceWalls = [];
   let samaelGates = [];
   let seraphielRays = [];
+  let remielMirages = [];
+  let remielFakeShots = [];
   let toxicWaters=[];
   let bossFish=[];
   let abyssShocks=[];
@@ -112,6 +114,7 @@
     piranha: { speed: 198, tongue: 0,   damage: 1.08, defense:0.90, sink:3, hue:0, scale:0.95 },
     crayfish:{ speed: 138, tongue: 0,   damage: 1.18, defense:1.20, sink:10,hue:0, scale:1.08 },
     beelzebub:{speed: 154, tongue: 350, damage: 1.12, defense:1.10, sink:8, hue:0, scale:1.10},
+    remiel:{speed: 170, tongue: 205, damage: .98, defense:1.00, sink:5, hue:0, scale:1.00},
     seraphiel:{speed: 178, tongue: 205, damage: 1.24, defense:.84, sink:5, hue:0, scale:1.02},
     samael: {speed: 158, tongue: 235, damage: 1.10, defense:1.06, sink:7, hue:0, scale:1.08},
     kawazu: {speed: 205, tongue: 225, damage: 0.98, defense:0.90, sink:4, hue:0, scale:0.90},
@@ -350,6 +353,9 @@
       'アビスショック（上弧）：上 ＋ パンチ',
       'アビスショック（下弧）：下 ＋ キック',
       'ベノムショット：前 ＋ パンチ'
+    ],
+    remiel:[
+      'ミラージュ（上）：上 ＋ ガード','ミラージュ（下）：下 ＋ ガード','ミラージュカウンター：後ろ ＋ ガード','アクアパリィ：前 ＋ ガード / ジャストガード','フロストショット：前 ＋ パンチ','ミラージュキック：前 ＋ キック'
     ],
     seraphiel:[
       'セラフィックアッパー：上 ＋ パンチ',
@@ -749,6 +755,9 @@
         belly:'#b8ff68',
         eyeBump:'#72ff2d'
       };
+    }
+    if(type==='remiel'){
+      return {body:'#7eaebf',limb:'#79a6b8',light:'#c9edf2',belly:'#b8dce4',eyeBump:'#a9d6df'};
     }
     if(type==='seraphiel'){
       return {
@@ -1234,6 +1243,7 @@
     draw() {
       ctx.save();
       ctx.translate(this.x,this.y);
+      if(this.type==='remiel'&&this.specialType==='mirageKick'&&this.specialT>0&&Math.floor(this.specialT*24)%2===0)ctx.globalAlpha=.10;
       const pal=fighterPalette(this.type);
 
       if(this.specialType==='burningCyclone'){
@@ -1631,6 +1641,11 @@
         ctx.ellipse(0,20,10,3.2,0,0,Math.PI);
         ctx.fill();
         ctx.restore();
+      }
+
+      if(this.type==='remiel'){
+        const mir=remielMirages.find(m=>m.owner===this&&m.t>0);
+        if(mir){ctx.save();ctx.translate(0,mir.offsetY);ctx.globalAlpha=mir.alpha*Math.min(1,mir.t/.28);ctx.globalCompositeOperation='lighter';ctx.shadowColor='#bfefff';ctx.shadowBlur=13;ctx.fillStyle='rgba(150,215,230,.55)';ctx.beginPath();ctx.ellipse(0,18,39,51,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(-18,-23,16,0,Math.PI*2);ctx.arc(18,-23,16,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(210,250,255,.7)';ctx.lineWidth=10;ctx.lineCap='round';if(this.attack==='punch'){ctx.beginPath();ctx.moveTo(22,10);ctx.lineTo(57,-2);ctx.stroke();}if(this.attack==='kick'){ctx.beginPath();ctx.moveTo(15,46);ctx.lineTo(66,49);ctx.stroke();}ctx.restore();}
       }
 
       // 頭
@@ -2432,7 +2447,7 @@
     }));
 
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; burstWaves=[];
 
     for(let i=0;i<12;i++){
       spawnLeafTarget(i,true);
@@ -2727,7 +2742,7 @@
   }
 
 
-  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish','seraphiel','samael'].concat(isKawazuUnlocked()?['kawazu']:[]);
+  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish','remiel','seraphiel','samael'].concat(isKawazuUnlocked()?['kawazu']:[]);
 
   function practiceSpecialText(type){
     const map={
@@ -2738,6 +2753,7 @@
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
+      remiel:['上 ＋ ガード：ミラージュ（上）','下 ＋ ガード：ミラージュ（下）','後ろ ＋ ガード：ミラージュカウンター','前 ＋ ガード：アクアパリィ','前 ＋ パンチ：フロストショット','前 ＋ キック：ミラージュキック'],
       seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
       samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
@@ -2771,7 +2787,7 @@
       'ミカエル':'green','ミカエルさん':'green','ガブリエル':'blue','ガブリエルさん':'blue',
       'ルシファー':'black','ルシファーさん':'black','リリス':'purple','リリスさん':'purple',
       'ラファエル':'yellow','ラファエルさん':'yellow','ウリエル':'orange','ウリエルさん':'orange',
-      'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael','セラフィエル':'seraphiel','セラフィエルさん':'seraphiel',
+      'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael','セラフィエル':'seraphiel','セラフィエルさん':'seraphiel','レミエル':'remiel','レミエルさん':'remiel',
       'リヴァイア':'piranha','リヴァイアさん':'piranha','アスモデウス':'crayfish','アスモデウスさん':'crayfish',
       'アザゼル':'piranha','アザゼルさん':'piranha','ベリアル':'crayfish','ベリアルさん':'crayfish'
     };
@@ -2803,13 +2819,13 @@
       green:'ミカエルさん', blue:'ガブリエルさん', black:'ルシファーさん',
       purple:'リリスさん', yellow:'ラファエルさん', orange:'ウリエルさん',
       piranha:'リヴァイアさん', crayfish:'アスモデウスさん',
-      beelzebub:'ベルゼブブさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', kawazu:'カワズさん'
+      beelzebub:'ベルゼブブさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', remiel:'レミエルさん', kawazu:'カワズさん'
     }[type]||type;
   }
 
   function resetBattleEffects(){
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; burstWaves=[];
     leafTargets=[]; guardTargets=[]; toxicWaters=[]; bossFish=[]; abyssShocks=[]; kawazuShots=[]; kawazuGhosts=[];
   }
 
@@ -3962,6 +3978,33 @@
     return true;
   }
 
+  function remielMakeMirage(f,where){
+    if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
+    remielMirages=remielMirages.filter(m=>m.owner!==f);
+    remielMirages.push({owner:f,offsetY:where==='up'?-105:105,t:4.2,life:4.2,alpha:.48});
+    f.specialType='remielMirage';f.specialT=.34;
+    comboEl.textContent=where==='up'?'ミラージュ（上）!':'ミラージュ（下）!'; return true;
+  }
+  function specialMirageCounter(f){
+    if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
+    f.guard=false;f.specialType='mirageCounter';f.specialT=.48;f.remielCounterT=.30;comboEl.textContent='ミラージュカウンター…';return true;
+  }
+  function specialAquaParry(f,just=false){
+    if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
+    f.guard=true;f.guardStartT=.28;f.specialType='aquaParry';f.specialT=just?.30:.38;f.remielParryT=just?.18:.15;comboEl.textContent=just?'ジャスト・アクアパリィ!':'アクアパリィ…';return true;
+  }
+  function specialRemielFrostShot(f){
+    if(!specialWater2Shot(f,{name:'フロストショット',attack:'punch',color:'ice',style:'iceOrb',speed:270,damage:4.8,r:15,charge:.40,maxReflect:5})) return false;
+    const mir=remielMirages.find(m=>m.owner===f&&m.t>0),target=f.isPlayer?enemy:player;
+    if(mir&&target){const sx=f.x+f.face*42,sy=f.y+mir.offsetY-12,dx=target.x-sx,dy=target.y-sy,d=Math.hypot(dx,dy)||1,sp=265;remielFakeShots.push({owner:f,x:sx,y:sy,vx:dx/d*sp,vy:dy/d*sp,r:14,t:1.15,life:1.15});}
+    return true;
+  }
+  function specialMirageKick(f){
+    if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='mirageKick';f.specialT=.66;f.attack='kick';f.attackT=.66;f.vx=f.face*335;
+    const other=f.isPlayer?enemy:player,dir=f.face;setTimeout(()=>{if(other&&Math.abs(other.x-f.x)<132&&Math.abs(other.y-f.y)<82){damageHit(f,other,9.8*f.damageMul,315*dir,-50);spawnImpact(other.x,other.y,'hit');}},180);comboEl.textContent='ミラージュキック!';return true;
+  }
+
   function specialSeraphicUpper(f){
     if(gameOver||!f||f.type!=='seraphiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
     f.specialType='seraphicUpper';f.specialT=.68;f.attack='punch';f.attackVariant='up';f.attackT=.68;
@@ -4173,6 +4216,11 @@
       return specialEngineerMiniVortex(f);
     }
 
+
+    if(f.type==='remiel'){
+      if(kind==='punch' && water2HeldDir(f,'forward')){clearCommand();return specialRemielFrostShot(f);}
+      if(kind==='kick' && water2HeldDir(f,'forward')){clearCommand();return specialMirageKick(f);}
+    }
 
     // セラフィエル：ミカエル系の高火力・低防御。レイだけ独自技。
     if(f.type==='seraphiel'){
@@ -4538,6 +4586,12 @@
   }
 
   function damageHit(attacker,target,dmg,kx,ky,bypassCounter=false){
+    if(target&&target.type==='remiel'&&attacker&&attacker!==target&&!bypassCounter){
+      if(target.remielCounterT>0){target.remielCounterT=0;target.specialT=.32;damageHit(target,attacker,7.2*target.damageMul,-Math.sign(target.x-attacker.x||1)*230,-75,true);spawnImpact(target.x,target.y,'guard');comboEl.textContent='ミラージュカウンター!';return;}
+      if(target.remielParryT>0){target.remielParryT=0;target.specialT=.24;attacker.vx=-Math.sign(target.x-attacker.x||1)*255;attacker.vy=-55;attacker.stun=Math.max(attacker.stun||0,.34);spawnImpact(target.x,target.y,'guard');comboEl.textContent='アクアパリィ!';return;}
+      if(target.guard&&target.guardStartT>.18){attacker.vx=-Math.sign(target.x-attacker.x||1)*220;attacker.stun=Math.max(attacker.stun||0,.24);spawnImpact(target.x,target.y,'guard');comboEl.textContent='ジャスト・アクアパリィ!';return;}
+    }
+
     if(attacker&&attacker.type==='green'&&attacker.michaelBoostAttackT>0)dmg*=1.35;
     if(attacker && !attacker.isPlayer && target && target.isPlayer){
       dmg*=difficultyProfile().damage;
@@ -4726,6 +4780,14 @@
       e.preventDefault();btn.classList.add('pressed');
       if(action==='guard'){
         if(player){
+          if(player.type==='remiel'){
+            let used=false;
+            if(input.y<-.35) used=remielMakeMirage(player,'up');
+            else if(input.y>.35) used=remielMakeMirage(player,'down');
+            else if((player.face>0&&input.x<-.35)||(player.face<0&&input.x>.35)) used=specialMirageCounter(player);
+            else if((player.face>0&&input.x>.35)||(player.face<0&&input.x<-.35)) used=specialAquaParry(player,false);
+            if(used){btn.classList.remove('pressed');return;}
+          }
           // ルシファー：後ろ＋ガードは通常ガードより優先してアイスウォール。
           const luciferBackHeld = player.type==='black' &&
             ((player.face>0 && input.x<-.35) || (player.face<0 && input.x>.35));
@@ -4972,8 +5034,16 @@
     if(e.key==='k') attack(player,'kick');
     if(e.key==='l')attack(player,'tongue');
     if(e.key==='i'&&player){
+      let remielUsed=false;
+      if(player.type==='remiel'){
+        if(keys['w']) remielUsed=remielMakeMirage(player,'up');
+        else if(keys['s']) remielUsed=remielMakeMirage(player,'down');
+        else if((player.face>0&&keys['a'])||(player.face<0&&keys['d'])) remielUsed=specialMirageCounter(player);
+        else if((player.face>0&&keys['d'])||(player.face<0&&keys['a'])) remielUsed=specialAquaParry(player,false);
+      }
       const backHeld=player.type==='black'&&((player.face>0&&keys['a'])||(player.face<0&&keys['d']));
-      if(backHeld){ specialIceWall(player); }
+      if(remielUsed){player.guard=false;}
+      else if(backHeld){ specialIceWall(player); }
       else{
         if(player.type==='orange'&&!player.urielGuardHoldStart)player.urielGuardHoldStart=performance.now();
         player.guard=true;
@@ -5031,6 +5101,7 @@
         if(roll<dt*.26){ specialAbyssShock(enemy,dy<0?'upper':'lower'); return; }
         if(dist>150 && roll<dt*.46){ specialWater2Shot(enemy,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.5,r:16,charge:.50,poisonDuration:2.2,maxReflect:4}); return; }
       }
+      if(enemy.type==='remiel' && enemy.specialT<=0){const roll=Math.random();if(!remielMirages.some(m=>m.owner===enemy)&&roll<dt*.10){remielMakeMirage(enemy,Math.random()<.5?'up':'down');return;}if(dist>190&&roll<dt*.28){specialRemielFrostShot(enemy);return;}if(dist<150&&roll<dt*.18){specialMirageKick(enemy);return;}if(dist<115&&roll<dt*.10){specialAquaParry(enemy,false);return;}}
       if(enemy.type==='seraphiel' && enemy.specialT<=0){
         const roll=Math.random();
         if(dist>220 && roll<dt*.22){specialWater2Shot(enemy,{name:'セラフィックショット',attack:'punch',color:'seraphic',style:'seraphicShot',speed:310,damage:5.8,r:15,charge:.36,maxReflect:5});return;}
@@ -5511,6 +5582,11 @@ function drawBackground(dt){
         }
       });
       iceWalls=iceWalls.filter(w=>w.t>0);
+
+      remielMirages.forEach(m=>{m.t-=dt;const foe=m.owner.isPlayer?enemy:player;if(foe&&foe.attackT>0&&Math.abs(foe.x-m.owner.x)<105&&Math.abs(foe.y-(m.owner.y+m.offsetY))<72){m.t=0;spawnImpact(m.owner.x,m.owner.y+m.offsetY,'guard');}for(const q of water2Shots){if(q.owner!==m.owner&&Math.abs(q.x-m.owner.x)<48&&Math.abs(q.y-(m.owner.y+m.offsetY))<58){m.t=0;q.t=0;spawnImpact(q.x,q.y,'guard');break;}}});
+      remielMirages=remielMirages.filter(m=>m.t>0);
+      remielFakeShots.forEach(q=>{q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;});
+      remielFakeShots=remielFakeShots.filter(q=>q.t>0&&q.x>-50&&q.x<innerWidth+50&&q.y>-50&&q.y<innerHeight+50);
 
       // セラフィエル：セラフィックレイ。予告0.32秒後に短時間だけ攻撃判定。
       seraphielRays.forEach(r=>{
@@ -6350,6 +6426,8 @@ function drawBackground(dt){
       ctx.globalAlpha=.65;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-8,-40);ctx.lineTo(7,-18);ctx.lineTo(-5,4);ctx.lineTo(10,27);ctx.stroke();
       ctx.restore();
     });
+
+    remielFakeShots.forEach(q=>{ctx.save();ctx.translate(q.x,q.y);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.32*Math.min(1,q.t/.18);ctx.shadowColor='#bdefff';ctx.shadowBlur=16;ctx.fillStyle='#d9f8ff';ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#9ddbea';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();ctx.restore();});
 
     seraphielRays.forEach(r=>{
       const elapsed=r.life-r.t;
