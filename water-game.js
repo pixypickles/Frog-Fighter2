@@ -1675,7 +1675,14 @@
         if(!this.jihalCharging){
           // 高速技は長い雷の残光を後方へ引く。
           ctx.globalAlpha=.34;ctx.strokeStyle='#fff08a';ctx.lineWidth=8;ctx.lineCap='round';ctx.shadowColor='#ffe75a';ctx.shadowBlur=16;
-          for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(-28,i*23);ctx.lineTo(-145,i*23+i*5);ctx.stroke();}
+          const rushDir=this.jihalRushDir||this.face||1;
+          const localDir=rushDir*(this.face||1);
+          for(let i=-1;i<=1;i++){
+            ctx.beginPath();
+            ctx.moveTo(-28*localDir,i*23);
+            ctx.lineTo(-145*localDir,i*23+i*5);
+            ctx.stroke();
+          }
         }
         const p=this.jihalCharging?(.35+.65*(this.jihalCharge||0)):1;
         ctx.globalAlpha=.48*p;ctx.strokeStyle='#fff19a';ctx.lineWidth=3;ctx.shadowColor='#ffe75a';ctx.shadowBlur=13;
@@ -4108,7 +4115,7 @@
   function specialGravityBall(f){
     if(gameOver||!f||f.type!=='kokabiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
     f.specialType='gravityBall';f.specialT=.54;f.attack='punch';f.attackT=.54;
-    gravityBalls.push({owner:f,x:f.x+f.face*48,y:f.y-8,vx:f.face*185,vy:0,r:20,t:4,damage:4.4,reflects:0,maxReflect:4,pull:105});
+    gravityBalls.push({owner:f,x:f.x+f.face*48,y:f.y-8,vx:f.face*185,vy:0,r:20,t:4,damage:4.4,reflects:0,maxReflect:4,pull:210});
     comboEl.textContent='グラビティボール…';return true;
   }
   function specialGravityZone(f){
@@ -4118,7 +4125,7 @@
     const x=t?Math.max(80,Math.min(innerWidth-80,t.x-f.face*85)):f.x+f.face*150;
     const y=t?t.y:f.y;
     gravityZones=gravityZones.filter(z=>z.owner!==f);
-    gravityZones.push({owner:f,x,y,r:22,maxR:112,t:3.2,life:3.2,arm:.42});
+    gravityZones.push({owner:f,x,y,r:22,maxR:132,t:3.2,life:3.2,arm:.42});
     comboEl.textContent='グラビティゾーン…';return true;
   }
   function specialMeteorRain(f){
@@ -5825,7 +5832,7 @@ function drawBackground(dt){
         q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;
         const target=q.owner.isPlayer?enemy:player;if(!target||q.t<=0)return;
         const dx=q.x-target.x,dy=q.y-target.y,d=Math.hypot(dx,dy)||1;
-        if(d<230){const f=(1-d/230)*q.pull;target.vx+=dx/d*f*dt;target.vy+=dy/d*f*.72*dt;}
+        if(d<230){const f=(1-d/230)*q.pull+28;target.vx+=dx/d*f*dt;target.vy+=dy/d*f*.72*dt;}
         if(Math.abs(q.x-target.x)<target.radius+q.r+8&&Math.abs(q.y-target.y)<target.radius+q.r+8){
           if(target.guard){q.owner=target;q.vx=-q.vx*1.05;q.reflects++;q.x=target.x+Math.sign(q.vx)*56;spawnImpact(target.x,target.y,'guard');if(q.reflects>=q.maxReflect)q.t=0;}
           else{damageHit(q.owner,target,q.damage,Math.sign(q.vx)*100,-24);spawnImpact(q.x,q.y,'hit');q.t=0;}
@@ -5836,7 +5843,7 @@ function drawBackground(dt){
         z.t-=dt;z.arm=Math.max(0,z.arm-dt);
         const target=z.owner.isPlayer?enemy:player;if(!target||z.t<=0)return;
         const dx=z.x-target.x,dy=z.y-target.y,d=Math.hypot(dx,dy)||1;
-        if(z.arm<=0&&d<z.maxR){const f=(1-d/z.maxR)*240+42;target.vx+=dx/d*f*dt;target.vy+=dy/d*f*.78*dt;}
+        if(z.arm<=0&&d<z.maxR){const f=(1-d/z.maxR)*520+95;target.vx+=dx/d*f*dt;target.vy+=dy/d*f*.78*dt;}
       });
       gravityZones=gravityZones.filter(z=>z.t>0);
       meteorDrops.forEach(m=>{
@@ -5849,6 +5856,17 @@ function drawBackground(dt){
         }
       });
       meteorDrops=meteorDrops.filter(m=>m.t>0&&m.y<innerHeight+90);
+
+      // ジィハル高速技は発動時の進行方向と速度を維持する。
+      [player,enemy].forEach(f=>{
+        if(!f||f.type!=='jihal')return;
+        const dir=f.jihalRushDir||f.face||1;
+        if(f.specialType==='lightningDash'&&f.specialT>0) f.vx=dir*920;
+        if(f.specialType==='thunderChargeRush'&&f.specialT>0){
+          const c=Math.max(0,Math.min(1,f.jihalChargePower||0));
+          f.vx=dir*(980+520*c);
+        }
+      });
 
       // ジィハル高速技の当たり判定。
       [player,enemy].forEach(f=>{
@@ -5868,15 +5886,16 @@ function drawBackground(dt){
 
         // サンダーチャージは相手に当たっても速度を落とさず、そのまま通り抜ける。
         if(f.specialType==='thunderChargeRush' && f.specialT>0){
-          if(!f.jihalThunderHit && Math.abs(o.x-f.x)<82 && Math.abs(o.y-f.y)<82){
+          if(!f.jihalThunderHit && Math.abs(o.x-f.x)<86 && Math.abs(o.y-f.y)<84){
             f.jihalThunderHit=true;
             const c=Math.max(0,Math.min(1,f.jihalChargePower||0));
-            const keepVx=f.vx; // 命中後も突進速度を保持
-            damageHit(f,o,(10.5+6*c)*f.damageMul,(410+180*c)*f.face,-70);
+            const dir=f.jihalRushDir||f.face||1;
+            const keepVx=dir*(980+520*c);
+            damageHit(f,o,(10.5+6*c)*f.damageMul,(410+180*c)*dir,-70);
+            // hit処理後も速度を完全復元し、相手の反対側へ抜ける。
             f.vx=keepVx;
-            // 相手との重なりを少しだけ解消しつつ、自分は進行方向へ抜ける。
-            o.x-=f.face*18;
-            f.x+=f.face*12;
+            f.x=o.x+dir*(o.radius+f.radius+16);
+            o.x-=dir*8;
             spawnImpact(o.x,o.y,'hit');
           }
         }
