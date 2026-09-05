@@ -75,6 +75,7 @@
   let water2Shots = [];
   let iceWalls = [];
   let samaelGates = [];
+  let seraphielRays = [];
   let toxicWaters=[];
   let bossFish=[];
   let abyssShocks=[];
@@ -111,6 +112,7 @@
     piranha: { speed: 198, tongue: 0,   damage: 1.08, defense:0.90, sink:3, hue:0, scale:0.95 },
     crayfish:{ speed: 138, tongue: 0,   damage: 1.18, defense:1.20, sink:10,hue:0, scale:1.08 },
     beelzebub:{speed: 154, tongue: 350, damage: 1.12, defense:1.10, sink:8, hue:0, scale:1.10},
+    seraphiel:{speed: 178, tongue: 205, damage: 1.24, defense:.84, sink:5, hue:0, scale:1.02},
     samael: {speed: 158, tongue: 235, damage: 1.10, defense:1.06, sink:7, hue:0, scale:1.08},
     kawazu: {speed: 205, tongue: 225, damage: 0.98, defense:0.90, sink:4, hue:0, scale:0.90},
     pascal: {speed: 176, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78},
@@ -348,6 +350,13 @@
       'アビスショック（上弧）：上 ＋ パンチ',
       'アビスショック（下弧）：下 ＋ キック',
       'ベノムショット：前 ＋ パンチ'
+    ],
+    seraphiel:[
+      'セラフィックアッパー：上 ＋ パンチ',
+      'セラフィックキック：前 ＋ キック',
+      'セラフィックショット：後ろ ＋ パンチ',
+      'セラフィックサイクロン：下 → 前 → 後ろ ＋ キック',
+      'セラフィックレイ：下 → 前 ＋ パンチ（セラフィエル独自技）'
     ],
     samael:[
       'ポイズンゲート：方向 ＋ パンチ（指定方向に発生点 → 相手へ毒弾）',
@@ -739,6 +748,15 @@
         light:'#6f587d',
         belly:'#b8ff68',
         eyeBump:'#72ff2d'
+      };
+    }
+    if(type==='seraphiel'){
+      return {
+        body:'#f1ead7',
+        limb:'#f5efd9',
+        light:'#fff5ae',
+        belly:'#fff9df',
+        eyeBump:'#ffe88a'
       };
     }
     if(type==='samael'){
@@ -2397,7 +2415,7 @@
     }));
 
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; burstWaves=[];
 
     for(let i=0;i<12;i++){
       spawnLeafTarget(i,true);
@@ -2692,7 +2710,7 @@
   }
 
 
-  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish','samael'].concat(isKawazuUnlocked()?['kawazu']:[]);
+  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish','seraphiel','samael'].concat(isKawazuUnlocked()?['kawazu']:[]);
 
   function practiceSpecialText(type){
     const map={
@@ -2703,6 +2721,7 @@
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
+      seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 前 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
       samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
@@ -2735,7 +2754,7 @@
       'ミカエル':'green','ミカエルさん':'green','ガブリエル':'blue','ガブリエルさん':'blue',
       'ルシファー':'black','ルシファーさん':'black','リリス':'purple','リリスさん':'purple',
       'ラファエル':'yellow','ラファエルさん':'yellow','ウリエル':'orange','ウリエルさん':'orange',
-      'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael',
+      'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael','セラフィエル':'seraphiel','セラフィエルさん':'seraphiel',
       'リヴァイア':'piranha','リヴァイアさん':'piranha','アスモデウス':'crayfish','アスモデウスさん':'crayfish',
       'アザゼル':'piranha','アザゼルさん':'piranha','ベリアル':'crayfish','ベリアルさん':'crayfish'
     };
@@ -2767,13 +2786,13 @@
       green:'ミカエルさん', blue:'ガブリエルさん', black:'ルシファーさん',
       purple:'リリスさん', yellow:'ラファエルさん', orange:'ウリエルさん',
       piranha:'リヴァイアさん', crayfish:'アスモデウスさん',
-      beelzebub:'ベルゼブブさん', samael:'サマエルさん', kawazu:'カワズさん'
+      beelzebub:'ベルゼブブさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', kawazu:'カワズさん'
     }[type]||type;
   }
 
   function resetBattleEffects(){
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; burstWaves=[];
     leafTargets=[]; guardTargets=[]; toxicWaters=[]; bossFish=[]; abyssShocks=[]; kawazuShots=[]; kawazuGhosts=[];
   }
 
@@ -2839,7 +2858,7 @@
     leafTargets=[];
     guardTargets=[];
 
-    storyQueue=playableTypes.filter(t=>t!==selectedFighter && t!=='kawazu' && t!=='samael');
+    storyQueue=playableTypes.filter(t=>t!==selectedFighter && t!=='kawazu' && t!=='samael' && t!=='seraphiel');
     if(selectedFighter!=='beelzebub') storyQueue.push('beelzebub');
     if(selectedFighter!=='samael') storyQueue.push('samael');
     storyFightIndex=0;
@@ -3926,6 +3945,55 @@
     return true;
   }
 
+  function specialSeraphicUpper(f){
+    if(gameOver||!f||f.type!=='seraphiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='seraphicUpper';f.specialT=.62;f.attack='punch';f.attackVariant='up';f.attackT=.62;
+    const other=f.isPlayer?enemy:player,dir=f.face;
+    setTimeout(()=>{if(other&&Math.abs(other.x-f.x)<112&&Math.abs(other.y-f.y)<105){
+      damageHit(f,other,13.2*f.damageMul,165*dir,-290);spawnImpact(other.x,other.y,'hit');
+    }},150);
+    comboEl.textContent='セラフィックアッパー!';
+    return true;
+  }
+
+  function specialSeraphicKick(f){
+    if(gameOver||!f||f.type!=='seraphiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='seraphicKick';f.specialT=.58;f.attack='kick';f.attackT=.58;
+    f.vx=f.face*305;
+    const other=f.isPlayer?enemy:player,dir=f.face;
+    setTimeout(()=>{if(other&&Math.abs(other.x-f.x)<128&&Math.abs(other.y-f.y)<82){
+      damageHit(f,other,11.8*f.damageMul,330*dir,-65);spawnImpact(other.x,other.y,'hit');
+    }},145);
+    comboEl.textContent='セラフィックキック!';
+    return true;
+  }
+
+  function specialSeraphicCyclone(f){
+    if(gameOver||!f||f.type!=='seraphiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='seraphicCyclone';f.specialT=.95;f.attack='kick';f.attackT=.95;
+    const other=f.isPlayer?enemy:player;
+    let hits=0;
+    const timer=setInterval(()=>{
+      if(gameOver||!other||f.specialType!=='seraphicCyclone'){clearInterval(timer);return;}
+      f.spinAngle=(f.spinAngle||0)+1.5;
+      if(Math.abs(other.x-f.x)<105&&Math.abs(other.y-f.y)<90&&hits<3){
+        hits++; damageHit(f,other,4.2*f.damageMul,105*f.face,(hits===3?-155:-35));spawnImpact(other.x,other.y,'hit');
+      }
+    },105);
+    setTimeout(()=>{clearInterval(timer);f.spinAngle=0;},720);
+    comboEl.textContent='セラフィックサイクロン!';
+    return true;
+  }
+
+  function specialSeraphicRay(f){
+    if(gameOver||!f||f.type!=='seraphiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='seraphicRay';f.specialT=.92;f.attack='punch';f.attackT=.92;
+    // 独自技：細い光線ではなく、水中を貫く太い光の帯。予告後に一瞬だけ発生。
+    seraphielRays.push({owner:f,x:f.x+f.face*55,y:f.y-8,dir:f.face,t:.62,life:.62,active:false,hit:false});
+    comboEl.textContent='セラフィックレイ…';
+    return true;
+  }
+
   function specialDeadlyAqua(f){
     if(gameOver || !f || f.type!=='samael' || f.stun>0 || f.guard || f.specialT>0 || f.attackT>0) return false;
     const target=f.isPlayer?enemy:player;
@@ -4085,6 +4153,25 @@
       return specialEngineerMiniVortex(f);
     }
 
+
+    // セラフィエル：ミカエル系の高火力・低防御。レイだけ独自技。
+    if(f.type==='seraphiel'){
+      if(kind==='kick'){
+        if(water2HeldDir(f,'forward')){clearCommand();return specialSeraphicKick(f);}
+        if(water2HeldDir(f,'back') && hasCommand([forward,'down'],1500)){
+          clearCommand();return specialSeraphicCyclone(f);
+        }
+      }
+      if(kind==='punch'){
+        if(water2HeldDir(f,'up')){clearCommand();return specialSeraphicUpper(f);}
+        if(water2HeldDir(f,'forward') && hasCommand(['down'],1200)){
+          clearCommand();return specialSeraphicRay(f);
+        }
+        if(water2HeldDir(f,'back')){
+          clearCommand();return specialWater2Shot(f,{name:'セラフィックショット',attack:'punch',color:'seraphic',style:'seraphicShot',speed:310,damage:5.8,r:15,charge:.36,maxReflect:5});
+        }
+      }
+    }
 
     // サマエル：本人ではなく指定方向に毒の発生点を作る。
     if(f.type==='samael'){
@@ -4924,6 +5011,13 @@
         if(roll<dt*.26){ specialAbyssShock(enemy,dy<0?'upper':'lower'); return; }
         if(dist>150 && roll<dt*.46){ specialWater2Shot(enemy,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.5,r:16,charge:.50,poisonDuration:2.2,maxReflect:4}); return; }
       }
+      if(enemy.type==='seraphiel' && enemy.specialT<=0){
+        const roll=Math.random();
+        if(dist>220 && roll<dt*.22){specialWater2Shot(enemy,{name:'セラフィックショット',attack:'punch',color:'seraphic',style:'seraphicShot',speed:310,damage:5.8,r:15,charge:.36,maxReflect:5});return;}
+        if(dist>180 && roll<dt*.10){specialSeraphicRay(enemy);return;}
+        if(dist<135 && roll<dt*.24){specialSeraphicKick(enemy);return;}
+        if(dist<110 && roll<dt*.12){specialSeraphicUpper(enemy);return;}
+      }
       if(enemy.type==='samael' && enemy.specialT<=0){
         const roll=Math.random();
         if(enemy.hp<enemy.maxHp*.55 && roll<dt*.10){ specialDeadlyAqua(enemy); return; }
@@ -5397,6 +5491,29 @@ function drawBackground(dt){
         }
       });
       iceWalls=iceWalls.filter(w=>w.t>0);
+
+      // セラフィエル：セラフィックレイ。予告0.32秒後に短時間だけ攻撃判定。
+      seraphielRays.forEach(r=>{
+        r.t-=dt;
+        const elapsed=r.life-r.t;
+        r.active=elapsed>.32 && elapsed<.50;
+        const target=r.owner.isPlayer?enemy:player;
+        if(r.active && target && !r.hit){
+          const ahead=(target.x-r.x)*r.dir;
+          if(ahead>0 && ahead<innerWidth && Math.abs(target.y-r.y)<34+target.radius*.45){
+            if(target.guard){
+              // レイは飛び道具ではないので反射せず、シャボンで大きく軽減。
+              damageHit(r.owner,target,3.0*r.owner.damageMul,80*r.dir,-15);
+              spawnImpact(target.x,target.y,'guard');
+            }else{
+              damageHit(r.owner,target,15.5*r.owner.damageMul,265*r.dir,-55);
+              spawnImpact(target.x,target.y,'hit');
+            }
+            r.hit=true;
+          }
+        }
+      });
+      seraphielRays=seraphielRays.filter(r=>r.t>0);
 
       // サマエル：毒弾の発生地点。紫＋青白い渦を見せてから相手へ発射。
       samaelGates.forEach(g=>{
@@ -6211,6 +6328,25 @@ function drawBackground(dt){
       ctx.fillStyle=g;ctx.strokeStyle='#efffff';ctx.lineWidth=3;
       ctx.beginPath();ctx.moveTo(-10,-56);ctx.lineTo(14,-48);ctx.lineTo(11,-18);ctx.lineTo(18,7);ctx.lineTo(9,55);ctx.lineTo(-15,49);ctx.lineTo(-12,15);ctx.lineTo(-19,-8);ctx.closePath();ctx.fill();ctx.stroke();
       ctx.globalAlpha=.65;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-8,-40);ctx.lineTo(7,-18);ctx.lineTo(-5,4);ctx.lineTo(10,27);ctx.stroke();
+      ctx.restore();
+    });
+
+    seraphielRays.forEach(r=>{
+      const elapsed=r.life-r.t;
+      ctx.save();ctx.globalCompositeOperation='lighter';
+      if(elapsed<.32){
+        const p=elapsed/.32;
+        ctx.globalAlpha=.28+.32*p;ctx.strokeStyle='#fff2a6';ctx.lineWidth=2+5*p;
+        ctx.shadowColor='#fff7c4';ctx.shadowBlur=14;
+        ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.dir*innerWidth,r.y);ctx.stroke();
+      }else{
+        const fade=Math.max(0,Math.min(1,r.t/.12));
+        ctx.globalAlpha=.72*fade;ctx.strokeStyle='#fff9d7';ctx.lineWidth=28;
+        ctx.shadowColor='#fff0a0';ctx.shadowBlur=30;
+        ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.dir*innerWidth,r.y);ctx.stroke();
+        ctx.globalAlpha=.95*fade;ctx.strokeStyle='#ffffff';ctx.lineWidth=8;
+        ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.dir*innerWidth,r.y);ctx.stroke();
+      }
       ctx.restore();
     });
 
