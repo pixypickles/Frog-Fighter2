@@ -111,7 +111,7 @@
     piranha: { speed: 198, tongue: 0,   damage: 1.08, defense:0.90, sink:3, hue:0, scale:0.95 },
     crayfish:{ speed: 138, tongue: 0,   damage: 1.18, defense:1.20, sink:10,hue:0, scale:1.08 },
     beelzebub:{speed: 154, tongue: 350, damage: 1.12, defense:1.10, sink:8, hue:0, scale:1.10},
-    samael: {speed: 158, tongue: 315, damage: 1.10, defense:1.06, sink:7, hue:0, scale:1.08},
+    samael: {speed: 158, tongue: 235, damage: 1.10, defense:1.06, sink:7, hue:0, scale:1.08},
     kawazu: {speed: 205, tongue: 225, damage: 0.98, defense:0.90, sink:4, hue:0, scale:0.90},
     pascal: {speed: 176, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78},
     malphas:{speed: 174, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78}
@@ -352,7 +352,7 @@
     samael:[
       'ポイズンゲート：方向 ＋ パンチ（指定方向に発生点 → 相手へ毒弾）',
       'ヴェノムタン：舌（舌先から毒弾）',
-      'デッドリー・アクア：下 → 前 → 後ろ ＋ パンチ＋キック'
+      'デッドリー・アクア：前 → 下 → 後ろ ＋ キック'
     ],
     kawazu:[
       '水圧ラッシュ：パンチ連打',
@@ -2703,7 +2703,7 @@
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
-      samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','下 → 前 → 後ろ ＋ パンチ＋キック：デッドリー・アクア'],
+      samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
     return map[type] || ['専用必殺技：練習対象外'];
@@ -4088,6 +4088,14 @@
 
     // サマエル：本人ではなく指定方向に毒の発生点を作る。
     if(f.type==='samael'){
+      // 上位技はスマホでも押しやすい「前 → 下 → 後ろ ＋ キック」。
+      if(kind==='kick'){
+        const seq=commandDirs.slice(-3);
+        if(seq.length>=3 && seq[0]==='forward' && seq[1]==='down' && seq[2]==='back'){
+          clearCommand(); f.attackT=0; f.attack=null;
+          return specialDeadlyAqua(f);
+        }
+      }
       if(kind==='punch'){
         let side=null;
         if(water2HeldDir(f,'up')) side='up';
@@ -4199,18 +4207,6 @@
   }
 
   function attack(f, kind) {
-    if(f && f.type==='samael' && (kind==='punch'||kind==='kick')){
-      const now=performance.now();
-      const other=(kind==='punch'?'kick':'punch');
-      const seq=commandDirs.slice(-3);
-      const hasDeadlySeq=seq.length>=3 && seq[0]==='down' && seq[1]==='forward' && seq[2]==='back';
-      if(hasDeadlySeq && samaelComboButton===other && now-samaelComboButtonAt<300){
-        samaelComboButton=null; samaelComboButtonAt=0; clearCommand();
-        f.attack=null; f.attackT=0;
-        if(specialDeadlyAqua(f)) return;
-      }
-      samaelComboButton=kind; samaelComboButtonAt=now;
-    }
     if(basketMiniActive){
       hockeyStrike(f,kind);
     }
@@ -6279,10 +6275,10 @@ function drawBackground(dt){
         ctx.fillStyle='rgba(255,255,255,.72)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.32,q.r*.23,q.r*.12,-.6,0,Math.PI*2);ctx.fill();
       }else if(q.style==='samaelVenom'){
         const rg=ctx.createRadialGradient(-q.r*.32,-q.r*.35,1,0,0,q.r*1.2);
-        rg.addColorStop(0,'#f4ffff');rg.addColorStop(.20,'#b9efff');rg.addColorStop(.45,'#a65cff');rg.addColorStop(.78,'#54247f');rg.addColorStop(1,'#241032');
-        ctx.shadowColor='#aeefff';ctx.shadowBlur=25;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
-        ctx.strokeStyle='rgba(218,248,255,.75)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();
-        ctx.fillStyle='rgba(255,255,255,.82)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.33,q.r*.22,q.r*.11,-.6,0,Math.PI*2);ctx.fill();
+        rg.addColorStop(0,'#f2c8ff');rg.addColorStop(.18,'#d774ff');rg.addColorStop(.48,'#9a39df');rg.addColorStop(.78,'#5b1a91');rg.addColorStop(1,'#2b0b48');
+        ctx.shadowColor='#b64cff';ctx.shadowBlur=25;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='rgba(205,116,255,.78)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();
+        ctx.fillStyle='rgba(255,230,255,.75)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.33,q.r*.22,q.r*.11,-.6,0,Math.PI*2);ctx.fill();
       }else if(q.style==='spinBlade'){
         // 水圧カッターを縦方向に潰した、薄い高速刃。
         ctx.rotate(q.spin||0);ctx.scale(1.35,.48);
