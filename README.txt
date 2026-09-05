@@ -14,3 +14,8 @@ v0.4.1 修正:
 ・バーニングショット「後ろ＋パンチ」の560ms入力制限を撤廃
 ・キーボード(WASD)の方向入力も上位コマンド履歴へ記録
 ・下→後ろ＋キック等の上位技はコマンド入力を維持
+
+
+v0.4.2 changes:
+- Water2 projectiles no longer expire on short per-shot timers; they disappear on hit, leaving the arena, max reflect, or an 18s emergency safety cap.
+- Carp pressure cutter visual is mirrored for upper/lower arc paths.

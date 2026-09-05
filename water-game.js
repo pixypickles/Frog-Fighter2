@@ -3926,12 +3926,17 @@
       const shot={
         owner:f, x:f.x+dir*(opts.offsetX||58), y:f.y+(opts.offsetY||0),
         vx:dir*Math.cos(angle)*speed, vy:Math.sin(angle)*speed,
-        r:opts.r||13, t:opts.life||2.4, life:opts.life||2.4,
+        r:opts.r||13,
+        // v0.4.2: 弾は速度差で不公平にならないよう、通常は時間切れで消さない。
+        // maxAge は画面外に出られない等の異常時だけ使う長い安全寿命。
+        age:0, maxAge:opts.maxAge||18, t:1, life:1,
         damage:opts.damage||4.0, name, color:opts.color||'aqua',
         reflected:0, hit:false, spin:0,
         style:opts.style||opts.color||'aqua',
         poisonDuration:opts.poisonDuration||0,
         curve:opts.curve||0,
+        // カープ水圧カッターの上/下で刃の絵も反転させる。
+        arcFlip: opts.arcFlip || ((opts.curve||0) < 0 ? -1 : 1),
         wobble:opts.wobble||0,
         baseVy:Math.sin(angle)*speed,
         maxReflect:opts.maxReflect||6
@@ -4035,10 +4040,10 @@
       if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialPressureBlade(f,0,'punch'); }
       if(kind==='kick' && water2HeldDir(f,'forward')){ clearCommand(); return specialPressureBlade(f,15,'kick'); }
       if(kind==='punch' && water2HeldDir(f,'back')){
-        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'punch',color:'blade',style:'carpBlade',speed:285,angle:-30,damage:3.7,r:12,charge:.40,life:2.35,curve:105,maxReflect:6});
+        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'punch',color:'blade',style:'carpBlade',speed:285,angle:-30,damage:3.7,r:12,charge:.40,curve:105,maxReflect:6});
       }
       if(kind==='kick' && water2HeldDir(f,'back')){
-        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'kick',color:'blade',style:'carpBlade',speed:285,angle:30,damage:3.7,r:12,charge:.40,life:2.35,curve:-105,maxReflect:6});
+        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'kick',color:'blade',style:'carpBlade',speed:285,angle:30,damage:3.7,r:12,charge:.40,curve:-105,maxReflect:6});
       }
     }
 
@@ -4053,11 +4058,11 @@
     }
     // リリス：後ろ＋舌で遅いバブルショット。
     if(f.type==='purple' && kind==='tongue' && hasCommand([back],560)){
-      clearCommand(); return specialWater2Shot(f,{name:'バブルショット',attack:'tongue',color:'bubble',style:'bubble',speed:175,damage:3.0,r:20,charge:.34,life:3.5,wobble:.18,maxReflect:6});
+      clearCommand(); return specialWater2Shot(f,{name:'バブルショット',attack:'tongue',color:'bubble',style:'bubble',speed:175,damage:3.0,r:20,charge:.34,wobble:.18,maxReflect:6});
     }
 
     if(f.type==='beelzebub'){
-      if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.7,r:16,charge:.50,life:2.9,poisonDuration:2.6,maxReflect:6}); }
+      if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.7,r:16,charge:.50,poisonDuration:2.6,maxReflect:6}); }
       const downForward=f.face>0?'downRight':'downLeft';
       const bossQuarterCommand=
         hasCommand(['down',forward],850)||hasCommand(['down',downForward],850)||hasCommand([downForward,forward],850);
@@ -5223,7 +5228,7 @@ function drawBackground(dt){
 
       // 水中格闘2 共通飛び道具：シャボンガードに触れると自動反射。
       water2Shots.forEach(q=>{
-        q.t-=dt;
+        q.age=(q.age||0)+dt;
         q.spin=(q.spin||0)+dt*(q.style==='aquaSpin'?10:4);
         if(q.curve){ q.vy += q.curve*dt; }
         q.x+=q.vx*dt;
@@ -5239,14 +5244,14 @@ function drawBackground(dt){
             q.x=target.x+target.face*(target.radius+q.r+12);
             // 反射回数が増えるほど不安定に。上限では派手に消散。
             if(q.reflected>=q.maxReflect){
-              q.hit=true; q.t=0;
+              q.hit=true;
               spawnImpact(q.x,q.y,'guard');
               comboEl.textContent='OVER REFLECT!';
             }else{
               comboEl.textContent=q.reflected>1?'REFLECT x'+q.reflected+'!':'REFLECT!';
             }
           }else{
-            q.hit=true; q.t=0; q.owner._projectileHit=true;
+            q.hit=true; q.owner._projectileHit=true;
             damageHit(q.owner,target,q.damage*q.owner.damageMul,75*Math.sign(q.vx||q.owner.face),-8);
             q.owner._projectileHit=false;
             if(q.poisonDuration>0) applyPoison(target,q.owner,q.poisonDuration);
@@ -5254,7 +5259,7 @@ function drawBackground(dt){
           }
         }
       });
-      water2Shots=water2Shots.filter(q=>q.t>0&&!q.hit&&q.x>-100&&q.x<innerWidth+100&&q.y>-100&&q.y<innerHeight+100);
+      water2Shots=water2Shots.filter(q=>!q.hit&&(q.age||0)<(q.maxAge||18)&&q.x>-100&&q.x<innerWidth+100&&q.y>-100&&q.y<innerHeight+100);
 
       toxicWaters.forEach(v=>{
         v.t-=dt;
@@ -5991,8 +5996,8 @@ function drawBackground(dt){
     });
 
     water2Shots.forEach(q=>{
-      const a=Math.max(0,Math.min(1,q.t/q.life));
-      ctx.save(); ctx.translate(q.x,q.y); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.9*a;
+      const a=1;
+      ctx.save(); ctx.translate(q.x,q.y); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.9;
       const sp=Math.hypot(q.vx,q.vy)||1;
       const ang=Math.atan2(q.vy,q.vx);
       ctx.rotate(ang);
@@ -6036,7 +6041,8 @@ function drawBackground(dt){
         ctx.fillStyle='rgba(115,229,255,.40)';ctx.beginPath();ctx.ellipse(0,0,20,13,0,0,Math.PI*2);ctx.fill();
         ctx.strokeStyle='#e4ffff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,18,-1.1,1.1);ctx.stroke();
       }else if(q.style==='carpBlade'){
-        ctx.rotate(Math.PI/2);ctx.scale(1,.55);ctx.strokeStyle='#c7fbff';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,0,25,-1.1,1.1);ctx.stroke();
+        // 軌道に合わせて三日月の上下も反転。上ルート/下ルートが同じ絵に見えないようにする。
+        ctx.rotate(Math.PI/2);ctx.scale(1,.55*(q.arcFlip||1));ctx.strokeStyle='#c7fbff';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,0,25,-1.1,1.1);ctx.stroke();
         ctx.strokeStyle='#5dd9f4';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,25,-1.1,1.1);ctx.stroke();
       }else{
         let fill='#8feeff', glow='#d9fbff';
