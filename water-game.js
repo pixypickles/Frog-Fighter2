@@ -108,8 +108,8 @@
     orange:  { speed: 142, tongue: 215, damage: 1.05, defense:1.28, sink:9, hue:0, scale:1.10 },
     piranha: { speed: 198, tongue: 0,   damage: 1.08, defense:0.90, sink:3, hue:0, scale:0.95 },
     crayfish:{ speed: 138, tongue: 0,   damage: 1.18, defense:1.20, sink:10,hue:0, scale:1.08 },
-    beelzebub:{speed: 158, tongue: 415, damage: 1.28, defense:1.22, sink:8, hue:0, scale:1.13},
-    kawazu: {speed: 220, tongue: 225, damage: 0.94, defense:0.94, sink:4, hue:0, scale:0.86},
+    beelzebub:{speed: 154, tongue: 350, damage: 1.12, defense:1.10, sink:8, hue:0, scale:1.10},
+    kawazu: {speed: 205, tongue: 225, damage: 0.98, defense:0.90, sink:4, hue:0, scale:0.90},
     pascal: {speed: 176, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78},
     malphas:{speed: 174, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78}
   };
@@ -341,7 +341,7 @@
       'バックスピンキック：後ろ ＋ キック（追加入力で追加回転）'
     ],
     beelzebub:[
-      'ヴェノム・ウォーター：方向キー1回転 ＋ ガード',
+      'ヴェノム・ウォーター：下 → 後ろ ＋ ガード',
       'アビスショック（上弧）：上 ＋ パンチ',
       'アビスショック（下弧）：下 ＋ キック',
       'ベノムショット：前 ＋ パンチ'
@@ -421,7 +421,7 @@
         btn.dataset.fighter='kawazu';
         btn.innerHTML=`<span class="fighter-emoji kawazu-frog">🐸</span>
           <strong>カワズさん</strong>
-          <span class="special-hint move-names">水圧ラッシュ / ミラージュキック / ハイスピードサイクロン</span>
+          <span class="special-hint move-names">水圧ラッシュ / ミラージュキック / スピンキックカッター</span>
           `;
         grid.appendChild(btn);
         applySelectCardCommands(btn);
@@ -3357,8 +3357,8 @@
 
     toxicWaters.push({
       owner:f,
-      t:5.4,
-      life:5.4,
+      t:4.2,
+      life:4.2,
       tick:0,
       // v6.34: ベルゼブブ本人を中心に毒煙が広がる。
       originX:f.x,
@@ -3405,33 +3405,33 @@
     return true;
   }
 
-  function specialAbyssShock(f){
+  function specialAbyssShock(f, route='upper'){
     if(gameOver || !f || f.stun>0 || f.specialT>0 || f.bossSpecialCooldown>0) return false;
-
+    const upper=route!=='lower';
     f.specialType='abyssShock';
-    f.specialT=.68;
-    f.attack='kick';
-    f.attackVariant='up';
-    f.attackT=.68;
-    f.bossSpecialCooldown=1.7;
+    f.specialT=.62;
+    f.attack=upper?'punch':'kick';
+    f.attackVariant=upper?'up':'down';
+    f.attackT=.62;
+    f.bossSpecialCooldown=1.25;
 
     setTimeout(()=>{
       if(gameOver || !f) return;
       abyssShocks.push({
         owner:f,
-        x:f.x+f.face*48,
-        y:f.y+42,
-        vx:f.face*430,
-        vy:-120,
-        t:1.5,
-        life:1.5,
-        r:42,
-        hit:false
+        x:f.x+f.face*52,
+        y:f.y+(upper?-28:52),
+        vx:f.face*300,
+        vy:upper?-220:220,
+        curve:upper?185:-185,
+        t:2.4, life:2.4,
+        r:30, hit:false, reflected:0, maxReflect:4,
+        damage:5.8
       });
-    },130);
+    },180);
 
     comboEl.textContent='アビスショック!';
-    setTimeout(()=>{if(comboEl.textContent==='アビスショック!')comboEl.textContent='';},760);
+    setTimeout(()=>{if(comboEl.textContent==='アビスショック!')comboEl.textContent='';},700);
     clearCommand();
     return true;
   }
@@ -3790,14 +3790,14 @@
   function specialKawazuPressureRush(f){
     if(gameOver || f.stun>0 || f.specialT>0)return false;
     f.specialType='kawazuPressureRush';f.specialT=.62;f.attack='punch';f.attackT=.62;
-    const count=14;
+    const count=10;
     for(let i=0;i<count;i++){
       const spread=(-.48+Math.random()*.96);
-      const speed=390+Math.random()*170;
+      const speed=370+Math.random()*145;
       kawazuShots.push({
         owner:f,x:f.x+f.face*45,y:f.y+5+(Math.random()-.5)*20,
         vx:f.face*Math.cos(spread)*speed,vy:Math.sin(spread)*speed,
-        r:8+Math.random()*4,t:.9,life:.9,hit:false,reflected:0
+        r:8+Math.random()*3,t:.85,life:.85,hit:false,reflected:0
       });
     }
     comboEl.textContent='水圧ラッシュ!';
@@ -3814,14 +3814,14 @@
       if(gameOver||!other||f.specialType!=='kawazuMirageKick')return;
       if(Math.hypot(other.x-f.x,other.y-f.y)<other.radius+f.radius+72){
         f.vx=0;other.stun=Math.max(other.stun,.95);
-        for(let i=0;i<9;i++){
+        for(let i=0;i<7;i++){
           setTimeout(()=>{
             if(gameOver||!other)return;
-            const a=i*Math.PI*2/9;
+            const a=i*Math.PI*2/7;
             const gx=other.x+Math.cos(a)*72,gy=other.y+Math.sin(a)*54;
             kawazuGhosts.push({x:gx,y:gy,t:.22,life:.22,angle:a});
             spawnImpact(other.x+Math.cos(a)*20,other.y+Math.sin(a)*15,'hit');
-            damageHit(f,other,(i===8?2.8:1.05)*f.damageMul,(i===8?190:12)*startFace,(i===8?-55:0));
+            damageHit(f,other,(i===6?2.5:.90)*f.damageMul,(i===6?180:10)*startFace,(i===6?-50:0));
           },i*62);
         }
       }
@@ -3841,8 +3841,8 @@
         const speed=330+i*18;
         water2Shots.push({
           owner:f,x:f.x+dir*58,y:f.y+(-18+i*18),vx:dir*speed,vy:(i-1)*36,
-          r:13,t:1.55,life:1.55,damage:2.15,name:'スピンキックカッター',color:'blade',
-          reflected:0,hit:false,spin:0,style:'spinBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:5
+          r:13,t:1.55,life:1.55,damage:2.0,name:'スピンキックカッター',color:'blade',
+          reflected:0,hit:false,spin:0,style:'spinBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:4
         });
       },delay);
     });
@@ -3973,14 +3973,6 @@
 
     // カワズさん：4キャラ運用を前提に入力を短く。
     if(f.type==='kawazu'){
-      if(kind==='tongue' && hasCommand(['down',forward],720)){
-        clearCommand();
-        return specialKawazuTonguePiledriver(f);
-      }
-      if(kind==='kick' && hasCommand(['down',back],720)){
-        clearCommand();
-        return specialKawazuCyclone(f);
-      }
       if(kind==='kick' && water2HeldDir(f,'back')){
         clearCommand();
         return specialKawazuSpinCutter(f);
@@ -4062,12 +4054,9 @@
     }
 
     if(f.type==='beelzebub'){
-      if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.7,r:16,charge:.50,poisonDuration:2.6,maxReflect:5}); }
-      const downForward=f.face>0?'downRight':'downLeft';
-      const bossQuarterCommand=
-        hasCommand(['down',forward],850)||hasCommand(['down',downForward],850)||hasCommand([downForward,forward],850);
-      if(kind==='punch' && bossQuarterCommand) return specialFishRaid(f);
-      if(kind==='kick' && bossQuarterCommand) return specialAbyssShock(f);
+      if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.5,r:16,charge:.50,poisonDuration:2.2,maxReflect:4}); }
+      if(kind==='punch' && water2HeldDir(f,'up')){ clearCommand(); return specialAbyssShock(f,'upper'); }
+      if(kind==='kick' && water2HeldDir(f,'down')){ clearCommand(); return specialAbyssShock(f,'lower'); }
     }
 
     return false;
@@ -4539,8 +4528,8 @@
             }
           }
 
-          // ベルゼブブさん：方向キー1回転＋ガードで毒水
-          if(player.type==='beelzebub' && !player.throwState && hasFullCircle(1100)){
+          // ベルゼブブさん：強力な毒水は2方向コマンド（下→後ろ＋ガード）。
+          if(player.type==='beelzebub' && !player.throwState && hasCommand(['down',player.face>0?'left':'right'],900)){
             if(specialVenomWater(player)){
               btn.classList.remove('pressed');
               return;
@@ -4777,9 +4766,15 @@
     if(enemy.attackT<=0){
       if(enemy.type==='beelzebub' && enemy.specialT<=0 && enemy.bossSpecialCooldown<=0){
         const roll=Math.random();
-        if(roll<dt*.16){ specialVenomWater(enemy); return; }
-        if(roll<dt*.34){ specialFishRaid(enemy); return; }
-        if(roll<dt*.52){ specialAbyssShock(enemy); return; }
+        if(roll<dt*.10){ specialVenomWater(enemy); return; }
+        if(roll<dt*.26){ specialAbyssShock(enemy,dy<0?'upper':'lower'); return; }
+        if(dist>150 && roll<dt*.46){ specialWater2Shot(enemy,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.5,r:16,charge:.50,poisonDuration:2.2,maxReflect:4}); return; }
+      }
+      if(enemy.type==='kawazu' && enemy.specialT<=0){
+        const roll=Math.random();
+        if(dist>135 && roll<dt*.24){ specialKawazuPressureRush(enemy); return; }
+        if(dist<250 && roll<dt*.42){ specialKawazuMirageKick(enemy); return; }
+        if(dist>120 && roll<dt*.58){ specialKawazuSpinCutter(enemy); return; }
       }
 
       if(dist>105){ enemy.vx += Math.sign(dx)*enemy.speed*.9*diff.move*dt; enemy.vy += Math.sign(dy)*enemy.speed*.55*diff.move*dt; }
@@ -5270,11 +5265,11 @@ function drawBackground(dt){
         v.tick-=dt;
         const target=v.owner && v.owner.isPlayer ? enemy : player;
         if(target && v.tick<=0){
-          v.tick=.48;
+          v.tick=.60;
           // 紫の水の間、相手だけ。毒耐性持ちは継続毒を受けない。
           if(!target.guard && !isPoisonImmune(target)){
             v.owner._projectileHit=true;
-            damageHit(v.owner,target,1.45*v.owner.damageMul,0,0);
+            damageHit(v.owner,target,1.15*v.owner.damageMul,0,0);
             v.owner._projectileHit=false;
           }
         }
@@ -5313,18 +5308,27 @@ function drawBackground(dt){
 
       abyssShocks.forEach(w=>{
         w.t-=dt;
+        w.vy+=(w.curve||0)*dt;
         w.x+=w.vx*dt;
         w.y+=w.vy*dt;
-        w.r+=42*dt;
         const target=w.owner && w.owner.isPlayer ? enemy : player;
-        if(!w.hit && target && Math.hypot(target.x-w.x,target.y-w.y)<target.radius+w.r){
-          w.hit=true;
-          w.owner._projectileHit=true;
-          damageHit(w.owner,target,8.5*w.owner.damageMul,190*w.owner.face,-165);
-          w.owner._projectileHit=false;
+        if(!w.hit && target && Math.hypot(target.x-w.x,target.y-w.y)<target.radius+w.r+8){
+          if(target.guard){
+            spawnImpact(w.x,w.y,'guard'); playSfx('guard');
+            w.owner=target; w.vx=-w.vx*1.06; w.vy=-w.vy*.96; w.curve=-(w.curve||0);
+            w.reflected=(w.reflected||0)+1;
+            w.x=target.x+target.face*(target.radius+w.r+12);
+            if(w.reflected>=w.maxReflect){w.hit=true;comboEl.textContent='OVER REFLECT!';}
+            else comboEl.textContent='REFLECT!';
+          }else{
+            w.hit=true;
+            w.owner._projectileHit=true;
+            damageHit(w.owner,target,(w.damage||5.8)*w.owner.damageMul,135*Math.sign(w.vx||w.owner.face),-80);
+            w.owner._projectileHit=false;
+          }
         }
       });
-      abyssShocks=abyssShocks.filter(w=>w.t>0 && !w.hit && w.x>-100 && w.x<innerWidth+100);
+      abyssShocks=abyssShocks.filter(w=>w.t>0 && !w.hit && w.x>-100 && w.x<innerWidth+100 && w.y>-120 && w.y<innerHeight+120);
 
       if(raceMiniActive){
         raceMiniElapsed=(performance.now()-raceMiniStart)/1000;
@@ -5484,7 +5488,7 @@ function drawBackground(dt){
           }else{
             p.hit=true;
             p.owner._projectileHit=true;
-            damageHit(p.owner,target,1.15*p.owner.damageMul,30*Math.sign(p.vx),p.vy*.08);
+            damageHit(p.owner,target,1.00*p.owner.damageMul,30*Math.sign(p.vx),p.vy*.08);
             p.owner._projectileHit=false;
           }
         }
