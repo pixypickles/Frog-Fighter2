@@ -1663,7 +1663,7 @@
         if(!this.jihalCharging){
           // 高速技は長い雷の残光を後方へ引く。
           ctx.globalAlpha=.34;ctx.strokeStyle='#fff08a';ctx.lineWidth=8;ctx.lineCap='round';ctx.shadowColor='#ffe75a';ctx.shadowBlur=16;
-          for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(-this.face*28,i*23);ctx.lineTo(-this.face*145,i*23+this.face*i*5);ctx.stroke();}
+          for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(-28,i*23);ctx.lineTo(-145,i*23+i*5);ctx.stroke();}
         }
         const p=this.jihalCharging?(.35+.65*(this.jihalCharge||0)):1;
         ctx.globalAlpha=.48*p;ctx.strokeStyle='#fff19a';ctx.lineWidth=3;ctx.shadowColor='#ffe75a';ctx.shadowBlur=13;
