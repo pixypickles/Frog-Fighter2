@@ -62,6 +62,10 @@
   let storyLosses=0;
   let storyWins=0;
   let storyFinished=false;
+  let storyPhase='tournament';
+  let storyTournament=[];
+  let storyDay=1;
+
   let running = false;
   let last = performance.now();
   let bubbles = [];
@@ -3053,8 +3057,8 @@
     if(gameMode==='story'){
       if(storyHud){
         storyHud.hidden=false;
-        const total=storyQueue.length;
-        storyHud.textContent=`STORY ${storyFightIndex+1}/${total}　勝${storyWins} 敗${storyLosses}/3　VS ${fighterDisplayName(rivalType)}`;
+        const roundNames=['1回戦','2回戦','3回戦','池の騒動','4回戦','5回戦','池の騒動','決勝戦','SPECIAL'];
+        storyHud.textContent=`STORY ${roundNames[storyFightIndex]||''}　勝${storyWins} 敗${storyLosses}/3　VS ${fighterDisplayName(rivalType)}`;
       }
     }else{
       if(storyHud) storyHud.hidden=true;
@@ -3065,51 +3069,133 @@
     updateHud();
   }
 
+  function shuffleStory(a){
+    const b=a.slice();
+    for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}
+    return b;
+  }
+
+  function buildTournamentStory(){
+    // 本大会はセラフィエル主催。サマエルは反対ブロックから決勝へ上がってくる。
+    // 大会参加枠から操作キャラ・サマエル・セラフィエルを除き、5人を主人公側の対戦相手にする。
+    const tournamentPool=['green','blue','yellow','orange','black','purple','remiel','jihal','kokabiel','sariel','beelzebub','kawazu']
+      .filter(t=>t!==selectedFighter && t!=='samael' && t!=='seraphiel');
+    let picked=shuffleStory(tournamentPool).slice(0,5);
+
+    // ベルゼブブ／カワズが主人公側へ来た場合は強敵枠として後半へ。
+    const normal=picked.filter(t=>t!=='beelzebub'&&t!=='kawazu');
+    const heavy=picked.filter(t=>t==='beelzebub'||t==='kawazu');
+    picked=normal.concat(heavy);
+    return picked;
+  }
+
   function startStoryMode(){
-    // ストーリー開始前にミニゲームHUD/状態を完全クリア
     if(leafMiniHud){leafMiniHud.hidden=true;leafMiniHud.style.display='none';}
     if(guardMiniHud){guardMiniHud.hidden=true;guardMiniHud.style.display='none';}
-    leafMiniActive=false;
-    guardMiniActive=false;
-    leafTargets=[];
-    guardTargets=[];
+    leafMiniActive=false;guardMiniActive=false;leafTargets=[];guardTargets=[];
 
-    storyQueue=playableTypes.filter(t=>t!==selectedFighter && t!=='kawazu' && t!=='samael' && t!=='seraphiel');
-    if(selectedFighter!=='beelzebub') storyQueue.push('beelzebub');
-    if(selectedFighter!=='samael') storyQueue.push('samael');
-    storyFightIndex=0;
-    storyLosses=0;
-    storyWins=0;
-    storyFinished=false;
-    stageTheme=0;
+    storyTournament=buildTournamentStory();
+    // 1～3回戦 → リヴァイア → 4～5回戦 → アスモデウス → 決勝サマエル → エキシビション・セラフィエル
+    storyQueue=[
+      storyTournament[0],storyTournament[1],storyTournament[2],
+      'piranha',
+      storyTournament[3],storyTournament[4],
+      'crayfish',
+      'samael','seraphiel'
+    ];
+    storyFightIndex=0;storyLosses=0;storyWins=0;storyFinished=false;storyPhase='tournament';storyDay=1;stageTheme=0;
 
-    show('game');
-    resize();
-
+    show('game');resize();
     showStoryNarrative([
-      '仕事に疲れた河津一郎は、帰り道、ぼんやりと池を眺めていた。\n\n水の中を泳ぐ一匹のカエル。\n\n「……あいつらは呑気でいいよな」',
-      'しばらく眺めているうちに、ふと思う。\n\n「いや、待てよ……」\n\n「あいつらはあいつらで、厳しい世界を生き抜いているのかもしれない」',
-      '河津一郎は妄想し始めた――。'
+      '前回の「カエル大戦！？」――。\n\nカワズさんが参戦し、ベルゼブブさんを懲らしめたことで、池には再び平和が訪れた。',
+      '……しかし、平和すぎるというのも困りものだった。\n\n退屈してきた誰かが、ぽつりと言った。\n\n「正直言うとさ、あの戦い見てるの、けっこう興奮したんだよね……。またあの戦い見たくない？」',
+      '「そうだ、格闘大会開こうよ」\n\n「いいね！ あっちの池の腕自慢たちも呼んでさ！」',
+      'こうして話は、妙に早くまとまった。\n\nそして――みんなのところへ、一通ずつ招待状が送られた。',
+      '数日後。\n\n透き通った水に照明がきらめく、水中格闘大会の特設水槽。\n\n主催者セラフィエルさん「ようこそ皆さん。存分に、素晴らしい戦いを見せてください！」',
+      `トーナメント開始！\n\nこちらのブロック、一回戦の相手は――${fighterDisplayName(storyQueue[0])}！\n\n反対側のブロックでは、サマエルさんが静かに試合を見つめていた……。`
     ],()=>startGame('story',storyQueue[0]));
   }
 
-  function continueStory(){
-    if(storyFinished) return;
-
-    storyFightIndex++;
-    if(storyFightIndex>=storyQueue.length){
-      storyFinished=true;
-      gameOver=true;
-      comboEl.textContent=`STORY CLEAR!　${storyWins}勝 ${storyLosses}敗`;
-      restartButton.hidden=false;
-      restartButton.textContent='キャラ選択へ';
-      return;
+  function storyInterlude(nextIndex,callback){
+    // indexは「次に戦うstoryQueue位置」
+    if(nextIndex===3){
+      storyDay=1;
+      showStoryNarrative([
+        '――大会1日目、三回戦終了。',
+        '観客席がまだ熱気に包まれている、そのときだった。\n\n「ちょ、ちょっと！ 大変だよ！」',
+        '「外の池でリヴァイアさんが暴れてるんだ！ このままだと大会どころじゃないよ！ 何とかしてよ！」',
+        '……なぜ大会の合間に池のトラブルまで解決することになったのか。\n\nともかく、外の池へ急げ！',
+        'EXTRA BATTLE\nVS リヴァイアさん'
+      ],callback);return true;
     }
+    if(nextIndex===4){
+      storyDay=2;
+      showStoryNarrative([
+        'リヴァイアさんを何とか静め、大会会場へ戻った。\n\nそして翌日――。',
+        '大会2日目。\n\n昨日より照明は鮮やかに、水槽の青も少し深くなっている。',
+        `四回戦――VS ${fighterDisplayName(storyQueue[4])}！`
+      ],callback);return true;
+    }
+    if(nextIndex===6){
+      showStoryNarrative([
+        '――大会2日目、全試合終了。\n\nこれで残すは最終日の決勝戦……のはずだった。',
+        '「また大変だよ！」\n\n「今度はアスモデウスさんが外の池で暴れてる！」',
+        '「なんで毎日ひとりずつ暴れるの！？」\n\n理由を考えている暇はない。再び外の池へ！',
+        'EXTRA BATTLE\nVS アスモデウスさん'
+      ],callback);return true;
+    }
+    if(nextIndex===7){
+      storyDay=3;
+      showStoryNarrative([
+        'アスモデウスさんも撃破。\n\nそして――最終日。',
+        '決勝用に飾られた水槽は、これまでとは別物だった。\n\n光が水面から幾重にも差し込み、会場中の泡が宝石のように輝いている。',
+        '反対側のブロックを勝ち上がってきたのは、やはりこのカエル。',
+        'サマエルさん「……待っていた」',
+        'FINAL\nVS サマエルさん'
+      ],callback);return true;
+    }
+    if(nextIndex===8){
+      showStoryNarrative([
+        'サマエルさんを破り――大会優勝！\n\n会場いっぱいに歓声と泡が舞い上がる。',
+        'そこへ、大会主催者のセラフィエルさんがゆっくりと前へ出た。',
+        'セラフィエルさん「実に素晴らしい戦いでしたよ！」',
+        'セラフィエルさん「おかげで私も血が騒いでしまってね。ひとつ、手合わせ願えないだろうか？」',
+        '優勝したと思ったら、主催者が最後に出てきた。\n\n……この大会、最初からこれが目的だったのでは？',
+        'SPECIAL MATCH\nVS セラフィエルさん'
+      ],callback);return true;
+    }
+    return false;
+  }
 
-    // 3戦ごとに背景を変更。ラスボスは専用の暗い水域。
+  function showStoryEnding(){
+    storyFinished=true;gameOver=true;
+    comboEl.textContent=`STORY CLEAR!　${storyWins}勝 ${storyLosses}敗`;
+    restartButton.hidden=true;
+    showStoryNarrative([
+      'セラフィエルさん「……参りました。いやあ、実に楽しかった！」',
+      'こうして、水中格闘大会は今度こそ本当に終了した。\n\n優勝者を称える泡が水槽いっぱいに舞い、みんなは勝った負けたと好き勝手に騒いでいる。',
+      'ベルゼブブさん「次はもっとルールを減らそう」\n\n誰か「増やすんじゃなくて！？」\n\nカワズさんは隅で静かに首を振った。',
+      'そして外の池では――。\n\nリヴァイアさんとアスモデウスさんが、何事もなかったような顔で泳いでいた。',
+      '「……次の大会も、やる？」',
+      '一瞬の沈黙。\n\n「やる！」\n\n池の平和は戻った。\n\nたぶん。\n\n少なくとも、次の招待状が届くまでは――。',
+      '水中格闘2\n\nTHE END'
+    ],()=>{restartButton.hidden=false;restartButton.textContent='キャラ選択へ';});
+  }
+
+  function continueStory(){
+    if(storyFinished)return;
+    storyFightIndex++;
+    if(storyFightIndex>=storyQueue.length){showStoryEnding();return;}
     const nextType=storyQueue[storyFightIndex];
-    stageTheme=(nextType==='samael'||nextType==='beelzebub') ? 3 : Math.min(2,Math.floor(storyFightIndex/3));
-    startGame('story',nextType);
+
+    // 水槽照明：1日目→2日目→決勝。外の池は別テーマ。
+    if(nextType==='piranha'||nextType==='crayfish')stageTheme=0;
+    else if(nextType==='samael'||nextType==='seraphiel')stageTheme=3;
+    else stageTheme=storyFightIndex>=4?2:1;
+
+    const go=()=>startGame('story',nextType);
+    if(storyInterlude(storyFightIndex,go))return;
+    go();
   }
 
 
@@ -4990,43 +5076,22 @@
     }
 
     if(gameMode==='story'){
-      if(playerWon) storyWins++;
-      else storyLosses++;
+      if(playerWon)storyWins++;else storyLosses++;
 
-      if(!playerWon && storyLosses>=4){
+      if(!playerWon&&storyLosses>=4){
         storyFinished=true;
         comboEl.textContent=`GAME OVER　${storyWins}勝 ${storyLosses}敗`;
         restartButton.textContent='キャラ選択へ';
-      }else if(storyFightIndex>=storyQueue.length-1){
-        storyFinished=true;
-        const perfectUnlock=playerWon && storyLosses===0 && selectedFighter!=='beelzebub';
-        if(perfectUnlock) unlockBeelzebub();
-
-        if(playerWon){
-          const firstKawazu=!isKawazuUnlocked();
-          unlockKawazu();
-          comboEl.textContent=perfectUnlock
-            ? `PERFECT CLEAR!　ベルゼブブさん＆カワズさん解禁!`
-            : `STORY CLEAR!　カワズさん解禁!`;
-          restartButton.hidden=true;
-          showStoryNarrative([
-            '激闘の末、ベルゼブブさんは倒れた。\n\n……\n\n池を眺めていた河津一郎は、我に返った。',
-            '河津一郎「……俺も、負けちゃいられないな」\n\n一郎は立ち上がった。\n\nそして――\n\n池に飛び込んだ。\n\nポチャン。',
-            '水かきのついた手足で、水中を勢いよく進んでいく河津一郎。\n\n河津一郎の小さな緑色の体は、水を切るように泳いだ。\nその速さは、池のどのカエルにも負けていなかった。',
-            '河津一郎――いや、\n\nカワズさん参戦！！'
-          ],()=>{restartButton.hidden=false;});
-        }else{
-          comboEl.textContent=`STORY END　${storyWins}勝 ${storyLosses}敗`;
-        }
-        restartButton.textContent='キャラ選択へ';
+      }else if(playerWon&&storyFightIndex>=storyQueue.length-1){
+        showStoryEnding();
+        if(storyHud)storyHud.textContent=`STORY CLEAR　勝${storyWins} 敗${storyLosses}`;
+        return;
       }else{
-        comboEl.textContent=playerWon ? 'YOU WIN!　次の相手へ' : `YOU LOSE　残り猶予 ${3-storyLosses}`;
-        restartButton.textContent='次の相手';
+        const label=(storyFightIndex===2?'1日目終了':storyFightIndex===5?'2日目終了':storyFightIndex===7?'大会優勝':'次の試合へ');
+        comboEl.textContent=playerWon?`YOU WIN!　${label}`:`YOU LOSE　残り猶予 ${3-storyLosses}`;
+        restartButton.textContent='次へ';
       }
-
-      if(storyHud){
-        storyHud.textContent=`STORY ${storyFightIndex+1}/${storyQueue.length}　勝${storyWins} 敗${storyLosses}/3`;
-      }
+      if(storyHud)storyHud.textContent=`STORY　勝${storyWins} 敗${storyLosses}/3`;
       restartButton.hidden=false;
       return;
     }

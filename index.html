@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <meta name="theme-color" content="#0b6f7a" />
-  <title>水中格闘2 Prototype v1.3</title>
+  <title>水中格闘2 Prototype v1.4</title>
   <link rel="stylesheet" href="water-style.css" />
 </head>
 <body>
@@ -15,7 +15,7 @@
       <h1>水中格闘2</h1>
       <p class="subtitle">見て、守って、返せる。スロー水中格闘</p>
       <p class="rotate-note">スマホを横持ちすると自動で始まります</p>
-      <div class="start-version">WATER FIGHTER 2　PROTOTYPE v1.3</div>
+      <div class="start-version">WATER FIGHTER 2　PROTOTYPE v1.4</div>
       <div class="title-start-actions">
         <button id="portraitStart" class="soft-btn portrait-start-btn">縦画面のまま始める</button>
         <button id="desktopStart" class="soft-btn">PCで試す</button>
@@ -26,7 +26,6 @@
     <section id="selectScreen" class="screen">
       <h2>ファイターをえらぶ</h2>
       <div class="fighter-grid">
-<div class="fighter-group-label">天使系</div>
 <button class="fighter-card selected" data-fighter="green">
           <span class="fighter-emoji" style="--frog-body:#35d851;--frog-eye-bump:#69e86e;--frog-iris:#173126;--frog-mouth:#146030;--frog-cheek:#d7b774;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
           <strong>ミカエルさん</strong>
@@ -71,7 +70,6 @@
           <strong>サリエルさん</strong>
           <span class="special-hint move-names">月 / 邪眼 / ブラッドムーン</span>
         </button>
-<div class="fighter-group-label">悪魔系</div>
 <button class="fighter-card" data-fighter="black">
           <span class="fighter-emoji black-frog" style="--frog-body:#3b3e47;--frog-eye-bump:#50545f;--frog-iris:#101010;--frog-mouth:#183024;--frog-cheek:#a75e70;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
           <strong>ルシファーさん</strong>
@@ -84,7 +82,6 @@
         
           <span class="special-hint move-names">リボンラッシュ / ナマズさん突進 / バックスピンキック</span>
         </button>
-<div class="fighter-group-label">ボス・特殊枠</div>
 <button class="fighter-card boss-card" data-fighter="samael">
           <span class="fighter-emoji boss-frog" style="--frog-body:#2b193d;--frog-eye-bump:#7760be;--frog-iris:#d9f7ff;--frog-mouth:#8c70d8;--frog-cheek:#75526f;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
           <strong>サマエルさん</strong>
@@ -131,7 +128,7 @@
           </select>
         </div>
         <div class="story-rule">
-          ストーリー：自分以外の全員＋最後にボス／3敗までOK
+          ストーリー：水中格闘大会トーナメント／3敗までOK
         </div>
       </div>
 
@@ -160,7 +157,7 @@
 
       <p class="auto-attack-note">自動補正：相手が上ならパンチが上向き / 相手が下ならキックが下向き</p>
       <div id="bossTeaser" class="boss-teaser" hidden>
-        STORY FINAL BOSS：サマエルさん
+        STORY：決勝 サマエルさん → SPECIAL セラフィエルさん
       </div>
     </section>
 
@@ -240,7 +237,7 @@
       <strong>スマホを横持ちすると自動で始まります</strong>
       <button id="portraitOverlayStart" class="soft-btn portrait-overlay-start">縦画面のまま始める</button>
       <small class="portrait-overlay-note">横画面にできない端末はこちら</small>
-      <span class="portrait-version">WATER FIGHTER 2　v1.3</span>
+      <span class="portrait-version">WATER FIGHTER 2　v1.4</span>
     </div>
   </div>
   <script src="water-game.js"></script>

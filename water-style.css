@@ -1735,3 +1735,6 @@ body.portrait-play #portraitOverlay{
   .fighter-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
   .fighter-group-label{font-size:11px}
 }
+
+/* v1.3.1: roster remains ordered by category, but is packed continuously. */
+.fighter-group-label{display:none !important;}
