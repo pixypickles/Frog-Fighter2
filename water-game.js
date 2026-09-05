@@ -827,6 +827,11 @@
       this.ribbonWhipIndex=0;
       this.luciferDiveHits=0;
 
+      // 水中格闘2：毒状態。ベルゼブブ（将来のサマエルも）は継続毒を無効化。
+      this.poisonT=0;
+      this.poisonTick=0;
+      this.poisonOwner=null;
+
       // 舌システム
       this.tonguePullTarget=null;   // 今、舌で引き寄せている相手
       this.tonguePullTimer=0;       // 2回目の舌入力を受け付ける時間
@@ -837,6 +842,20 @@
     }
     update(dt) {
       if (this.stun>0) this.stun-=dt;
+      if(this.poisonT>0){
+        this.poisonT=Math.max(0,this.poisonT-dt);
+        this.poisonTick-=dt;
+        if(this.poisonTick<=0){
+          this.poisonTick=.62;
+          if(!isPoisonImmune(this) && this.poisonOwner && !gameOver){
+            const src=this.poisonOwner;
+            src._projectileHit=true;
+            damageHit(src,this,.62*src.damageMul,0,0);
+            src._projectileHit=false;
+          }
+        }
+        if(this.poisonT<=0)this.poisonOwner=null;
+      }
       if(this.healT>0){
         this.healT-=dt;
         this.hp=Math.min(100,this.hp+3.2*dt);
@@ -1767,7 +1786,7 @@
         ctx.lineCap='round';
         ctx.beginPath();
         ctx.moveTo(14,46);
-        // v0.30: 蹴り足を少し斜め上へ伸ばす。
+        // v0.40: 蹴り足を少し斜め上へ伸ばす。
         ctx.lineTo(67,25);
         ctx.stroke();
         ctx.restore();
@@ -3406,7 +3425,7 @@
         vy:-120,
         t:1.5,
         life:1.5,
-        r:58,
+        r:42,
         hit:false
       });
     },130);
@@ -3778,7 +3797,7 @@
       kawazuShots.push({
         owner:f,x:f.x+f.face*45,y:f.y+5+(Math.random()-.5)*20,
         vx:f.face*Math.cos(spread)*speed,vy:Math.sin(spread)*speed,
-        r:8+Math.random()*4,t:.9,life:.9,hit:false
+        r:8+Math.random()*4,t:.9,life:.9,hit:false,reflected:0
       });
     }
     comboEl.textContent='水圧ラッシュ!';
@@ -3809,6 +3828,25 @@
     },105);
     comboEl.textContent='ミラージュキック!';
     clearCommand();return true;
+  }
+
+  function specialKawazuSpinCutter(f){
+    if(gameOver || !f || f.type!=='kawazu' || f.stun>0 || f.guard || f.specialT>0) return false;
+    f.specialType='kawazuSpinCutter'; f.specialT=.72; f.attack='kick'; f.attackT=.72;
+    comboEl.textContent='スピンキックカッター!';
+    const dir=f.face;
+    [0,120,240].forEach((delay,i)=>{
+      setTimeout(()=>{
+        if(gameOver||!f)return;
+        const speed=330+i*18;
+        water2Shots.push({
+          owner:f,x:f.x+dir*58,y:f.y+(-18+i*18),vx:dir*speed,vy:(i-1)*36,
+          r:13,t:1.55,life:1.55,damage:2.15,name:'スピンキックカッター',color:'blade',
+          reflected:0,hit:false,spin:0,style:'spinBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:6
+        });
+      },delay);
+    });
+    clearCommand(); return true;
   }
 
   function specialKawazuCyclone(f){
@@ -3890,7 +3928,13 @@
         vx:dir*Math.cos(angle)*speed, vy:Math.sin(angle)*speed,
         r:opts.r||13, t:opts.life||2.4, life:opts.life||2.4,
         damage:opts.damage||4.0, name, color:opts.color||'aqua',
-        reflected:0, hit:false
+        reflected:0, hit:false, spin:0,
+        style:opts.style||opts.color||'aqua',
+        poisonDuration:opts.poisonDuration||0,
+        curve:opts.curve||0,
+        wobble:opts.wobble||0,
+        baseVy:Math.sin(angle)*speed,
+        maxReflect:opts.maxReflect||6
       };
       water2Shots.push(shot);
       comboEl.textContent=name+'!';
@@ -3919,6 +3963,10 @@
         clearCommand();
         return specialKawazuCyclone(f);
       }
+      if(kind==='kick' && hasCommand([back],560)){
+        clearCommand();
+        return specialKawazuSpinCutter(f);
+      }
       if(kind==='kick' && hasCommand([forward],520)){
         clearCommand();
         return specialKawazuMirageKick(f);
@@ -3936,7 +3984,7 @@
       if(kind==='punch' && hasCommand(['up'],560)){ clearCommand(); return specialUppercut(f); }
       if(kind==='kick' && hasCommand([forward],560)){ clearCommand(); return specialDropKick(f); }
       if(kind==='punch' && hasCommand([back],560)){
-        clearCommand(); return specialWater2Shot(f,{name:'バーニングショット',attack:'punch',color:'fire',speed:300,damage:4.4,r:14,charge:.38});
+        clearCommand(); return specialWater2Shot(f,{name:'バーニングショット',attack:'punch',color:'fire',style:'burning',speed:315,damage:4.4,r:15,charge:.40,maxReflect:6});
       }
     }
 
@@ -3946,7 +3994,7 @@
       if(kind==='kick' && hasCommand(['down'],560)){ clearCommand(); return specialAquaStream(f); }
       if(kind==='punch' && hasCommand([back],560)){ clearCommand(); return specialAquaVortex(f); }
       if(kind==='punch' && hasCommand([forward],560)){
-        clearCommand(); return specialWater2Shot(f,{name:'アクアショット',attack:'punch',color:'aqua',speed:285,damage:3.8,r:13,charge:.34});
+        clearCommand(); return specialWater2Shot(f,{name:'アクアショット',attack:'punch',color:'aqua',style:'aquaSpin',speed:285,damage:3.8,r:14,charge:.36,wobble:.10,maxReflect:6});
       }
     }
 
@@ -3974,29 +4022,29 @@
       if(kind==='punch' && hasCommand([forward],560)){ clearCommand(); return specialPressureBlade(f,0,'punch'); }
       if(kind==='kick' && hasCommand([forward],560)){ clearCommand(); return specialPressureBlade(f,15,'kick'); }
       if(kind==='punch' && hasCommand([back],560)){
-        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'punch',color:'blade',speed:275,angle:-28,damage:3.7,r:12,charge:.38,life:2.2});
+        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'punch',color:'blade',style:'carpBlade',speed:285,angle:-30,damage:3.7,r:12,charge:.40,life:2.35,curve:105,maxReflect:6});
       }
       if(kind==='kick' && hasCommand([back],560)){
-        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'kick',color:'blade',speed:275,angle:28,damage:3.7,r:12,charge:.38,life:2.2});
+        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'kick',color:'blade',style:'carpBlade',speed:285,angle:30,damage:3.7,r:12,charge:.40,life:2.35,curve:-105,maxReflect:6});
       }
     }
 
     // 水中格闘2：ウリエル G＋P（直前のガードタップ＋P）でホワイトショット。
     if(f.type==='orange' && kind==='punch'){
       const justGuarded=performance.now()-(input.lastSimpleGuardTapTime||0)<=650;
-      if(justGuarded){ input.lastSimpleGuardTapTime=0; clearCommand(); return specialWater2Shot(f,{name:'ホワイトショット',attack:'punch',color:'white',speed:270,damage:3.6,r:13,charge:.34}); }
+      if(justGuarded){ input.lastSimpleGuardTapTime=0; clearCommand(); return specialWater2Shot(f,{name:'ホワイトショット',attack:'punch',color:'white',style:'whiteOrb',speed:250,damage:3.7,r:17,charge:.38,maxReflect:6}); }
     }
     // ルシファー：前＋キックでパワーショット。
     if(f.type==='black' && kind==='kick' && hasCommand([forward],560)){
-      clearCommand(); return specialWater2Shot(f,{name:'パワーショット',attack:'kick',color:'dark',speed:255,damage:5.4,r:17,charge:.46});
+      clearCommand(); return specialWater2Shot(f,{name:'パワーショット',attack:'kick',color:'dark',style:'powerOrb',speed:245,damage:5.5,r:19,charge:.48,maxReflect:6});
     }
     // リリス：後ろ＋舌で遅いバブルショット。
     if(f.type==='purple' && kind==='tongue' && hasCommand([back],560)){
-      clearCommand(); return specialWater2Shot(f,{name:'バブルショット',attack:'tongue',color:'bubble',speed:185,damage:3.1,r:18,charge:.32,life:3.2});
+      clearCommand(); return specialWater2Shot(f,{name:'バブルショット',attack:'tongue',color:'bubble',style:'bubble',speed:175,damage:3.0,r:20,charge:.34,life:3.5,wobble:.18,maxReflect:6});
     }
 
     if(f.type==='beelzebub'){
-      if(kind==='punch' && hasCommand([forward],560)){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',speed:245,damage:4.8,r:15,charge:.48,life:2.7}); }
+      if(kind==='punch' && hasCommand([forward],560)){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.7,r:16,charge:.50,life:2.9,poisonDuration:2.6,maxReflect:6}); }
       const downForward=f.face>0?'downRight':'downLeft';
       const bossQuarterCommand=
         hasCommand(['down',forward],850)||hasCommand(['down',downForward],850)||hasCommand([downForward,forward],850);
@@ -4922,6 +4970,18 @@
     }
   }
 
+  function isPoisonImmune(f){
+    return !!f && (f.type==='beelzebub' || f.type==='samael');
+  }
+
+  function applyPoison(target,owner,duration=2.5){
+    if(!target || isPoisonImmune(target)) return false;
+    target.poisonT=Math.max(target.poisonT||0,duration);
+    target.poisonTick=Math.min(target.poisonTick||0,.35);
+    target.poisonOwner=owner||null;
+    return true;
+  }
+
   function projectileImmuneByBubble(f){
     return !!(f && f.specialType==='raphaelBubbleMove' && f.specialT>0);
   }
@@ -5149,21 +5209,34 @@ function drawBackground(dt){
 
       // 水中格闘2 共通飛び道具：シャボンガードに触れると自動反射。
       water2Shots.forEach(q=>{
-        q.t-=dt; q.x+=q.vx*dt; q.y+=q.vy*dt;
+        q.t-=dt;
+        q.spin=(q.spin||0)+dt*(q.style==='aquaSpin'?10:4);
+        if(q.curve){ q.vy += q.curve*dt; }
+        q.x+=q.vx*dt;
+        q.y+=q.vy*dt + Math.sin((q.spin||0)*2)*(q.wobble||0)*18*dt;
         const target=q.owner&&q.owner.isPlayer?enemy:player;
         if(!target||q.hit) return;
         if(Math.hypot(target.x-q.x,target.y-q.y)<target.radius+q.r+14){
           if(target.guard){
             // 反射：所有者を入れ替え、相手方向へ返す。ラリーごとに少し加速・大型化。
             spawnImpact(q.x,q.y,'guard'); playSfx('guard');
-            q.owner=target; q.vx=-q.vx*1.10; q.vy=-q.vy*.92; q.r=Math.min(25,q.r*1.06);
+            q.owner=target; q.vx=-q.vx*1.10; q.vy=-q.vy*.92; q.r=Math.min(27,q.r*1.06);
             q.damage*=1.08; q.reflected=(q.reflected||0)+1;
             q.x=target.x+target.face*(target.radius+q.r+12);
-            comboEl.textContent=q.reflected>1?'REFLECT x'+q.reflected+'!':'REFLECT!';
+            // 反射回数が増えるほど不安定に。上限では派手に消散。
+            if(q.reflected>=q.maxReflect){
+              q.hit=true; q.t=0;
+              spawnImpact(q.x,q.y,'guard');
+              comboEl.textContent='OVER REFLECT!';
+            }else{
+              comboEl.textContent=q.reflected>1?'REFLECT x'+q.reflected+'!':'REFLECT!';
+            }
           }else{
             q.hit=true; q.t=0; q.owner._projectileHit=true;
             damageHit(q.owner,target,q.damage*q.owner.damageMul,75*Math.sign(q.vx||q.owner.face),-8);
-            q.owner._projectileHit=false; spawnImpact(q.x,q.y,'hit');
+            q.owner._projectileHit=false;
+            if(q.poisonDuration>0) applyPoison(target,q.owner,q.poisonDuration);
+            spawnImpact(q.x,q.y,'hit');
           }
         }
       });
@@ -5175,8 +5248,8 @@ function drawBackground(dt){
         const target=v.owner && v.owner.isPlayer ? enemy : player;
         if(target && v.tick<=0){
           v.tick=.48;
-          // 紫の水の間、相手だけ。ガードし続けていれば無傷。
-          if(!target.guard){
+          // 紫の水の間、相手だけ。毒耐性持ちは継続毒を受けない。
+          if(!target.guard && !isPoisonImmune(target)){
             v.owner._projectileHit=true;
             damageHit(v.owner,target,1.45*v.owner.damageMul,0,0);
             v.owner._projectileHit=false;
@@ -5376,10 +5449,21 @@ function drawBackground(dt){
         p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
         const target=p.owner&&p.owner.isPlayer?enemy:player;
         if(!p.hit&&target&&Math.hypot(target.x-p.x,target.y-p.y)<target.radius+p.r){
-          p.hit=true;
-          p.owner._projectileHit=true;
-          damageHit(p.owner,target,1.15*p.owner.damageMul,30*Math.sign(p.vx),p.vy*.08);
-          p.owner._projectileHit=false;
+          if(target.guard){
+            // 水圧ラッシュは反射されると単純に戻らず、上下へ散る。
+            spawnImpact(p.x,p.y,'guard');
+            p.owner=target; p.reflected=(p.reflected||0)+1;
+            p.vx=-p.vx*.78;
+            const sign=(p.vy||0)>=0?1:-1;
+            p.vy=sign*(150+Math.abs(p.vy)*.72);
+            p.x=target.x+target.face*(target.radius+p.r+10);
+            comboEl.textContent='SPLIT REFLECT!';
+          }else{
+            p.hit=true;
+            p.owner._projectileHit=true;
+            damageHit(p.owner,target,1.15*p.owner.damageMul,30*Math.sign(p.vx),p.vy*.08);
+            p.owner._projectileHit=false;
+          }
         }
       });
       kawazuShots=kawazuShots.filter(p=>p.t>0&&!p.hit&&p.x>-40&&p.x<innerWidth+40&&p.y>-40&&p.y<innerHeight+40);
@@ -5400,7 +5484,8 @@ function drawBackground(dt){
               p.size=Math.min(1.45,(p.size||1)*1.06);
               p.reflected=(p.reflected||0)+1;
               p.x=target.x+target.face*(target.radius+38);
-              comboEl.textContent=p.reflected>1?'REFLECT x'+p.reflected+'!':'REFLECT!';
+              if(p.reflected>=6){p.hit=true;p.t=0;comboEl.textContent='OVER REFLECT!';}
+              else comboEl.textContent=p.reflected>1?'REFLECT x'+p.reflected+'!':'REFLECT!';
             }else{
               p.hit=true;
               if(projectileImmuneByBubble(target)){
@@ -5893,17 +5978,59 @@ function drawBackground(dt){
 
     water2Shots.forEach(q=>{
       const a=Math.max(0,Math.min(1,q.t/q.life));
-      ctx.save(); ctx.translate(q.x,q.y); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.85*a;
-      let fill='#8feeff', glow='#d9fbff';
-      if(q.color==='fire'){fill='#ff6a35';glow='#ffd27a';}
-      if(q.color==='venom'){fill='#a448e8';glow='#d9a3ff';}
-      if(q.color==='dark'){fill='#8c5bd9';glow='#d5bcff';}
-      if(q.color==='white'){fill='#eafcff';glow='#ffffff';}
-      if(q.color==='bubble'){fill='rgba(185,245,255,.55)';glow='#f4ffff';}
-      if(q.color==='blade'){fill='#86ecff';glow='#ffffff';}
-      ctx.shadowColor=glow; ctx.shadowBlur=18;
-      ctx.fillStyle=fill; ctx.beginPath(); ctx.arc(0,0,q.r,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle=glow; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(0,0,q.r+3,0,Math.PI*2); ctx.stroke();
+      ctx.save(); ctx.translate(q.x,q.y); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.9*a;
+      const sp=Math.hypot(q.vx,q.vy)||1;
+      const ang=Math.atan2(q.vy,q.vx);
+      ctx.rotate(ang);
+
+      if(q.style==='burning'){
+        // 円形の核＋後方へ長く伸びる炎オーラ。
+        const tail=34+Math.min(26,(q.reflected||0)*5);
+        const g=ctx.createLinearGradient(-tail,0,q.r,0);
+        g.addColorStop(0,'rgba(255,70,20,0)'); g.addColorStop(.45,'rgba(255,95,22,.48)'); g.addColorStop(1,'rgba(255,232,118,.95)');
+        ctx.fillStyle=g; ctx.beginPath();
+        ctx.moveTo(-tail,0); ctx.quadraticCurveTo(-q.r,-q.r*.85,q.r*.7,-q.r*.45); ctx.arc(q.r*.15,0,q.r*.9,-.5,.5); ctx.quadraticCurveTo(-q.r,q.r*.85,-tail,0); ctx.fill();
+        ctx.shadowColor='#ff9a38';ctx.shadowBlur=20;ctx.fillStyle='#ffb13b';ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#fff1a1';ctx.beginPath();ctx.arc(q.r*.18,-q.r*.12,q.r*.48,0,Math.PI*2);ctx.fill();
+      }else if(q.style==='aquaSpin'){
+        ctx.rotate(q.spin||0); ctx.shadowColor='#8feeff';ctx.shadowBlur=18;
+        ctx.strokeStyle='#bffaff';ctx.lineWidth=4;
+        for(let i=0;i<3;i++){ctx.rotate(Math.PI*2/3);ctx.beginPath();ctx.arc(0,0,q.r*.78,-1.0,1.0);ctx.stroke();}
+        ctx.fillStyle='rgba(95,207,255,.52)';ctx.beginPath();ctx.arc(0,0,q.r*.72,0,Math.PI*2);ctx.fill();
+      }else if(q.style==='whiteOrb'){
+        ctx.shadowColor='#ffffff';ctx.shadowBlur=24;ctx.fillStyle='#f8ffff';ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='rgba(210,245,255,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,q.r+4,0,Math.PI*2);ctx.stroke();
+      }else if(q.style==='powerOrb'){
+        const rg=ctx.createRadialGradient(-q.r*.25,-q.r*.25,2,0,0,q.r*1.2);
+        rg.addColorStop(0,'#ff5b4b');rg.addColorStop(.45,'#751728');rg.addColorStop(1,'#140b12');
+        ctx.shadowColor='#e22f45';ctx.shadowBlur=20;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#ff7065';ctx.lineWidth=2;ctx.stroke();
+      }else if(q.style==='bubble'){
+        ctx.globalCompositeOperation='source-over';
+        ctx.fillStyle='rgba(180,242,255,.16)';ctx.strokeStyle='rgba(236,255,255,.82)';ctx.lineWidth=3;
+        ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.78)';ctx.beginPath();ctx.ellipse(-q.r*.32,-q.r*.35,q.r*.22,q.r*.12,-.6,0,Math.PI*2);ctx.fill();
+      }else if(q.style==='venomGloss'){
+        const rg=ctx.createRadialGradient(-q.r*.3,-q.r*.35,1,0,0,q.r*1.15);
+        rg.addColorStop(0,'#f3c4ff');rg.addColorStop(.18,'#c55cff');rg.addColorStop(.68,'#7023a8');rg.addColorStop(1,'#3e0f62');
+        ctx.shadowColor='#c865ff';ctx.shadowBlur=22;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.72)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.32,q.r*.23,q.r*.12,-.6,0,Math.PI*2);ctx.fill();
+      }else if(q.style==='spinBlade'){
+        // 水圧カッターを縦方向に潰した、薄い高速刃。
+        ctx.rotate(q.spin||0);ctx.scale(1.35,.48);
+        ctx.shadowColor='#8ef1ff';ctx.shadowBlur=14;
+        ctx.fillStyle='rgba(115,229,255,.40)';ctx.beginPath();ctx.ellipse(0,0,20,13,0,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#e4ffff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,18,-1.1,1.1);ctx.stroke();
+      }else if(q.style==='carpBlade'){
+        ctx.rotate(Math.PI/2);ctx.scale(1,.55);ctx.strokeStyle='#c7fbff';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,0,25,-1.1,1.1);ctx.stroke();
+        ctx.strokeStyle='#5dd9f4';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,25,-1.1,1.1);ctx.stroke();
+      }else{
+        let fill='#8feeff', glow='#d9fbff';
+        ctx.shadowColor=glow; ctx.shadowBlur=18;ctx.fillStyle=fill; ctx.beginPath(); ctx.arc(0,0,q.r,0,Math.PI*2); ctx.fill();
+      }
+      if((q.reflected||0)>=3){
+        ctx.globalAlpha=.35*a;ctx.strokeStyle='#ffffff';ctx.lineWidth=2+(q.reflected||0)*.4;ctx.beginPath();ctx.arc(0,0,q.r+7+(q.reflected||0)*2,0,Math.PI*2);ctx.stroke();
+      }
       ctx.restore();
     });
 
