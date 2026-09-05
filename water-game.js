@@ -4100,10 +4100,12 @@
   }
   function specialLightningDash(f){
     if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
-    f.jihalDashOriginX=f.x;f.specialType='lightningDash';f.specialT=.34;f.attack='kick';f.attackT=.34;f.vx=f.face*920;
-    const o=f.isPlayer?enemy:player,d=f.face;
-    setTimeout(()=>{if(o&&Math.abs(o.x-f.x)<145&&Math.abs(o.y-f.y)<84){damageHit(f,o,9.5*f.damageMul,365*d,-45);spawnImpact(o.x,o.y,'hit');}},65);
-    comboEl.textContent='ライトニングダッシュ!';return true;
+    f.jihalDashOriginX=f.x;
+    f.specialType='lightningDash';f.specialT=.34;f.attack='kick';f.attackT=.34;
+    f.jihalDashHit=false;f.jihalDashHitWindow=.21;
+    f.vx=f.face*920;
+    comboEl.textContent='ライトニングダッシュ!';
+    return true;
   }
   function startThunderCharge(f){
     if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.attackT>0||f.jihalCharging)return false;
@@ -4112,11 +4114,14 @@
   }
   function releaseThunderCharge(f){
     if(!f||!f.jihalCharging)return false;
-    const c=Math.max(0,Math.min(1,f.jihalCharge||0));f.jihalCharging=false;
-    f.jihalDashOriginX=f.x;f.specialType='thunderChargeRush';f.specialT=.30;f.attack='kick';f.attackT=.30;f.vx=f.face*(980+520*c);
-    const o=f.isPlayer?enemy:player,d=f.face;
-    setTimeout(()=>{if(o&&Math.abs(o.x-f.x)<158&&Math.abs(o.y-f.y)<90){damageHit(f,o,(10.5+6*c)*f.damageMul,(410+180*c)*d,-70);spawnImpact(o.x,o.y,'hit');}},55);
-    comboEl.textContent=c>.75?'フル・サンダーチャージ!':'サンダーチャージ!';return true;
+    const c=Math.max(0,Math.min(1,f.jihalCharge||0));
+    f.jihalCharging=false;
+    f.jihalDashOriginX=f.x;
+    f.specialType='thunderChargeRush';f.specialT=.30;f.attack='kick';f.attackT=.30;
+    f.jihalChargePower=c;f.jihalThunderHit=false;
+    f.vx=f.face*(980+520*c);
+    comboEl.textContent=c>.75?'フル・サンダーチャージ!':'サンダーチャージ!';
+    return true;
   }
   function specialSparkBurst(f){
     if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
@@ -5765,6 +5770,38 @@ function drawBackground(dt){
         }
       });
       iceWalls=iceWalls.filter(w=>w.t>0);
+
+      // ジィハル高速技の当たり判定。
+      [player,enemy].forEach(f=>{
+        if(!f||f.type!=='jihal')return;
+        const o=f.isPlayer?enemy:player;
+        if(!o)return;
+
+        // ライトニングダッシュは前半〜中盤だけ攻撃判定。
+        if(f.specialType==='lightningDash' && f.specialT>0){
+          const elapsed=.34-f.specialT;
+          if(elapsed<=.21 && !f.jihalDashHit && Math.abs(o.x-f.x)<78 && Math.abs(o.y-f.y)<76){
+            f.jihalDashHit=true;
+            damageHit(f,o,9.5*f.damageMul,365*f.face,-45);
+            spawnImpact(o.x,o.y,'hit');
+          }
+        }
+
+        // サンダーチャージは相手に当たっても速度を落とさず、そのまま通り抜ける。
+        if(f.specialType==='thunderChargeRush' && f.specialT>0){
+          if(!f.jihalThunderHit && Math.abs(o.x-f.x)<82 && Math.abs(o.y-f.y)<82){
+            f.jihalThunderHit=true;
+            const c=Math.max(0,Math.min(1,f.jihalChargePower||0));
+            const keepVx=f.vx; // 命中後も突進速度を保持
+            damageHit(f,o,(10.5+6*c)*f.damageMul,(410+180*c)*f.face,-70);
+            f.vx=keepVx;
+            // 相手との重なりを少しだけ解消しつつ、自分は進行方向へ抜ける。
+            o.x-=f.face*18;
+            f.x+=f.face*12;
+            spawnImpact(o.x,o.y,'hit');
+          }
+        }
+      });
 
       [player,enemy].forEach(f=>{if(f&&f.type==='jihal'&&f.jihalCharging){f.jihalCharge=Math.min(1,(f.jihalCharge||0)+dt/.95);f.specialT=999;f.vx*=.75;}});
       jihalBolts.forEach(q=>{
