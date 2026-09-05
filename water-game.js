@@ -19,6 +19,11 @@
   const storyNarrative=document.getElementById('storyNarrative');
   const storyNarrativeText=document.getElementById('storyNarrativeText');
   const storyNarrativeNext=document.getElementById('storyNarrativeNext');
+  const pauseButton=document.getElementById('pauseButton');
+  const pauseOverlay=document.getElementById('pauseOverlay');
+  const pauseFighterName=document.getElementById('pauseFighterName');
+  const pauseMoveList=document.getElementById('pauseMoveList');
+  const resumeButton=document.getElementById('resumeButton');
   const practiceHelp=document.getElementById('practiceHelp');
   const practiceSpecialTitle=document.getElementById('practiceSpecialTitle');
   const practiceSpecialMoves=document.getElementById('practiceSpecialMoves');
@@ -71,6 +76,7 @@
 
 
   let running = false;
+  let gamePaused=false;
   let last = performance.now();
   let bubbles = [];
   let particles = [];
@@ -660,6 +666,8 @@
 
   if(titleReturnButton){
     titleReturnButton.onclick=()=>{
+      gamePaused=false;
+      if(pauseOverlay){pauseOverlay.hidden=true;pauseOverlay.style.display='none';}
       gameOver=true;
       running=false;
       leafMiniActive=false;
@@ -2617,8 +2625,12 @@
   }
 
   function startLeafMiniGame(){
+    if(pauseButton)pauseButton.hidden=true;gamePaused=false;
     gameMode='leafMini';
     if(practiceHelp){practiceHelp.hidden=true;practiceHelp.style.display='none';}
+    gamePaused=false;
+    if(pauseOverlay){pauseOverlay.hidden=true;pauseOverlay.style.display='none';}
+    if(pauseButton)pauseButton.hidden=false;
     gameOver=false;
     restartButton.hidden=true;
     comboHits=0; comboTimer=0; comboEl.textContent='';
@@ -2721,6 +2733,7 @@
   }
 
   function startGuardMiniGame(){
+    if(pauseButton)pauseButton.hidden=true;gamePaused=false;
     gameMode='guardMini';
     if(practiceHelp){practiceHelp.hidden=true;practiceHelp.style.display='none';} gameOver=false; restartButton.hidden=true;
     comboHits=0; comboTimer=0; comboEl.textContent='';
@@ -2778,6 +2791,7 @@
   }
 
   function startRaceMiniGame(){
+    if(pauseButton)pauseButton.hidden=true;gamePaused=false;
     gameMode='raceMini'; gameOver=false; restartButton.hidden=true;
     comboEl.textContent=''; show('game'); resize();
     buildRaceCourse();
@@ -2819,6 +2833,7 @@
   }
 
   function startBasketMiniGame(){
+    if(pauseButton)pauseButton.hidden=true;gamePaused=false;
     gameMode='basketMini'; gameOver=false; restartButton.hidden=true;
     comboEl.textContent=''; show('game'); resize();
     player=new Fighter(innerWidth*.24,innerHeight*.52,true,selectedFighter);
@@ -2900,6 +2915,7 @@
   }
 
   function startPractice(){
+    if(pauseButton)pauseButton.hidden=true;gamePaused=false;
     gameMode='practice';
     updatePracticeHelp();
     gameOver=false;
@@ -2969,6 +2985,36 @@
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
     return map[type] || ['専用必殺技：練習対象外'];
+  }
+
+  function openPause(){
+    if(!player||gameOver||!screens.game.classList.contains('active'))return;
+    gamePaused=true;
+    if(pauseFighterName)pauseFighterName.textContent=fighterDisplayName(selectedFighter);
+    if(pauseMoveList){
+      const moves=practiceSpecialText(selectedFighter);
+      pauseMoveList.innerHTML=moves.map(v=>`<div>${v}</div>`).join('');
+    }
+    if(pauseOverlay){pauseOverlay.hidden=false;pauseOverlay.style.display='flex';}
+    if(pauseButton)pauseButton.hidden=true;
+    input.x=0;input.y=0;
+    if(stickId!==null)stickId=null;
+  }
+
+  function closePause(){
+    gamePaused=false;
+    if(pauseOverlay){pauseOverlay.hidden=true;pauseOverlay.style.display='none';}
+    if(pauseButton)pauseButton.hidden=false;
+    last=performance.now();
+  }
+
+  if(pauseButton){
+    pauseButton.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();openPause();});
+    pauseButton.addEventListener('click',e=>{if(window.PointerEvent)return;e.preventDefault();openPause();});
+  }
+  if(resumeButton){
+    resumeButton.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();closePause();});
+    resumeButton.addEventListener('click',e=>{if(window.PointerEvent)return;e.preventDefault();closePause();});
   }
 
   function updatePracticeHelp(){
@@ -3162,10 +3208,10 @@
     showStoryNarrative([
       '前回の「カエル大戦！？」――。\n\nカワズさんが参戦し、ベルゼブブさんを懲らしめたことで、池には再び平和が訪れた。',
       '……しかし、平和すぎるというのも困りものだった。\n\n退屈してきた誰かが、ぽつりと言った。\n\n「正直言うとさ、あの戦い見てるの、けっこう興奮したんだよね……。またあの戦い見たくない？」',
-      '「そうだ、格闘大会開こうよ」\n\n「いいね！ あっちの池の腕自慢たちも呼んでさ！」',
-      'こうして話は、妙に早くまとまった。\n\nそして――みんなのところへ、一通ずつ招待状が送られた。',
-      '数日後。\n\n透き通った水に照明がきらめく、水中格闘大会の特設水槽。\n\n主催者セラフィエルさん「ようこそ皆さん。存分に、素晴らしい戦いを見せてください！」',
-      `トーナメント開始！\n\nこちらのブロック、一回戦の相手は――${fighterDisplayName(storyQueue[0])}！\n\n反対側のブロックでは、サマエルさんが静かに試合を見つめていた……。`
+      '「そうだ、格闘大会を開いてもらえないか、頼みにいこうよ」\n\n「いいね！ あっちの池の腕自慢たちも呼んでもらおうよ！」',
+      'こうして一行は、大会を開いてもらえないか頼みにいった。\n\nすると話は、妙に早くまとまった。\n\nそして――みんなのところへ、一通ずつ招待状が送られた。',
+      '数日後。\n\n透き通った水に照明がきらめく、水中格闘大会の特設水槽。\n\n大会主催者「ようこそ皆さん。存分に、素晴らしい戦いを見せてください！」',
+      `トーナメント開始！\n\nこちらのブロック、一回戦の相手は――${fighterDisplayName(storyQueue[0])}！\n\n反対側のブロックでも、強豪たちの試合が静かに進んでいた……。`
     ],()=>startGame('story',storyQueue[0]));
   }
 
@@ -3202,19 +3248,19 @@
       showStoryNarrative([
         'アスモデウスさんも撃破。\n\nそして――最終日。',
         '決勝用に飾られた水槽は、これまでとは別物だった。\n\n光が水面から幾重にも差し込み、会場中の泡が宝石のように輝いている。',
-        '反対側のブロックを勝ち上がってきたのは、やはりこのカエル。',
-        'サマエルさん「……待っていた」',
-        'FINAL\nVS サマエルさん'
+        '反対側のブロックを勝ち上がってきたのは――大会中、ほとんど姿を見せなかった謎の強豪。',
+        '？？？「……待っていた」',
+        'FINAL\nVS ？？？'
       ],callback);return true;
     }
     if(nextIndex===8){
       showStoryNarrative([
         'サマエルさんを破り――大会優勝！\n\n会場いっぱいに歓声と泡が舞い上がる。',
-        'そこへ、大会主催者のセラフィエルさんがゆっくりと前へ出た。',
-        'セラフィエルさん「実に素晴らしい戦いでしたよ！」',
-        'セラフィエルさん「おかげで私も血が騒いでしまってね。ひとつ、手合わせ願えないだろうか？」',
+        'そこへ、大会主催者がゆっくりと前へ出た。',
+        '大会主催者「実に素晴らしい戦いでしたよ！」',
+        '大会主催者「おかげで私も血が騒いでしまってね。ひとつ、手合わせ願えないだろうか？」',
         '優勝したと思ったら、主催者が最後に出てきた。\n\n……この大会、最初からこれが目的だったのでは？',
-        'SPECIAL MATCH\nVS セラフィエルさん'
+        'SPECIAL MATCH\nVS 大会主催者'
       ],callback);return true;
     }
     return false;
@@ -5485,6 +5531,12 @@
   const keys={};
   const keyDashTimes={};
   addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&screens.game.classList.contains('active')){
+      e.preventDefault();
+      if(gamePaused)closePause();else openPause();
+      return;
+    }
+    if(gamePaused){e.preventDefault();return;}
     const key=e.key.toLowerCase();
     keys[key]=true;
     if(e.repeat)return;
@@ -5893,6 +5945,7 @@ function drawBackground(dt){
     requestAnimationFrame(loop);
     if(!screens.game.classList.contains('active')||!player||!enemy)return;
     let dt=Math.min(.033,(now-last)/1000);last=now;
+    if(gamePaused)return;
     if(!gameOver){
       let ix=input.x+(keys['d']?1:0)-(keys['a']?1:0);
       let iy=input.y+(keys['s']?1:0)-(keys['w']?1:0);
