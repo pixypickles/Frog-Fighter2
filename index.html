@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <meta name="theme-color" content="#0b6f7a" />
-  <title>水中格闘2 Prototype v1.2.1</title>
+  <title>水中格闘2 Prototype v1.3</title>
   <link rel="stylesheet" href="water-style.css" />
 </head>
 <body>
@@ -15,7 +15,7 @@
       <h1>水中格闘2</h1>
       <p class="subtitle">見て、守って、返せる。スロー水中格闘</p>
       <p class="rotate-note">スマホを横持ちすると自動で始まります</p>
-      <div class="start-version">WATER FIGHTER 2　PROTOTYPE v1.2.1</div>
+      <div class="start-version">WATER FIGHTER 2　PROTOTYPE v1.3</div>
       <div class="title-start-actions">
         <button id="portraitStart" class="soft-btn portrait-start-btn">縦画面のまま始める</button>
         <button id="desktopStart" class="soft-btn">PCで試す</button>
@@ -26,99 +26,90 @@
     <section id="selectScreen" class="screen">
       <h2>ファイターをえらぶ</h2>
       <div class="fighter-grid">
-        <button class="fighter-card selected" data-fighter="green">
+<div class="fighter-group-label">天使系</div>
+<button class="fighter-card selected" data-fighter="green">
           <span class="fighter-emoji" style="--frog-body:#35d851;--frog-eye-bump:#69e86e;--frog-iris:#173126;--frog-mouth:#146030;--frog-cheek:#d7b774;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
           <strong>ミカエルさん</strong>
         
           <span class="special-hint move-names">バーニングアッパー / バーニングキック / バーニングサイクロン</span>
         </button>
-        <button class="fighter-card" data-fighter="blue">
+<button class="fighter-card" data-fighter="blue">
           <span class="fighter-emoji blue-frog" style="--frog-body:#35bde6;--frog-eye-bump:#63d9f5;--frog-iris:#15362f;--frog-mouth:#0d6547;--frog-cheek:#89c6b4;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
           <strong>ガブリエルさん</strong>
         
           <span class="special-hint move-names">アクアトルネード / アクアストリーム / アクアボルテックス</span>
         </button>
-        <button class="fighter-card" data-fighter="black">
-          <span class="fighter-emoji black-frog" style="--frog-body:#3b3e47;--frog-eye-bump:#50545f;--frog-iris:#101010;--frog-mouth:#183024;--frog-cheek:#a75e70;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
-          <strong>ルシファーさん</strong>
-        
-          <span class="special-hint move-names">ヘルクラッシュ / アビスチャージ</span>
-        </button>
-        <button class="fighter-card" data-fighter="purple">
-          <span class="fighter-emoji purple-frog" style="--frog-body:#9850c8;--frog-eye-bump:#ad65dc;--frog-iris:#14312b;--frog-mouth:#275a37;--frog-cheek:#db64ad;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
-          <strong>リリスさん</strong>
-        
-          <span class="special-hint move-names">リボンラッシュ / ナマズさん突進 / バックスピンキック</span>
-        </button>
-        <button class="fighter-card" data-fighter="yellow">
+<button class="fighter-card" data-fighter="yellow">
           <span class="fighter-emoji yellow-frog" style="--frog-body:#e3cf42;--frog-eye-bump:#f2df66;--frog-iris:#26351c;--frog-mouth:#557528;--frog-cheek:#e9a761;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
           <strong>ラファエルさん</strong>
         
           <span class="special-hint move-names">水圧カッター / ヒーリングバブル / 高速バブル移動</span>
         </button>
-        <button class="fighter-card" data-fighter="orange">
+<button class="fighter-card" data-fighter="orange">
           <span class="fighter-emoji orange-frog" style="--frog-body:#ef8c36;--frog-eye-bump:#f6a24e;--frog-iris:#26321d;--frog-mouth:#6b4f1c;--frog-cheek:#f1bc65;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
           <strong>ウリエルさん</strong>
         
           <span class="special-hint move-names">ホワイトカウンター / ガーディアンタックル / ホワイトリーチ</span>
         </button>
-        <button class="fighter-card" data-fighter="piranha">
+<button class="fighter-card" data-fighter="remiel">
+          <span class="fighter-emoji" style="--frog-body:#87b7c9;--frog-eye-bump:#bfe6ee;--frog-iris:#5d8fa8;--frog-mouth:#5f8294;--frog-cheek:#a8d2dc;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
+          <strong>レミエルさん</strong>
+          <span class="special-hint move-names">ミラージュ / アクアパリィ / フロストショット</span>
+        </button>
+<button class="fighter-card" data-fighter="jihal">
+          <span class="fighter-emoji" style="--frog-body:#244f78;--frog-eye-bump:#f1d64e;--frog-iris:#17364f;--frog-mouth:#d8bf42;--frog-cheek:#668caf;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#fff;">🐸</span>
+          <strong>ジィハルさん</strong>
+          <span class="special-hint move-names">雷 / 高速移動 / ボルトショット</span>
+        </button>
+<button class="fighter-card" data-fighter="kokabiel">
+          <span class="fighter-emoji" style="--frog-body:#20263f;--frog-eye-bump:#63dbe7;--frog-iris:#202738;--frog-mouth:#72dbe4;--frog-cheek:#765f8f;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
+          <strong>コカビエルさん</strong>
+          <span class="special-hint move-names">重力 / 引き寄せ / メテオレイン</span>
+        </button>
+<button class="fighter-card" data-fighter="sariel">
+          <span class="fighter-emoji" style="--frog-body:#5d6488;--frog-eye-bump:#d8ddf5;--frog-iris:#65151f;--frog-mouth:#ddd8f1;--frog-cheek:#9e819e;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#fff;">🐸</span>
+          <strong>サリエルさん</strong>
+          <span class="special-hint move-names">月 / 邪眼 / ブラッドムーン</span>
+        </button>
+<div class="fighter-group-label">悪魔系</div>
+<button class="fighter-card" data-fighter="black">
+          <span class="fighter-emoji black-frog" style="--frog-body:#3b3e47;--frog-eye-bump:#50545f;--frog-iris:#101010;--frog-mouth:#183024;--frog-cheek:#a75e70;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
+          <strong>ルシファーさん</strong>
+        
+          <span class="special-hint move-names">ヘルクラッシュ / アビスチャージ</span>
+        </button>
+<button class="fighter-card" data-fighter="purple">
+          <span class="fighter-emoji purple-frog" style="--frog-body:#9850c8;--frog-eye-bump:#ad65dc;--frog-iris:#14312b;--frog-mouth:#275a37;--frog-cheek:#db64ad;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
+          <strong>リリスさん</strong>
+        
+          <span class="special-hint move-names">リボンラッシュ / ナマズさん突進 / バックスピンキック</span>
+        </button>
+<div class="fighter-group-label">ボス・特殊枠</div>
+<button class="fighter-card boss-card" data-fighter="samael">
+          <span class="fighter-emoji boss-frog" style="--frog-body:#2b193d;--frog-eye-bump:#7760be;--frog-iris:#d9f7ff;--frog-mouth:#8c70d8;--frog-cheek:#75526f;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
+          <strong>サマエルさん</strong>
+          <span class="special-hint move-names">ポイズンゲート / ヴェノムタン</span>
+        </button>
+<button class="fighter-card" data-fighter="seraphiel">
+          <span class="fighter-emoji" style="--frog-body:#f5f1df;--frog-eye-bump:#fff9d5;--frog-iris:#ffd85c;--frog-mouth:#c9973e;--frog-cheek:#f0b6a8;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
+          <strong>セラフィエルさん</strong>
+          <span class="special-hint move-names">セラフィックアッパー / セラフィックレイ</span>
+        </button>
+<button class="fighter-card" data-fighter="piranha">
           <span class="fighter-emoji creature-emoji">🐟</span>
           <strong>リヴァイアさん</strong>
         
           <span class="special-hint move-names">高速突進噛みつき / 急降下背びれ / 急降下テール</span>
         </button>
-        <button class="fighter-card" data-fighter="crayfish">
+<button class="fighter-card" data-fighter="crayfish">
           <span class="fighter-emoji creature-emoji">🦞</span>
           <strong>アスモデウスさん</strong>
         
           <span class="special-hint move-names">クローラッシュ / ボトムスマッシュ / クロー・カウンター</span>
         </button>
-        <button id="beelzebubCard" class="fighter-card boss-card" data-fighter="beelzebub" hidden>
-          <span class="fighter-emoji boss-frog" style="--frog-body:#111714;--frog-eye-bump:#6eff20;--frog-iris:#b5ff48;--frog-mouth:#70d52b;--frog-cheek:#547232;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
-          <strong>ベルゼブブさん</strong>
-          <span class="special-hint move-names">ヴェノム・ウォーター / フィッシュ・レイド / アビスショック</span>
-        </button>
+</div>
 
-        <button class="fighter-card" data-fighter="sariel">
-          <span class="fighter-emoji" style="--frog-body:#5d6488;--frog-eye-bump:#d8ddf5;--frog-iris:#65151f;--frog-mouth:#ddd8f1;--frog-cheek:#9e819e;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#fff;">🐸</span>
-          <strong>サリエルさん</strong>
-          <span class="special-hint move-names">月 / 邪眼 / ブラッドムーン</span>
-        </button>
-
-        <button class="fighter-card" data-fighter="kokabiel">
-          <span class="fighter-emoji" style="--frog-body:#20263f;--frog-eye-bump:#63dbe7;--frog-iris:#202738;--frog-mouth:#72dbe4;--frog-cheek:#765f8f;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
-          <strong>コカビエルさん</strong>
-          <span class="special-hint move-names">重力 / 引き寄せ / メテオレイン</span>
-        </button>
-
-        <button class="fighter-card" data-fighter="jihal">
-          <span class="fighter-emoji" style="--frog-body:#244f78;--frog-eye-bump:#f1d64e;--frog-iris:#17364f;--frog-mouth:#d8bf42;--frog-cheek:#668caf;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#fff;">🐸</span>
-          <strong>ジィハルさん</strong>
-          <span class="special-hint move-names">雷 / 高速移動 / ボルトショット</span>
-        </button>
-
-        <button class="fighter-card" data-fighter="remiel">
-          <span class="fighter-emoji" style="--frog-body:#87b7c9;--frog-eye-bump:#bfe6ee;--frog-iris:#5d8fa8;--frog-mouth:#5f8294;--frog-cheek:#a8d2dc;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
-          <strong>レミエルさん</strong>
-          <span class="special-hint move-names">ミラージュ / アクアパリィ / フロストショット</span>
-        </button>
-
-        <button class="fighter-card" data-fighter="seraphiel">
-          <span class="fighter-emoji" style="--frog-body:#f5f1df;--frog-eye-bump:#fff9d5;--frog-iris:#ffd85c;--frog-mouth:#c9973e;--frog-cheek:#f0b6a8;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
-          <strong>セラフィエルさん</strong>
-          <span class="special-hint move-names">セラフィックアッパー / セラフィックレイ</span>
-        </button>
-
-        <button class="fighter-card boss-card" data-fighter="samael">
-          <span class="fighter-emoji boss-frog" style="--frog-body:#2b193d;--frog-eye-bump:#7760be;--frog-iris:#d9f7ff;--frog-mouth:#8c70d8;--frog-cheek:#75526f;position:absolute;left:18px;top:50%;transform:translateY(-50%);--frog-eye-area:#ffffff;">🐸</span>
-          <strong>サマエルさん</strong>
-          <span class="special-hint move-names">ポイズンゲート / ヴェノムタン</span>
-        </button>
-
-      </div>
-
-      <div class="battle-mode-panel">
+      <div class="battle-mode-panel battle-mode-panel-compact">
         <div class="opponent-pick">
           <label for="opponentSelect">フリー対戦：対戦相手</label>
           <select id="opponentSelect">
@@ -249,7 +240,7 @@
       <strong>スマホを横持ちすると自動で始まります</strong>
       <button id="portraitOverlayStart" class="soft-btn portrait-overlay-start">縦画面のまま始める</button>
       <small class="portrait-overlay-note">横画面にできない端末はこちら</small>
-      <span class="portrait-version">WATER FIGHTER 2　v1.2.1</span>
+      <span class="portrait-version">WATER FIGHTER 2　v1.3</span>
     </div>
   </div>
   <script src="water-game.js"></script>

@@ -1656,3 +1656,82 @@ body.portrait-play #portraitOverlay{
   border:1px solid rgba(255,255,255,.55);border-radius:999px;padding:7px 12px;
   font:900 12px/1.1 system-ui,-apple-system,sans-serif;backdrop-filter:blur(4px);
 }
+
+
+/* v1.3 compact roster/select screen */
+.fighter-grid{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:8px !important;
+  align-items:stretch;
+}
+.fighter-group-label{
+  grid-column:1/-1;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  opacity:.78;
+  padding:2px 4px 0;
+  margin-top:2px;
+}
+.fighter-card{
+  min-height:54px !important;
+  padding:7px 7px 7px 48px !important;
+  border-radius:11px !important;
+  font-size:13px !important;
+  position:relative;
+}
+.fighter-card .fighter-emoji{
+  left:8px !important;
+  transform:translateY(-50%) scale(.72) !important;
+  transform-origin:center !important;
+}
+.fighter-card strong{
+  font-size:13px !important;
+  line-height:1.05 !important;
+}
+.fighter-card .special-hint,
+.fighter-card .move-names{
+  display:none !important;
+}
+.fighter-card:hover .special-hint,
+.fighter-card:focus .special-hint,
+.fighter-card.selected .special-hint{
+  display:block !important;
+  position:absolute;
+  z-index:20;
+  left:4px;
+  right:4px;
+  top:calc(100% + 4px);
+  padding:7px 8px;
+  border-radius:9px;
+  background:rgba(6,25,34,.96);
+  color:#fff;
+  font-size:11px;
+  line-height:1.35;
+  box-shadow:0 6px 18px rgba(0,0,0,.28);
+  pointer-events:none;
+}
+.battle-mode-panel-compact{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:8px !important;
+  margin-top:10px !important;
+}
+.battle-mode-panel-compact button,
+.battle-mode-panel-compact .mode-button,
+.battle-mode-panel-compact .battle-mode-button{
+  min-height:44px !important;
+  padding:8px 6px !important;
+  font-size:12px !important;
+}
+@media (max-width:760px){
+  .fighter-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
+  .fighter-card{min-height:50px !important;padding-left:43px !important;}
+  .fighter-card .fighter-emoji{transform:translateY(-50%) scale(.66) !important;}
+  .battle-mode-panel-compact{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+}
+@media (max-width:480px){
+  .fighter-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+  .fighter-group-label{font-size:11px}
+}
