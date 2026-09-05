@@ -1,21 +1,11 @@
-水中格闘2 Prototype v0.4.1
+水中格闘2 Prototype v0.4.3
 
-起動方法:
- index.html を開いてください。
+起動: index.html
 
-必要ファイル:
- index.html
- water-game.js
- water-style.css
-
-v0.4.1 修正:
-・配布ZIPを水中格闘2に必要なファイルだけに整理
-・方向＋ボタン技は方向を押しっぱなしで出るように変更
-・バーニングショット「後ろ＋パンチ」の560ms入力制限を撤廃
-・キーボード(WASD)の方向入力も上位コマンド履歴へ記録
-・下→後ろ＋キック等の上位技はコマンド入力を維持
-
-
-v0.4.2 changes:
-- Water2 projectiles no longer expire on short per-shot timers; they disappear on hit, leaving the arena, max reflect, or an 18s emergency safety cap.
-- Carp pressure cutter visual is mirrored for upper/lower arc paths.
+変更点:
+- カープ水圧カッターの刃を通常の水圧カッターと同じ描画に統一
+- カープ水圧カッターは軌道の接線方向へ自然に回転
+- 飛び道具ラリーの上限を基本5回へ短縮
+- バブルショットは最大4回反射
+- 反射時の弾サイズ成長を控えめに変更
+- バブルショットの大きな二重リング表示を廃止

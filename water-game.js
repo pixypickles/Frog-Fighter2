@@ -3842,7 +3842,7 @@
         water2Shots.push({
           owner:f,x:f.x+dir*58,y:f.y+(-18+i*18),vx:dir*speed,vy:(i-1)*36,
           r:13,t:1.55,life:1.55,damage:2.15,name:'スピンキックカッター',color:'blade',
-          reflected:0,hit:false,spin:0,style:'spinBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:6
+          reflected:0,hit:false,spin:0,style:'spinBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:5
         });
       },delay);
     });
@@ -3939,7 +3939,7 @@
         arcFlip: opts.arcFlip || ((opts.curve||0) < 0 ? -1 : 1),
         wobble:opts.wobble||0,
         baseVy:Math.sin(angle)*speed,
-        maxReflect:opts.maxReflect||6
+        maxReflect:opts.maxReflect||5
       };
       water2Shots.push(shot);
       comboEl.textContent=name+'!';
@@ -4002,7 +4002,7 @@
       if(kind==='punch' && water2HeldDir(f,'up')){ clearCommand(); return specialUppercut(f); }
       if(kind==='kick' && water2HeldDir(f,'forward')){ clearCommand(); return specialDropKick(f); }
       if(kind==='punch' && water2HeldDir(f,'back')){
-        clearCommand(); return specialWater2Shot(f,{name:'バーニングショット',attack:'punch',color:'fire',style:'burning',speed:315,damage:4.4,r:15,charge:.40,maxReflect:6});
+        clearCommand(); return specialWater2Shot(f,{name:'バーニングショット',attack:'punch',color:'fire',style:'burning',speed:315,damage:4.4,r:15,charge:.40,maxReflect:5});
       }
     }
 
@@ -4012,7 +4012,7 @@
       if(kind==='kick' && water2HeldDir(f,'down')){ clearCommand(); return specialAquaStream(f); }
       if(kind==='punch' && water2HeldDir(f,'back')){ clearCommand(); return specialAquaVortex(f); }
       if(kind==='punch' && water2HeldDir(f,'forward')){
-        clearCommand(); return specialWater2Shot(f,{name:'アクアショット',attack:'punch',color:'aqua',style:'aquaSpin',speed:285,damage:3.8,r:14,charge:.36,wobble:.10,maxReflect:6});
+        clearCommand(); return specialWater2Shot(f,{name:'アクアショット',attack:'punch',color:'aqua',style:'aquaSpin',speed:285,damage:3.8,r:14,charge:.36,wobble:.10,maxReflect:5});
       }
     }
 
@@ -4040,29 +4040,29 @@
       if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialPressureBlade(f,0,'punch'); }
       if(kind==='kick' && water2HeldDir(f,'forward')){ clearCommand(); return specialPressureBlade(f,15,'kick'); }
       if(kind==='punch' && water2HeldDir(f,'back')){
-        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'punch',color:'blade',style:'carpBlade',speed:285,angle:-30,damage:3.7,r:12,charge:.40,curve:105,maxReflect:6});
+        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'punch',color:'blade',style:'carpBlade',speed:285,angle:-30,damage:3.7,r:12,charge:.40,curve:105,maxReflect:5});
       }
       if(kind==='kick' && water2HeldDir(f,'back')){
-        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'kick',color:'blade',style:'carpBlade',speed:285,angle:30,damage:3.7,r:12,charge:.40,curve:-105,maxReflect:6});
+        clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'kick',color:'blade',style:'carpBlade',speed:285,angle:30,damage:3.7,r:12,charge:.40,curve:-105,maxReflect:5});
       }
     }
 
     // 水中格闘2：ウリエル G＋P（直前のガードタップ＋P）でホワイトショット。
     if(f.type==='orange' && kind==='punch'){
       const justGuarded=performance.now()-(input.lastSimpleGuardTapTime||0)<=650;
-      if(justGuarded){ input.lastSimpleGuardTapTime=0; clearCommand(); return specialWater2Shot(f,{name:'ホワイトショット',attack:'punch',color:'white',style:'whiteOrb',speed:250,damage:3.7,r:17,charge:.38,maxReflect:6}); }
+      if(justGuarded){ input.lastSimpleGuardTapTime=0; clearCommand(); return specialWater2Shot(f,{name:'ホワイトショット',attack:'punch',color:'white',style:'whiteOrb',speed:250,damage:3.7,r:17,charge:.38,maxReflect:5}); }
     }
     // ルシファー：前＋キックでパワーショット。
     if(f.type==='black' && kind==='kick' && hasCommand([forward],560)){
-      clearCommand(); return specialWater2Shot(f,{name:'パワーショット',attack:'kick',color:'dark',style:'powerOrb',speed:245,damage:5.5,r:19,charge:.48,maxReflect:6});
+      clearCommand(); return specialWater2Shot(f,{name:'パワーショット',attack:'kick',color:'dark',style:'powerOrb',speed:245,damage:5.5,r:19,charge:.48,maxReflect:5});
     }
     // リリス：後ろ＋舌で遅いバブルショット。
     if(f.type==='purple' && kind==='tongue' && hasCommand([back],560)){
-      clearCommand(); return specialWater2Shot(f,{name:'バブルショット',attack:'tongue',color:'bubble',style:'bubble',speed:175,damage:3.0,r:20,charge:.34,wobble:.18,maxReflect:6});
+      clearCommand(); return specialWater2Shot(f,{name:'バブルショット',attack:'tongue',color:'bubble',style:'bubble',speed:175,damage:3.0,r:20,charge:.34,wobble:.18,maxReflect:4});
     }
 
     if(f.type==='beelzebub'){
-      if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.7,r:16,charge:.50,poisonDuration:2.6,maxReflect:6}); }
+      if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.7,r:16,charge:.50,poisonDuration:2.6,maxReflect:5}); }
       const downForward=f.face>0?'downRight':'downLeft';
       const bossQuarterCommand=
         hasCommand(['down',forward],850)||hasCommand(['down',downForward],850)||hasCommand([downForward,forward],850);
@@ -5239,8 +5239,12 @@ function drawBackground(dt){
           if(target.guard){
             // 反射：所有者を入れ替え、相手方向へ返す。ラリーごとに少し加速・大型化。
             spawnImpact(q.x,q.y,'guard'); playSfx('guard');
-            q.owner=target; q.vx=-q.vx*1.10; q.vy=-q.vy*.92; q.r=Math.min(27,q.r*1.06);
-            q.damage*=1.08; q.reflected=(q.reflected||0)+1;
+            q.owner=target; q.vx=-q.vx*1.08; q.vy=-q.vy*.94;
+            // 泡は大きくなり過ぎない。ほかの弾も成長を控えめにしてラリーを見やすくする。
+            const grow=(q.style==='bubble')?1.015:1.035;
+            const cap=(q.style==='bubble')?23:25;
+            q.r=Math.min(cap,q.r*grow);
+            q.damage*=1.06; q.reflected=(q.reflected||0)+1;
             q.x=target.x+target.face*(target.radius+q.r+12);
             // 反射回数が増えるほど不安定に。上限では派手に消散。
             if(q.reflected>=q.maxReflect){
@@ -5503,7 +5507,7 @@ function drawBackground(dt){
               p.size=Math.min(1.45,(p.size||1)*1.06);
               p.reflected=(p.reflected||0)+1;
               p.x=target.x+target.face*(target.radius+38);
-              if(p.reflected>=6){p.hit=true;p.t=0;comboEl.textContent='OVER REFLECT!';}
+              if(p.reflected>=5){p.hit=true;p.t=0;comboEl.textContent='OVER REFLECT!';}
               else comboEl.textContent=p.reflected>1?'REFLECT x'+p.reflected+'!':'REFLECT!';
             }else{
               p.hit=true;
@@ -6041,15 +6045,45 @@ function drawBackground(dt){
         ctx.fillStyle='rgba(115,229,255,.40)';ctx.beginPath();ctx.ellipse(0,0,20,13,0,0,Math.PI*2);ctx.fill();
         ctx.strokeStyle='#e4ffff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,18,-1.1,1.1);ctx.stroke();
       }else if(q.style==='carpBlade'){
-        // 軌道に合わせて三日月の上下も反転。上ルート/下ルートが同じ絵に見えないようにする。
-        ctx.rotate(Math.PI/2);ctx.scale(1,.55*(q.arcFlip||1));ctx.strokeStyle='#c7fbff';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,0,25,-1.1,1.1);ctx.stroke();
-        ctx.strokeStyle='#5dd9f4';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,25,-1.1,1.1);ctx.stroke();
+        // カープ水圧カッターも通常の水圧カッターと同じ刃を使う。
+        // ここに追加の90度回転は掛けず、上で計算済みの進行方向(ang)に沿わせる。
+        // そのため弧を描くほど刃も自然に前方へ回転する。
+        ctx.globalAlpha=.34;
+        ctx.strokeStyle='#77e8ff';
+        ctx.lineWidth=15;
+        ctx.lineCap='round';
+        ctx.beginPath();
+        ctx.arc(0,0,28,-1.05,1.05);
+        ctx.stroke();
+
+        ctx.globalAlpha=.62;
+        ctx.strokeStyle='#d8fbff';
+        ctx.lineWidth=5;
+        ctx.beginPath();
+        ctx.arc(0,0,27,-1.03,1.03);
+        ctx.stroke();
+
+        ctx.globalAlpha=.38;
+        ctx.strokeStyle='#69d9ff';
+        ctx.lineWidth=3;
+        ctx.beginPath();
+        ctx.arc(-2,0,22,-1.0,1.0);
+        ctx.stroke();
+
+        ctx.globalAlpha=.42;
+        ctx.fillStyle='#dffcff';
+        ctx.beginPath();ctx.arc(-26,-9,3,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(-35,7,2.5,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(-44,-3,2,0,Math.PI*2);ctx.fill();
       }else{
         let fill='#8feeff', glow='#d9fbff';
         ctx.shadowColor=glow; ctx.shadowBlur=18;ctx.fillStyle=fill; ctx.beginPath(); ctx.arc(0,0,q.r,0,Math.PI*2); ctx.fill();
       }
-      if((q.reflected||0)>=3){
-        ctx.globalAlpha=.35*a;ctx.strokeStyle='#ffffff';ctx.lineWidth=2+(q.reflected||0)*.4;ctx.beginPath();ctx.arc(0,0,q.r+7+(q.reflected||0)*2,0,Math.PI*2);ctx.stroke();
+      if((q.reflected||0)>=3 && q.style!=='bubble'){
+        ctx.globalAlpha=.28*a;ctx.strokeStyle='#ffffff';ctx.lineWidth=2+(q.reflected||0)*.3;ctx.beginPath();ctx.arc(0,0,q.r+5+(q.reflected||0),0,Math.PI*2);ctx.stroke();
+      }else if((q.reflected||0)>=2 && q.style==='bubble'){
+        // バブルは二重の巨大泡にせず、表面が一瞬強く光る程度。
+        ctx.globalAlpha=.42*a;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();
       }
       ctx.restore();
     });
