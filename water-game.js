@@ -74,6 +74,7 @@
   let michaelAuraShots = [];
   let water2Shots = [];
   let iceWalls = [];
+  let samaelGates = [];
   let toxicWaters=[];
   let bossFish=[];
   let abyssShocks=[];
@@ -110,6 +111,7 @@
     piranha: { speed: 198, tongue: 0,   damage: 1.08, defense:0.90, sink:3, hue:0, scale:0.95 },
     crayfish:{ speed: 138, tongue: 0,   damage: 1.18, defense:1.20, sink:10,hue:0, scale:1.08 },
     beelzebub:{speed: 154, tongue: 350, damage: 1.12, defense:1.10, sink:8, hue:0, scale:1.10},
+    samael: {speed: 158, tongue: 315, damage: 1.10, defense:1.06, sink:7, hue:0, scale:1.08},
     kawazu: {speed: 205, tongue: 225, damage: 0.98, defense:0.90, sink:4, hue:0, scale:0.90},
     pascal: {speed: 176, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78},
     malphas:{speed: 174, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78}
@@ -346,6 +348,10 @@
       'アビスショック（上弧）：上 ＋ パンチ',
       'アビスショック（下弧）：下 ＋ キック',
       'ベノムショット：前 ＋ パンチ'
+    ],
+    samael:[
+      'ポイズンゲート：方向 ＋ パンチ（指定方向に発生点 → 相手へ毒弾）',
+      'ヴェノムタン：舌（舌先から毒弾）'
     ],
     kawazu:[
       '水圧ラッシュ：パンチ連打',
@@ -732,6 +738,15 @@
         light:'#6f587d',
         belly:'#b8ff68',
         eyeBump:'#72ff2d'
+      };
+    }
+    if(type==='samael'){
+      return {
+        body:'#2a183b',
+        limb:'#322047',
+        light:'#7862bd',
+        belly:'#55416f',
+        eyeBump:'#7562b9'
       };
     }
     if(type==='yellow'){
@@ -1870,7 +1885,7 @@
         ctx.beginPath();ctx.ellipse(0,18,49,64,0,0,Math.PI*2);ctx.stroke();ctx.restore();
       }
 
-      if(this.type==='beelzebub'){
+      if(this.type==='beelzebub' || this.type==='samael'){
         // 黒い身体に蛍光グリーンの目・輪郭が浮くラスボス演出
         ctx.save();
         ctx.globalCompositeOperation='lighter';
@@ -2007,8 +2022,8 @@
       if(this.tongueT>0 || (this.tonguePullTarget && this.tonguePullTimer>0) || (this.tongueClashTarget && this.tongueClashTimer>0)){
         const target = this.tongueClashTarget || this.tonguePullTarget || (this.isPlayer ? enemy : player);
         let len = Math.min(this.tongueRange, Math.abs(target.x-this.x));
-        ctx.strokeStyle='#ff718e';
-        ctx.lineWidth=8;
+        ctx.strokeStyle=this.type==='samael'?'#9a72e8':'#ff718e';
+        ctx.lineWidth=this.type==='samael'?9:8;
         ctx.lineCap='round';
         ctx.beginPath();
         // 舌だけは口の中央から出す
@@ -2381,7 +2396,7 @@
     }));
 
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; burstWaves=[];
 
     for(let i=0;i<12;i++){
       spawnLeafTarget(i,true);
@@ -2676,7 +2691,7 @@
   }
 
 
-  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish'].concat(isKawazuUnlocked()?['kawazu']:[]);
+  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish','samael'].concat(isKawazuUnlocked()?['kawazu']:[]);
 
   function practiceSpecialText(type){
     const map={
@@ -2686,7 +2701,8 @@
       orange:['下 → 後ろ ＋ ガード：ホワイトカウンター','後ろ → 前 ＋ ガード：ガーディアンタックル','ガード長押し：ホワイトオーラ','オーラ中 パンチ / キック：白い長リーチ攻撃','ガード ＋ パンチ：ホワイトショット'],
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
-      beelzebub:['方向キー1回転 ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
+      beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
+      samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
     return map[type] || ['専用必殺技：練習対象外'];
@@ -2718,7 +2734,7 @@
       'ミカエル':'green','ミカエルさん':'green','ガブリエル':'blue','ガブリエルさん':'blue',
       'ルシファー':'black','ルシファーさん':'black','リリス':'purple','リリスさん':'purple',
       'ラファエル':'yellow','ラファエルさん':'yellow','ウリエル':'orange','ウリエルさん':'orange',
-      'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub',
+      'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael',
       'リヴァイア':'piranha','リヴァイアさん':'piranha','アスモデウス':'crayfish','アスモデウスさん':'crayfish',
       'アザゼル':'piranha','アザゼルさん':'piranha','ベリアル':'crayfish','ベリアルさん':'crayfish'
     };
@@ -2750,13 +2766,13 @@
       green:'ミカエルさん', blue:'ガブリエルさん', black:'ルシファーさん',
       purple:'リリスさん', yellow:'ラファエルさん', orange:'ウリエルさん',
       piranha:'リヴァイアさん', crayfish:'アスモデウスさん',
-      beelzebub:'ベルゼブブさん', kawazu:'カワズさん'
+      beelzebub:'ベルゼブブさん', samael:'サマエルさん', kawazu:'カワズさん'
     }[type]||type;
   }
 
   function resetBattleEffects(){
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; burstWaves=[];
     leafTargets=[]; guardTargets=[]; toxicWaters=[]; bossFish=[]; abyssShocks=[]; kawazuShots=[]; kawazuGhosts=[];
   }
 
@@ -2822,8 +2838,9 @@
     leafTargets=[];
     guardTargets=[];
 
-    storyQueue=playableTypes.filter(t=>t!==selectedFighter && t!=='kawazu');
+    storyQueue=playableTypes.filter(t=>t!==selectedFighter && t!=='kawazu' && t!=='samael');
     if(selectedFighter!=='beelzebub') storyQueue.push('beelzebub');
+    if(selectedFighter!=='samael') storyQueue.push('samael');
     storyFightIndex=0;
     storyLosses=0;
     storyWins=0;
@@ -2855,7 +2872,7 @@
 
     // 3戦ごとに背景を変更。ラスボスは専用の暗い水域。
     const nextType=storyQueue[storyFightIndex];
-    stageTheme=nextType==='beelzebub' ? 3 : Math.min(2,Math.floor(storyFightIndex/3));
+    stageTheme=(nextType==='samael'||nextType==='beelzebub') ? 3 : Math.min(2,Math.floor(storyFightIndex/3));
     startGame('story',nextType);
   }
 
@@ -3908,6 +3925,49 @@
     return true;
   }
 
+  function specialSamaelGate(f,side){
+    if(gameOver || !f || f.type!=='samael' || f.stun>0 || f.guard || f.specialT>0 || f.attackT>0) return false;
+    const target=f.isPlayer?enemy:player;
+    if(!target) return false;
+    f.specialType='samaelGate'; f.specialT=.64; f.attack='punch'; f.attackT=.64;
+    let x=target.x, y=target.y;
+    const marginX=82, marginY=86;
+    if(side==='up'){ x=target.x; y=Math.max(64,target.y-170); }
+    else if(side==='down'){ x=target.x; y=Math.min(innerHeight-64,target.y+170); }
+    else if(side==='forward'){ x=Math.max(64,Math.min(innerWidth-64,target.x+f.face*190)); y=target.y; }
+    else { x=Math.max(64,Math.min(innerWidth-64,target.x-f.face*190)); y=target.y; }
+    samaelGates.push({owner:f,target,side,x,y,t:.56,life:.56,fired:false});
+    comboEl.textContent='ポイズンゲート…';
+    return true;
+  }
+
+  function specialSamaelTongueShot(f){
+    if(gameOver || !f || f.type!=='samael' || f.stun>0 || f.guard || f.specialT>0 || f.attackT>0) return false;
+    const target=f.isPlayer?enemy:player;
+    if(!target) return false;
+    f.specialType='samaelTongue'; f.specialT=.58;
+    f.attack='tongue'; f.attackT=.58; f.tongueT=.46;
+    f.bossTongueAimY=Math.max(-62,Math.min(62,(target.y-f.y)*.40));
+    comboEl.textContent='ヴェノムタン…';
+    setTimeout(()=>{
+      if(gameOver || !f || !target) return;
+      const reach=Math.min(f.tongueRange,Math.max(145,Math.abs(target.x-f.x)*.82));
+      const sx=f.x+f.face*reach;
+      const sy=f.y+8+(f.bossTongueAimY||0);
+      const dx=target.x-sx,dy=target.y-sy,d=Math.hypot(dx,dy)||1;
+      const speed=245;
+      water2Shots.push({
+        owner:f,x:sx,y:sy,vx:dx/d*speed,vy:dy/d*speed,r:15,
+        age:0,maxAge:18,t:1,life:1,damage:4.3,name:'ヴェノムタン',
+        color:'samaelVenom',reflected:0,hit:false,spin:0,style:'samaelVenom',
+        poisonDuration:2.0,curve:0,arcFlip:1,wobble:0,baseVy:dy/d*speed,maxReflect:4
+      });
+      comboEl.textContent='ヴェノムタン!';
+      setTimeout(()=>{if(comboEl.textContent==='ヴェノムタン!')comboEl.textContent='';},520);
+    },260);
+    return true;
+  }
+
   function specialWater2Shot(f,opts={}){
     if(gameOver || !f || f.stun>0 || f.guard || f.specialT>0 || f.attackT>0) return false;
     const dir=f.face;
@@ -4003,6 +4063,19 @@
       return specialEngineerMiniVortex(f);
     }
 
+
+    // サマエル：本人ではなく指定方向に毒の発生点を作る。
+    if(f.type==='samael'){
+      if(kind==='punch'){
+        let side=null;
+        if(water2HeldDir(f,'up')) side='up';
+        else if(water2HeldDir(f,'down')) side='down';
+        else if(water2HeldDir(f,'forward')) side='forward';
+        else if(water2HeldDir(f,'back')) side='back';
+        if(side){ clearCommand(); return specialSamaelGate(f,side); }
+      }
+      if(kind==='tongue'){ clearCommand(); return specialSamaelTongueShot(f); }
+    }
 
     // カワズさん：4キャラ運用を前提に入力を短く。
     if(f.type==='kawazu'){
@@ -4818,6 +4891,15 @@
         if(roll<dt*.26){ specialAbyssShock(enemy,dy<0?'upper':'lower'); return; }
         if(dist>150 && roll<dt*.46){ specialWater2Shot(enemy,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.5,r:16,charge:.50,poisonDuration:2.2,maxReflect:4}); return; }
       }
+      if(enemy.type==='samael' && enemy.specialT<=0){
+        const roll=Math.random();
+        if(roll<dt*.40){
+          const sides=['up','down','forward','back'];
+          specialSamaelGate(enemy,sides[Math.floor(Math.random()*sides.length)]);
+          return;
+        }
+        if(dist>120 && roll<dt*.62){ specialSamaelTongueShot(enemy); return; }
+      }
       if(enemy.type==='kawazu' && enemy.specialT<=0){
         const roll=Math.random();
         if(dist>135 && roll<dt*.24){ specialKawazuPressureRush(enemy); return; }
@@ -5281,6 +5363,28 @@ function drawBackground(dt){
         }
       });
       iceWalls=iceWalls.filter(w=>w.t>0);
+
+      // サマエル：毒弾の発生地点。紫＋青白い渦を見せてから相手へ発射。
+      samaelGates.forEach(g=>{
+        g.t-=dt;
+        if(g.t<=0 && !g.fired){
+          g.fired=true;
+          const target=g.target && g.target.hp>0 ? g.target : (g.owner.isPlayer?enemy:player);
+          if(target){
+            const dx=target.x-g.x,dy=target.y-g.y,d=Math.hypot(dx,dy)||1;
+            const speed=252;
+            water2Shots.push({
+              owner:g.owner,x:g.x,y:g.y,vx:dx/d*speed,vy:dy/d*speed,r:16,
+              age:0,maxAge:18,t:1,life:1,damage:4.7,name:'ポイズンゲート',
+              color:'samaelVenom',reflected:0,hit:false,spin:0,style:'samaelVenom',
+              poisonDuration:2.2,curve:0,arcFlip:1,wobble:.04,baseVy:dy/d*speed,maxReflect:4
+            });
+            comboEl.textContent='ポイズンゲート!';
+            setTimeout(()=>{if(comboEl.textContent==='ポイズンゲート!')comboEl.textContent='';},480);
+          }
+        }
+      });
+      samaelGates=samaelGates.filter(g=>g.t>-.08 && !g.fired);
 
       // 水中格闘2 共通飛び道具：シャボンガードに触れると自動反射。
       water2Shots.forEach(q=>{
@@ -6076,6 +6180,21 @@ function drawBackground(dt){
       ctx.restore();
     });
 
+    samaelGates.forEach(g=>{
+      const p=Math.max(0,Math.min(1,1-g.t/g.life));
+      ctx.save(); ctx.translate(g.x,g.y); ctx.globalCompositeOperation='lighter';
+      ctx.rotate(performance.now()/230);
+      ctx.globalAlpha=.35+.45*p;
+      ctx.shadowColor='#c5f7ff';ctx.shadowBlur=20;
+      for(let i=0;i<3;i++){
+        ctx.strokeStyle=i===0?'#7b42c6':(i===1?'#b976ff':'#dffcff');
+        ctx.lineWidth=8-i*2.2;
+        ctx.beginPath();ctx.arc(0,0,14+i*7,-1.0+p*.8,4.2+p*1.2);ctx.stroke();
+      }
+      ctx.globalAlpha=.65*p;ctx.fillStyle='#eefeff';ctx.beginPath();ctx.arc(0,0,4+4*p,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    });
+
     water2Shots.forEach(q=>{
       const a=1;
       if(q.style==='iceChargeOrb'&&q.trail){
@@ -6123,6 +6242,12 @@ function drawBackground(dt){
         rg.addColorStop(0,'#f3c4ff');rg.addColorStop(.18,'#c55cff');rg.addColorStop(.68,'#7023a8');rg.addColorStop(1,'#3e0f62');
         ctx.shadowColor='#c865ff';ctx.shadowBlur=22;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
         ctx.fillStyle='rgba(255,255,255,.72)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.32,q.r*.23,q.r*.12,-.6,0,Math.PI*2);ctx.fill();
+      }else if(q.style==='samaelVenom'){
+        const rg=ctx.createRadialGradient(-q.r*.32,-q.r*.35,1,0,0,q.r*1.2);
+        rg.addColorStop(0,'#f4ffff');rg.addColorStop(.20,'#b9efff');rg.addColorStop(.45,'#a65cff');rg.addColorStop(.78,'#54247f');rg.addColorStop(1,'#241032');
+        ctx.shadowColor='#aeefff';ctx.shadowBlur=25;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='rgba(218,248,255,.75)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.82)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.33,q.r*.22,q.r*.11,-.6,0,Math.PI*2);ctx.fill();
       }else if(q.style==='spinBlade'){
         // 水圧カッターを縦方向に潰した、薄い高速刃。
         ctx.rotate(q.spin||0);ctx.scale(1.35,.48);
