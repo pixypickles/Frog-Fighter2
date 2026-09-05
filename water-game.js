@@ -522,7 +522,9 @@
           <strong>カワズさん</strong>
           <span class="special-hint move-names">水圧ラッシュ / ミラージュキック / スピンキックカッター</span>
           `;
-        grid.appendChild(btn);
+        const outsideCard=grid.querySelector('.fighter-card[data-fighter="piranha"], .fighter-card[data-fighter="crayfish"]');
+        if(outsideCard)grid.insertBefore(btn,outsideCard);
+        else grid.appendChild(btn);
         applySelectCardCommands(btn);
         kawazuCard=btn;
         btn.addEventListener('click',()=>{
@@ -531,6 +533,14 @@
           selectedFighter='kawazu';
           refreshStoryAvailability();
         });
+      }
+    }
+
+    if(kawazuCard){
+      const grid=document.querySelector('#selectScreen .fighter-grid');
+      const outsideCard=grid&&grid.querySelector('.fighter-card[data-fighter="piranha"], .fighter-card[data-fighter="crayfish"]');
+      if(grid&&outsideCard&&kawazuCard.compareDocumentPosition(outsideCard)&Node.DOCUMENT_POSITION_PRECEDING){
+        grid.insertBefore(kawazuCard,outsideCard);
       }
     }
 
@@ -571,12 +581,13 @@
   refreshBossUnlock();
 
   function refreshStoryAvailability(){
-    if(!storyButton)return;
+    const btn=document.getElementById('storyButton');
+    if(!btn)return;
     const blocked=selectedFighter==='piranha'||selectedFighter==='crayfish';
-    storyButton.disabled=blocked;
-    storyButton.classList.toggle('story-disabled',blocked);
-    storyButton.setAttribute('aria-disabled',blocked?'true':'false');
-    storyButton.title=blocked?'リヴァイアさん／アスモデウスさんはストーリーでは使用できません':'';
+    btn.disabled=blocked;
+    btn.classList.toggle('story-disabled',blocked);
+    btn.setAttribute('aria-disabled',blocked?'true':'false');
+    btn.title=blocked?'リヴァイアさん／アスモデウスさんはストーリーでは使用できません':'';
   }
 
   document.querySelectorAll('.fighter-card').forEach(card => {
