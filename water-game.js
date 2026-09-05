@@ -362,7 +362,8 @@
     kokabiel:[
       'グラビティボール：前 ＋ パンチ',
       'グラビティゾーン：後ろ ＋ ガード',
-      'メテオレイン：下 ＋ パンチ'
+      'メテオレイン：下 ＋ パンチ',
+      'グラビティダイブ：下 ＋ キック'
     ],
     jihal:[
       'ボルトショット：前 ＋ パンチ',
@@ -1409,6 +1410,22 @@
 
         if(this.type==='kokabiel'&&(this.specialType==='gravityBall'||this.specialType==='gravityZone'||this.specialType==='meteorRain')){
         ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.28;ctx.strokeStyle='#75e6ee';ctx.lineWidth=2.5;ctx.shadowColor='#6de6ef';ctx.shadowBlur=12;ctx.beginPath();ctx.ellipse(0,18,46,59,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+      }
+
+      if((this.gravityHeavyT||0)>0){
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        ctx.globalAlpha=.20+.10*Math.sin(performance.now()/85);
+        ctx.strokeStyle='#75e6ee';ctx.lineWidth=3;ctx.shadowColor='#52dce8';ctx.shadowBlur=12;
+        for(let i=-1;i<=1;i++){
+          ctx.beginPath();ctx.moveTo(i*18,34);ctx.lineTo(i*18,78);ctx.stroke();
+          ctx.beginPath();ctx.moveTo(i*18-6,68);ctx.lineTo(i*18,78);ctx.lineTo(i*18+6,68);ctx.stroke();
+        }
+        ctx.restore();
+      }
+      if(this.type==='kokabiel'&&this.specialType==='gravityDive'&&this.specialT>0){
+        ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.34;
+        ctx.strokeStyle='#76e9f1';ctx.lineWidth=7;ctx.lineCap='round';ctx.shadowColor='#54dce8';ctx.shadowBlur=14;
+        ctx.beginPath();ctx.moveTo(-this.face*18,-35);ctx.lineTo(-this.face*55,-88);ctx.stroke();ctx.restore();
       }
 
       // 頭
@@ -2885,7 +2902,7 @@
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
-      kokabiel:['前 ＋ パンチ：グラビティボール','後ろ ＋ ガード：グラビティゾーン','下 ＋ パンチ：メテオレイン'],
+      kokabiel:['前 ＋ パンチ：グラビティボール','後ろ ＋ ガード：グラビティゾーン','下 ＋ パンチ：メテオレイン','下 ＋ キック：グラビティダイブ'],
       jihal:['前 ＋ パンチ：ボルトショット','前 ＋ キック：ライトニングダッシュ','後ろ ＋ キック長押し → 離す：サンダーチャージ','下 ＋ パンチ：スパークバースト'],
       remiel:['上 ＋ ガード：ミラージュ（上）','下 ＋ ガード：ミラージュ（下）','後ろ ＋ ガード：ミラージュカウンター','前 ＋ ガード：アクアパリィ','前 ＋ パンチ：フロストショット','前 ＋ キック：ミラージュキック'],
       seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
@@ -4137,6 +4154,13 @@
     comboEl.textContent='メテオレイン…';return true;
   }
 
+  function specialGravityDive(f){
+    if(gameOver||!f||f.type!=='kokabiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='gravityDive';f.specialT=.58;f.attack='kick';f.attackT=.58;
+    f.gravityDiveHit=false;f.vx=f.face*285;f.vy=430;
+    comboEl.textContent='グラビティダイブ!';return true;
+  }
+
   function specialJihalBolt(f){
     if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
     f.specialType='jihalBolt';f.specialT=.40;f.attack='punch';f.attackT=.40;
@@ -4434,6 +4458,7 @@
     if(f.type==='kokabiel'){
       if(kind==='punch'&&water2HeldDir(f,'forward')){clearCommand();return specialGravityBall(f);}
       if(kind==='punch'&&water2HeldDir(f,'down')){clearCommand();return specialMeteorRain(f);}
+      if(kind==='kick'&&water2HeldDir(f,'down')){clearCommand();return specialGravityDive(f);}
     }
 
     if(f.type==='jihal'){
@@ -5827,6 +5852,25 @@ function drawBackground(dt){
         }
       });
       iceWalls=iceWalls.filter(w=>w.t>0);
+
+      // コカビエル：急降下キックと重力異常。
+      [player,enemy].forEach(f=>{
+        if(!f)return;
+        if((f.gravityHeavyT||0)>0){
+          f.gravityHeavyT=Math.max(0,f.gravityHeavyT-dt);
+          f.vy+=360*dt;
+          if(f.vy<0)f.vy*=.88;
+        }
+        if(f.type!=='kokabiel'||f.specialType!=='gravityDive'||f.specialT<=0)return;
+        f.vy=Math.max(f.vy,390);
+        const o=f.isPlayer?enemy:player;
+        if(o&&!f.gravityDiveHit&&Math.abs(o.x-f.x)<78&&Math.abs(o.y-f.y)<82){
+          f.gravityDiveHit=true;
+          damageHit(f,o,8.2*f.damageMul,145*f.face,135);
+          o.gravityHeavyT=2.25;o.vy=Math.max(o.vy,180);
+          spawnImpact(o.x,o.y,'hit');comboEl.textContent='ヘヴィ・グラビティ!';
+        }
+      });
 
       gravityBalls.forEach(q=>{
         q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;
