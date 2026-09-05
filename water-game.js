@@ -4090,8 +4090,9 @@
     if(f.type==='samael'){
       // 上位技はスマホでも押しやすい「前 → 下 → 後ろ ＋ キック」。
       if(kind==='kick'){
-        const seq=commandDirs.slice(-3);
-        if(seq.length>=3 && seq[0]==='forward' && seq[1]==='down' && seq[2]==='back'){
+        // 実際の方向履歴は input.commandHistory に画面方向で保存される。
+        // 向きに応じて「前 → 下 → 後ろ」を絶対方向へ変換して判定。
+        if(hasCommand([forward,'down',back],1100)){
           clearCommand(); f.attackT=0; f.attack=null;
           return specialDeadlyAqua(f);
         }
