@@ -3146,3 +3146,13 @@ body.portrait-play #portraitOverlay{
     font-size:43px !important;
   }
 }
+
+
+/* v1.7 story availability */
+#storyButton.story-disabled,
+#storyButton:disabled{
+  opacity:.42 !important;
+  filter:saturate(.35) !important;
+  box-shadow:none !important;
+  cursor:not-allowed !important;
+}

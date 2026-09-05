@@ -14,6 +14,8 @@
   const beelzebubCard=document.getElementById('beelzebubCard');
   const beelzebubOpponent=document.getElementById('beelzebubOpponent');
   const bossTeaser=document.getElementById('bossTeaser');
+  const samaelCard=document.querySelector('#selectScreen .fighter-card[data-fighter="samael"]');
+  const seraphielCard=document.querySelector('#selectScreen .fighter-card[data-fighter="seraphiel"]');
   let kawazuCard=document.getElementById('kawazuCard');
   let kawazuOpponent=document.getElementById('kawazuOpponent');
   const storyNarrative=document.getElementById('storyNarrative');
@@ -325,9 +327,9 @@
   refreshDifficultyButtons();
 
   function difficultyProfile(){
-    if(difficulty==='easy') return {move:.82,attack:.58,tongue:.55,guard:.55,special:.55,damage:.80};
-    if(difficulty==='hard') return {move:1.14,attack:1.42,tongue:1.35,guard:1.45,special:1.5,damage:1.14};
-    return {move:1,attack:1,tongue:1,guard:1,special:1,damage:1};
+    if(difficulty==='easy') return {move:.82,attack:.58,tongue:.55,guard:.55,projectileGuard:.26,special:.55,damage:.80};
+    if(difficulty==='hard') return {move:1.14,attack:1.42,tongue:1.35,guard:1.45,projectileGuard:.78,special:1.5,damage:1.14};
+    return {move:1,attack:1,tongue:1,guard:1,projectileGuard:.52,special:1,damage:1};
   }
 
   const selectCardCommands={
@@ -435,6 +437,39 @@
   }
   document.querySelectorAll('#selectScreen .fighter-card').forEach(applySelectCardCommands);
 
+  function isStoryCleared(){
+    try{return localStorage.getItem('kaeru_story_cleared')==='1';}
+    catch(e){return false;}
+  }
+
+  function refreshStoryClearUnlock(){
+    const unlocked=isStoryCleared();
+    [samaelCard,seraphielCard].forEach(card=>{
+      if(!card)return;
+      card.hidden=!unlocked;
+      card.style.display=unlocked?'':'none';
+      card.setAttribute('aria-hidden',unlocked?'false':'true');
+    });
+    if(opponentSelect){
+      ['samael','seraphiel'].forEach(type=>{
+        const opt=opponentSelect.querySelector(`option[value="${type}"]`);
+        if(!opt)return;
+        opt.hidden=!unlocked;
+        opt.disabled=!unlocked;
+        opt.style.display=unlocked?'':'none';
+      });
+      if(!unlocked && ['samael','seraphiel'].includes(opponentSelect.value)){
+        opponentSelect.value='blue';
+        selectedOpponent='blue';
+      }
+    }
+  }
+
+  function unlockStoryBosses(){
+    try{localStorage.setItem('kaeru_story_cleared','1');}catch(e){}
+    refreshStoryClearUnlock();
+  }
+
   function isBeelzebubUnlocked(){
     try{return localStorage.getItem('kaeru_beelzebub_unlocked')==='1';}
     catch(e){return false;}
@@ -465,6 +500,7 @@
   function unlockBeelzebub(){
     try{localStorage.setItem('kaeru_beelzebub_unlocked','1');}catch(e){}
     refreshBossUnlock();
+  refreshStoryClearUnlock();
   }
 
   function isKawazuUnlocked(){
@@ -493,6 +529,7 @@
           document.querySelectorAll('.fighter-card').forEach(c=>c.classList.remove('selected'));
           btn.classList.add('selected');
           selectedFighter='kawazu';
+          refreshStoryAvailability();
         });
       }
     }
@@ -533,13 +570,24 @@
 
   refreshBossUnlock();
 
+  function refreshStoryAvailability(){
+    if(!storyButton)return;
+    const blocked=selectedFighter==='piranha'||selectedFighter==='crayfish';
+    storyButton.disabled=blocked;
+    storyButton.classList.toggle('story-disabled',blocked);
+    storyButton.setAttribute('aria-disabled',blocked?'true':'false');
+    storyButton.title=blocked?'リヴァイアさん／アスモデウスさんはストーリーでは使用できません':'';
+  }
+
   document.querySelectorAll('.fighter-card').forEach(card => {
     card.addEventListener('click', () => {
       document.querySelectorAll('.fighter-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selectedFighter = card.dataset.fighter;
+      refreshStoryAvailability();
     });
   });
+  refreshStoryAvailability();
 
   if(opponentSelect){
     opponentSelect.value=selectedOpponent;
@@ -570,6 +618,11 @@
       if(e){
         e.preventDefault();
         e.stopPropagation();
+      }
+      if(selectedFighter==='piranha'||selectedFighter==='crayfish'){
+        comboEl.textContent='このキャラではストーリーを選べません';
+        refreshStoryAvailability();
+        return;
       }
       playSfx('menu');
       startStoryMode();
@@ -2965,7 +3018,12 @@
   }
 
 
-  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish','sariel','kokabiel','jihal','remiel','seraphiel','samael'].concat(isKawazuUnlocked()?['kawazu']:[]);
+  function currentPlayableTypes(){
+    const base=['green','blue','black','purple','yellow','orange','piranha','crayfish','sariel','kokabiel','jihal','remiel'];
+    if(isKawazuUnlocked())base.push('kawazu');
+    if(isStoryCleared())base.push('samael','seraphiel');
+    return base;
+  }
 
   function practiceSpecialText(type){
     const map={
@@ -3144,7 +3202,7 @@
   }
 
   function startAllBattleMode(){
-    allBattleQueue=playableTypes.filter(t=>t!==selectedFighter && t!=='seraphiel');
+    allBattleQueue=currentPlayableTypes().filter(t=>t!==selectedFighter && t!=='seraphiel');
     // ボスクラスは後半へ。セラフィエルは最後。
     const bosses=['beelzebub','samael'];
     const normal=allBattleQueue.filter(t=>!bosses.includes(t));
@@ -3267,7 +3325,7 @@
   }
 
   function showStoryEnding(){
-    storyFinished=true;gameOver=true;
+    storyFinished=true;gameOver=true;unlockStoryBosses();
     comboEl.textContent=`STORY CLEAR!　${storyWins}勝 ${storyLosses}敗`;
     restartButton.hidden=true;
     showStoryNarrative([
@@ -5619,12 +5677,33 @@
     if(enemy.stun>0)return;
     const dx=player.x-enemy.x,dy=player.y-enemy.y,dist=Math.hypot(dx,dy);
 
-    // 水中格闘2：CPUは反射可能な飛び道具を見たらシャボンガードを優先。
-    if(incomingReflectableThreat(enemy)){
+    // 飛び道具へのガードは難易度別の成功率。
+    // 何もしていない時だけ反応しやすく、移動中・攻撃中・必殺技中は基本的に被弾する。
+    enemy.cpuProjectileGuardT=Math.max(0,(enemy.cpuProjectileGuardT||0)-dt);
+    enemy.cpuProjectileDecisionCd=Math.max(0,(enemy.cpuProjectileDecisionCd||0)-dt);
+    const projectileThreat=incomingReflectableThreat(enemy);
+
+    if(enemy.cpuProjectileGuardT>0){
       enemy.guard=true;
-      enemy.guardStartT=.28;
-      enemy.vx*=.82; enemy.vy*=.82;
+      enemy.guardStartT=Math.max(enemy.guardStartT||0,.18);
+      enemy.vx*=.84;enemy.vy*=.84;
       return;
+    }
+
+    if(projectileThreat && enemy.cpuProjectileDecisionCd<=0){
+      const moving=Math.hypot(enemy.vx||0,enemy.vy||0)>42;
+      const busy=(enemy.attackT||0)>0 || (enemy.specialT||0)>0 || moving;
+      enemy.cpuProjectileDecisionCd=.62;
+
+      if(!busy && Math.random()<diff.projectileGuard){
+        enemy.cpuProjectileGuardT=.34;
+        enemy.guard=true;
+        enemy.guardStartT=.28;
+        enemy.vx*=.82;enemy.vy*=.82;
+        return;
+      }
+      // 失敗した時はその弾に対してすぐ再抽選しない。
+      // 通常AIを続けるので、移動や攻撃を始めればそのまま被弾しうる。
     }
     enemy.guard=false;
 
