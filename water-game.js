@@ -77,6 +77,8 @@
   let samaelGates = [];
   let seraphielRays = [];
   let remielMirages = [];
+  let jihalBolts=[];
+  let jihalBursts=[];
   let remielFakeShots = [];
   let toxicWaters=[];
   let bossFish=[];
@@ -114,6 +116,7 @@
     piranha: { speed: 198, tongue: 0,   damage: 1.08, defense:0.90, sink:3, hue:0, scale:0.95 },
     crayfish:{ speed: 138, tongue: 0,   damage: 1.18, defense:1.20, sink:10,hue:0, scale:1.08 },
     beelzebub:{speed: 154, tongue: 350, damage: 1.12, defense:1.10, sink:8, hue:0, scale:1.10},
+    jihal:{speed:184,tongue:190,damage:1.02,defense:.97,sink:5,hue:0,scale:1.00},
     remiel:{speed: 170, tongue: 205, damage: .98, defense:1.00, sink:5, hue:0, scale:1.00},
     seraphiel:{speed: 178, tongue: 205, damage: 1.24, defense:.84, sink:5, hue:0, scale:1.02},
     samael: {speed: 158, tongue: 235, damage: 1.10, defense:1.06, sink:7, hue:0, scale:1.08},
@@ -353,6 +356,12 @@
       'アビスショック（上弧）：上 ＋ パンチ',
       'アビスショック（下弧）：下 ＋ キック',
       'ベノムショット：前 ＋ パンチ'
+    ],
+    jihal:[
+      'ボルトショット：前 ＋ パンチ',
+      'ライトニングダッシュ：前 ＋ キック',
+      'サンダーチャージ：後ろ ＋ キック長押し → 離す',
+      'スパークバースト：下 ＋ パンチ'
     ],
     remiel:[
       'ミラージュ（上）：上 ＋ ガード','ミラージュ（下）：下 ＋ ガード','ミラージュカウンター：後ろ ＋ ガード','アクアパリィ：前 ＋ ガード / ジャストガード','フロストショット：前 ＋ パンチ','ミラージュキック：前 ＋ キック'
@@ -756,6 +765,7 @@
         eyeBump:'#72ff2d'
       };
     }
+    if(type==='jihal')return {body:'#30384c',limb:'#36425a',light:'#fff2a2',belly:'#e6cf55',eyeBump:'#f1d64e'};
     if(type==='remiel'){
       return {body:'#7eaebf',limb:'#79a6b8',light:'#c9edf2',belly:'#b8dce4',eyeBump:'#a9d6df'};
     }
@@ -1648,6 +1658,14 @@
         ctx.restore();
       }
 
+      if(this.type==='jihal'&&(this.jihalCharging||this.specialType==='lightningDash'||this.specialType==='thunderChargeRush')){
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        const p=this.jihalCharging?(.35+.65*(this.jihalCharge||0)):1;
+        ctx.globalAlpha=.48*p;ctx.strokeStyle='#fff19a';ctx.lineWidth=3;ctx.shadowColor='#ffe75a';ctx.shadowBlur=13;
+        for(let i=0;i<4;i++){const yy=-45+i*30,xx=(i%2?28:-28);ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx+this.face*13,yy+8);ctx.lineTo(xx-this.face*3,yy+17);ctx.stroke();}
+        ctx.restore();
+      }
+
       if(this.type==='remiel'){
         const mir=remielMirages.find(m=>m.owner===this&&m.t>0);
         if(mir){
@@ -2537,7 +2555,7 @@
     }));
 
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
 
     for(let i=0;i<12;i++){
       spawnLeafTarget(i,true);
@@ -2832,7 +2850,7 @@
   }
 
 
-  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish','remiel','seraphiel','samael'].concat(isKawazuUnlocked()?['kawazu']:[]);
+  const playableTypes=['green','blue','black','purple','yellow','orange','piranha','crayfish','jihal','remiel','seraphiel','samael'].concat(isKawazuUnlocked()?['kawazu']:[]);
 
   function practiceSpecialText(type){
     const map={
@@ -2843,6 +2861,7 @@
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
       purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
       beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
+      jihal:['前 ＋ パンチ：ボルトショット','前 ＋ キック：ライトニングダッシュ','後ろ ＋ キック長押し → 離す：サンダーチャージ','下 ＋ パンチ：スパークバースト'],
       remiel:['上 ＋ ガード：ミラージュ（上）','下 ＋ ガード：ミラージュ（下）','後ろ ＋ ガード：ミラージュカウンター','前 ＋ ガード：アクアパリィ','前 ＋ パンチ：フロストショット','前 ＋ キック：ミラージュキック'],
       seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
       samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
@@ -2877,7 +2896,7 @@
       'ミカエル':'green','ミカエルさん':'green','ガブリエル':'blue','ガブリエルさん':'blue',
       'ルシファー':'black','ルシファーさん':'black','リリス':'purple','リリスさん':'purple',
       'ラファエル':'yellow','ラファエルさん':'yellow','ウリエル':'orange','ウリエルさん':'orange',
-      'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael','セラフィエル':'seraphiel','セラフィエルさん':'seraphiel','レミエル':'remiel','レミエルさん':'remiel',
+      'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael','セラフィエル':'seraphiel','セラフィエルさん':'seraphiel','レミエル':'remiel','レミエルさん':'remiel','ジィハル':'jihal','ジィハルさん':'jihal',
       'リヴァイア':'piranha','リヴァイアさん':'piranha','アスモデウス':'crayfish','アスモデウスさん':'crayfish',
       'アザゼル':'piranha','アザゼルさん':'piranha','ベリアル':'crayfish','ベリアルさん':'crayfish'
     };
@@ -2909,13 +2928,13 @@
       green:'ミカエルさん', blue:'ガブリエルさん', black:'ルシファーさん',
       purple:'リリスさん', yellow:'ラファエルさん', orange:'ウリエルさん',
       piranha:'リヴァイアさん', crayfish:'アスモデウスさん',
-      beelzebub:'ベルゼブブさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', remiel:'レミエルさん', kawazu:'カワズさん'
+      beelzebub:'ベルゼブブさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', remiel:'レミエルさん', jihal:'ジィハルさん', kawazu:'カワズさん'
     }[type]||type;
   }
 
   function resetBattleEffects(){
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
     leafTargets=[]; guardTargets=[]; toxicWaters=[]; bossFish=[]; abyssShocks=[]; kawazuShots=[]; kawazuGhosts=[];
   }
 
@@ -4068,6 +4087,41 @@
     return true;
   }
 
+  function specialJihalBolt(f){
+    if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='jihalBolt';f.specialT=.40;f.attack='punch';f.attackT=.40;
+    jihalBolts.push({owner:f,x:f.x+f.face*48,y:f.y-10,vx:f.face*350,vy:0,r:13,t:2.4,damage:5,reflects:0});
+    comboEl.textContent='ボルトショット!';return true;
+  }
+  function specialLightningDash(f){
+    if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='lightningDash';f.specialT=.50;f.attack='kick';f.attackT=.50;f.vx=f.face*520;
+    const o=f.isPlayer?enemy:player,d=f.face;
+    setTimeout(()=>{if(o&&Math.abs(o.x-f.x)<145&&Math.abs(o.y-f.y)<84){damageHit(f,o,9.5*f.damageMul,365*d,-45);spawnImpact(o.x,o.y,'hit');}},115);
+    comboEl.textContent='ライトニングダッシュ!';return true;
+  }
+  function startThunderCharge(f){
+    if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.attackT>0||f.jihalCharging)return false;
+    f.jihalCharging=true;f.jihalCharge=0;f.specialType='thunderChargeHold';f.specialT=999;f.vx*=.1;
+    comboEl.textContent='サンダーチャージ…';return true;
+  }
+  function releaseThunderCharge(f){
+    if(!f||!f.jihalCharging)return false;
+    const c=Math.max(0,Math.min(1,f.jihalCharge||0));f.jihalCharging=false;
+    f.specialType='thunderChargeRush';f.specialT=.44;f.attack='kick';f.attackT=.44;f.vx=f.face*(570+300*c);
+    const o=f.isPlayer?enemy:player,d=f.face;
+    setTimeout(()=>{if(o&&Math.abs(o.x-f.x)<158&&Math.abs(o.y-f.y)<90){damageHit(f,o,(10.5+6*c)*f.damageMul,(410+180*c)*d,-70);spawnImpact(o.x,o.y,'hit');}},90);
+    comboEl.textContent=c>.75?'フル・サンダーチャージ!':'サンダーチャージ!';return true;
+  }
+  function specialSparkBurst(f){
+    if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='sparkBurst';f.specialT=.50;f.attack='punch';f.attackT=.42;
+    jihalBursts.push({owner:f,x:f.x,y:f.y,r:8,maxR:108,t:.40,life:.40});
+    const o=f.isPlayer?enemy:player;
+    setTimeout(()=>{if(o&&Math.hypot(o.x-f.x,o.y-f.y)<112){damageHit(f,o,7*f.damageMul,Math.sign(o.x-f.x||1)*210,-65);spawnImpact(o.x,o.y,'hit');}},100);
+    comboEl.textContent='スパークバースト!';return true;
+  }
+
   function remielMakeMirage(f,where){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
     remielMirages=remielMirages.filter(m=>m.owner!==f);
@@ -4321,6 +4375,12 @@
       return specialEngineerMiniVortex(f);
     }
 
+
+    if(f.type==='jihal'){
+      if(kind==='punch'&&water2HeldDir(f,'forward')){clearCommand();return specialJihalBolt(f);}
+      if(kind==='punch'&&water2HeldDir(f,'down')){clearCommand();return specialSparkBurst(f);}
+      if(kind==='kick'&&water2HeldDir(f,'forward')){clearCommand();return specialLightningDash(f);}
+    }
 
     if(f.type==='remiel'){
       if(kind==='punch' && water2HeldDir(f,'forward')){clearCommand();return specialRemielFrostShot(f);}
@@ -5091,10 +5151,18 @@
         }
         attack(player,action);
       }
+      else if(action==='kick'&&player&&player.type==='jihal'){
+        const backHeld=(player.face>0&&input.x<-.35)||(player.face<0&&input.x>.35);
+        if(backHeld&&startThunderCharge(player)){btn.dataset.jihalCharge='1';return;}
+        attack(player,action);
+      }
       else if(player) attack(player,action);
     };
     const up=e=>{
       e.preventDefault(); btn.classList.remove('pressed');
+      if(action==='kick'&&player&&btn.dataset.jihalCharge==='1'){
+        btn.dataset.jihalCharge='';releaseThunderCharge(player);
+      }
       if(action==='punch' && player && btn.dataset.charging==='1'){
         btn.dataset.charging=''; releaseAbyssCharge(player);
       }
@@ -5136,7 +5204,10 @@
       }
     }
     if(e.key==='j')attack(player,'punch');
-    if(e.key==='k') attack(player,'kick');
+    if(e.key==='k'&&player){
+      const back=player.type==='jihal'&&((player.face>0&&keys['a'])||(player.face<0&&keys['d']));
+      if(back)startThunderCharge(player);else attack(player,'kick');
+    }
     if(e.key==='l')attack(player,'tongue');
     if(e.key==='i'&&player){
       let remielUsed=false;
@@ -5158,6 +5229,7 @@
     }
   });
   addEventListener('keyup',e=>{
+    if(e.key==='k'&&player&&player.type==='jihal'&&player.jihalCharging)releaseThunderCharge(player);
     const key=e.key.toLowerCase(); keys[key]=false;
     if(e.key==='i'&&player && player.specialType!=='iceWall')player.guard=false;
   });
@@ -5206,6 +5278,7 @@
         if(roll<dt*.26){ specialAbyssShock(enemy,dy<0?'upper':'lower'); return; }
         if(dist>150 && roll<dt*.46){ specialWater2Shot(enemy,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.5,r:16,charge:.50,poisonDuration:2.2,maxReflect:4}); return; }
       }
+      if(enemy.type==='jihal'&&enemy.specialT<=0&&!enemy.jihalCharging){const r=Math.random();if(dist>210&&r<dt*.28){specialJihalBolt(enemy);return;}if(dist<175&&r<dt*.18){specialLightningDash(enemy);return;}if(dist<110&&r<dt*.10){specialSparkBurst(enemy);return;}if(dist>250&&r<dt*.05){startThunderCharge(enemy);setTimeout(()=>{if(enemy&&enemy.jihalCharging)releaseThunderCharge(enemy);},650);return;}}
       if(enemy.type==='remiel' && enemy.specialT<=0){const roll=Math.random();if(!remielMirages.some(m=>m.owner===enemy)&&roll<dt*.10){remielMakeMirage(enemy,Math.random()<.5?'up':'down');return;}if(dist>190&&roll<dt*.28){specialRemielFrostShot(enemy);return;}if(dist<150&&roll<dt*.18){specialMirageKick(enemy);return;}if(dist<115&&roll<dt*.10){specialAquaParry(enemy,false);return;}}
       if(enemy.type==='seraphiel' && enemy.specialT<=0){
         const roll=Math.random();
@@ -5687,6 +5760,18 @@ function drawBackground(dt){
         }
       });
       iceWalls=iceWalls.filter(w=>w.t>0);
+
+      [player,enemy].forEach(f=>{if(f&&f.type==='jihal'&&f.jihalCharging){f.jihalCharge=Math.min(1,(f.jihalCharge||0)+dt/.95);f.specialT=999;f.vx*=.75;}});
+      jihalBolts.forEach(q=>{
+        q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;const t=q.owner.isPlayer?enemy:player;
+        if(t&&q.t>0&&Math.abs(q.x-t.x)<50&&Math.abs(q.y-t.y)<62){
+          if(t.guard){q.owner=t;q.vx=-q.vx*1.06;q.reflects++;q.x=t.x+Math.sign(q.vx)*52;spawnImpact(t.x,t.y,'guard');if(q.reflects>=5)q.t=0;}
+          else{damageHit(q.owner,t,q.damage,Math.sign(q.vx)*160,-30);spawnImpact(q.x,q.y,'hit');q.t=0;}
+        }
+      });
+      jihalBolts=jihalBolts.filter(q=>q.t>0&&q.x>-80&&q.x<innerWidth+80);
+      jihalBursts.forEach(b=>{b.t-=dt;b.r=b.maxR*(1-b.t/b.life);});
+      jihalBursts=jihalBursts.filter(b=>b.t>0);
 
       remielMirages.forEach(m=>{
         m.t-=dt;m.age=(m.age||0)+dt;
@@ -6540,6 +6625,9 @@ function drawBackground(dt){
       ctx.globalAlpha=.65;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-8,-40);ctx.lineTo(7,-18);ctx.lineTo(-5,4);ctx.lineTo(10,27);ctx.stroke();
       ctx.restore();
     });
+
+    jihalBolts.forEach(q=>{ctx.save();ctx.translate(q.x,q.y);ctx.globalCompositeOperation='lighter';ctx.shadowColor='#ffe75b';ctx.shadowBlur=18;ctx.fillStyle='#fff7ad';ctx.beginPath();ctx.arc(0,0,q.r*.72,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#f4d943';ctx.lineWidth=3;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(-q.r,i*6);ctx.lineTo(0,i*3-5);ctx.lineTo(q.r,i*5);ctx.stroke();}ctx.restore();});
+    jihalBursts.forEach(b=>{ctx.save();ctx.translate(b.x,b.y);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.max(0,b.t/b.life);ctx.strokeStyle='#fff09a';ctx.shadowColor='#ffe85b';ctx.shadowBlur=15;ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,b.r,0,Math.PI*2);ctx.stroke();for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.beginPath();ctx.moveTo(Math.cos(a)*b.r*.45,Math.sin(a)*b.r*.45);ctx.lineTo(Math.cos(a)*b.r,Math.sin(a)*b.r);ctx.stroke();}ctx.restore();});
 
     remielFakeShots.forEach(q=>{ctx.save();ctx.translate(q.x,q.y);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.32*Math.min(1,q.t/.18);ctx.shadowColor='#bdefff';ctx.shadowBlur=16;ctx.fillStyle='#d9f8ff';ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#9ddbea';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();ctx.restore();});
 
