@@ -1284,6 +1284,11 @@
       }
       const pal=fighterPalette(this.type);
 
+      // ムーンサルトキックは本体そのものが高速縦回転する。
+      if(this.type==='sariel'&&this.specialType==='moonSalt'&&this.specialT>0){
+        ctx.rotate(this.moonSaltSpin||0);
+      }
+
       if(this.specialType==='burningCyclone'){
         ctx.rotate(burningCycloneAngle(this));
       }
@@ -1449,7 +1454,6 @@
         }
         if(this.specialType==='moonSalt'&&this.specialT>0){
           ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(0,20);
-          ctx.rotate(this.moonSaltSpin||0);
           ctx.globalAlpha=.52;ctx.strokeStyle='#e8ecff';ctx.lineWidth=7;ctx.lineCap='round';ctx.shadowColor='#cbd4ff';ctx.shadowBlur=16;
           // 3本の回転残像で高速回転を明確に見せる。
           for(let i=0;i<3;i++){
@@ -4311,6 +4315,7 @@
   function specialLightningDash(f){
     if(gameOver||!f||f.type!=='jihal'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
     f.jihalDashOriginX=f.x;
+    f.jihalRushDir=f.face||1;
     f.specialType='lightningDash';f.specialT=.34;f.attack='kick';f.attackT=.34;
     f.jihalDashHit=false;f.jihalDashHitWindow=.21;
     f.vx=f.face*920;
@@ -4327,9 +4332,10 @@
     const c=Math.max(0,Math.min(1,f.jihalCharge||0));
     f.jihalCharging=false;
     f.jihalDashOriginX=f.x;
+    f.jihalRushDir=f.face||1;
     f.specialType='thunderChargeRush';f.specialT=.30;f.attack='kick';f.attackT=.30;
     f.jihalChargePower=c;f.jihalThunderHit=false;
-    f.vx=f.face*(980+520*c);
+    f.vx=f.jihalRushDir*(980+520*c);
     comboEl.textContent=c>.75?'フル・サンダーチャージ!':'サンダーチャージ!';
     return true;
   }
