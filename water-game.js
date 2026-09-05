@@ -3943,6 +3943,19 @@
     return true;
   }
 
+  function water2HeldDir(f, dir){
+    if(!f) return false;
+    const kx=(keys['d']?1:0)-(keys['a']?1:0);
+    const ky=(keys['s']?1:0)-(keys['w']?1:0);
+    const x=(input.x||0)+kx;
+    const y=(input.y||0)+ky;
+    if(dir==='up') return y<-.35;
+    if(dir==='down') return y>.35;
+    if(dir==='forward') return f.face>0 ? x>.35 : x<-.35;
+    if(dir==='back') return f.face>0 ? x<-.35 : x>.35;
+    return false;
+  }
+
   function trySpecial(f,kind){
     if(!f) return false;
     const forward=f.face>0?'right':'left';
@@ -3963,11 +3976,11 @@
         clearCommand();
         return specialKawazuCyclone(f);
       }
-      if(kind==='kick' && hasCommand([back],560)){
+      if(kind==='kick' && water2HeldDir(f,'back')){
         clearCommand();
         return specialKawazuSpinCutter(f);
       }
-      if(kind==='kick' && hasCommand([forward],520)){
+      if(kind==='kick' && water2HeldDir(f,'forward')){
         clearCommand();
         return specialKawazuMirageKick(f);
       }
@@ -3981,19 +3994,19 @@
     // 水中格闘2：ミカエル。基本技は1方向＋ボタン、サイクロンだけ上位コマンド。
     if(f.type==='green'){
       if(kind==='kick' && hasCommand(['down',back],760)){ clearCommand(); return specialBurningCyclone(f); }
-      if(kind==='punch' && hasCommand(['up'],560)){ clearCommand(); return specialUppercut(f); }
-      if(kind==='kick' && hasCommand([forward],560)){ clearCommand(); return specialDropKick(f); }
-      if(kind==='punch' && hasCommand([back],560)){
+      if(kind==='punch' && water2HeldDir(f,'up')){ clearCommand(); return specialUppercut(f); }
+      if(kind==='kick' && water2HeldDir(f,'forward')){ clearCommand(); return specialDropKick(f); }
+      if(kind==='punch' && water2HeldDir(f,'back')){
         clearCommand(); return specialWater2Shot(f,{name:'バーニングショット',attack:'punch',color:'fire',style:'burning',speed:315,damage:4.4,r:15,charge:.40,maxReflect:6});
       }
     }
 
     // 水中格闘2：ガブリエル。ガード始動をやめ、方向＋攻撃へ。
     if(f.type==='blue'){
-      if(kind==='punch' && hasCommand(['up'],560)){ clearCommand(); return specialAquaTornado(f); }
-      if(kind==='kick' && hasCommand(['down'],560)){ clearCommand(); return specialAquaStream(f); }
-      if(kind==='punch' && hasCommand([back],560)){ clearCommand(); return specialAquaVortex(f); }
-      if(kind==='punch' && hasCommand([forward],560)){
+      if(kind==='punch' && water2HeldDir(f,'up')){ clearCommand(); return specialAquaTornado(f); }
+      if(kind==='kick' && water2HeldDir(f,'down')){ clearCommand(); return specialAquaStream(f); }
+      if(kind==='punch' && water2HeldDir(f,'back')){ clearCommand(); return specialAquaVortex(f); }
+      if(kind==='punch' && water2HeldDir(f,'forward')){
         clearCommand(); return specialWater2Shot(f,{name:'アクアショット',attack:'punch',color:'aqua',style:'aquaSpin',speed:285,damage:3.8,r:14,charge:.36,wobble:.10,maxReflect:6});
       }
     }
@@ -4019,12 +4032,12 @@
 
     // 水中格闘2：ラファエル。4軌道の水圧カッターを方向＋攻撃で撃ち分け。
     if(f.type==='yellow'){
-      if(kind==='punch' && hasCommand([forward],560)){ clearCommand(); return specialPressureBlade(f,0,'punch'); }
-      if(kind==='kick' && hasCommand([forward],560)){ clearCommand(); return specialPressureBlade(f,15,'kick'); }
-      if(kind==='punch' && hasCommand([back],560)){
+      if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialPressureBlade(f,0,'punch'); }
+      if(kind==='kick' && water2HeldDir(f,'forward')){ clearCommand(); return specialPressureBlade(f,15,'kick'); }
+      if(kind==='punch' && water2HeldDir(f,'back')){
         clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'punch',color:'blade',style:'carpBlade',speed:285,angle:-30,damage:3.7,r:12,charge:.40,life:2.35,curve:105,maxReflect:6});
       }
-      if(kind==='kick' && hasCommand([back],560)){
+      if(kind==='kick' && water2HeldDir(f,'back')){
         clearCommand(); return specialWater2Shot(f,{name:'カープ水圧カッター',attack:'kick',color:'blade',style:'carpBlade',speed:285,angle:30,damage:3.7,r:12,charge:.40,life:2.35,curve:-105,maxReflect:6});
       }
     }
@@ -4044,7 +4057,7 @@
     }
 
     if(f.type==='beelzebub'){
-      if(kind==='punch' && hasCommand([forward],560)){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.7,r:16,charge:.50,life:2.9,poisonDuration:2.6,maxReflect:6}); }
+      if(kind==='punch' && water2HeldDir(f,'forward')){ clearCommand(); return specialWater2Shot(f,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.7,r:16,charge:.50,life:2.9,poisonDuration:2.6,maxReflect:6}); }
       const downForward=f.face>0?'downRight':'downLeft';
       const bossQuarterCommand=
         hasCommand(['down',forward],850)||hasCommand(['down',downForward],850)||hasCommand([downForward,forward],850);
@@ -4697,9 +4710,10 @@
     if(e.repeat)return;
 
     if(['w','a','s','d'].includes(key)){
+      const map={w:'up',a:'left',s:'down',d:'right'};
+      pushCommandDir(map[key]);
       const now=performance.now();
       if(keyDashTimes[key] && now-keyDashTimes[key]<=450){
-        const map={w:'up',a:'left',s:'down',d:'right'};
         doDash(map[key]);
         keyDashTimes[key]=0;
       }else{
