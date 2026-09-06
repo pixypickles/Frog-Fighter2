@@ -6032,9 +6032,9 @@ function drawBackground(dt){
     if(arenaActive){
       // 明るく透明度の高い大会水槽。草や暗転は使わない。
       const grad=ctx.createLinearGradient(0,0,0,innerHeight);
-      grad.addColorStop(0,'#bdf9ff');
-      grad.addColorStop(.48,'#78eaf4');
-      grad.addColorStop(1,'#48d5e3');
+      grad.addColorStop(0,'#d8fbff');
+      grad.addColorStop(.48,'#9ceff6');
+      grad.addColorStop(1,'#6ddde8');
       ctx.fillStyle=grad;
       ctx.fillRect(0,0,innerWidth,innerHeight);
 
@@ -6100,126 +6100,145 @@ function drawBackground(dt){
 
     ctx.save();
 
-    // 大型水槽のガラス反射。
-    ctx.globalAlpha=.07;
-    const glass=ctx.createLinearGradient(0,0,w,0);
-    glass.addColorStop(0,'rgba(255,255,255,.48)');
-    glass.addColorStop(.09,'rgba(255,255,255,.035)');
-    glass.addColorStop(.91,'rgba(255,255,255,.035)');
-    glass.addColorStop(1,'rgba(255,255,255,.48)');
-    ctx.fillStyle=glass;
-    ctx.fillRect(0,0,w,h);
-
-    // 奥の水がゆらいで見える屈折ライン。
-    // 強すぎない波紋を何本も重ねて、水槽越しの歪み感を出す。
+    // --- 水面 / 透明な大型水槽 ---
+    // 上部に、参考イメージのような明るい水面の揺らぎ。
     ctx.save();
-    ctx.globalAlpha=.075;
-    ctx.strokeStyle='rgba(245,255,255,.88)';
-    ctx.lineWidth=2;
-    for(let row=0;row<9;row++){
-      const baseY=h*.10+row*h*.065;
+    const surfaceY=h*.10;
+    ctx.globalAlpha=.22;
+    ctx.strokeStyle='rgba(255,255,255,.92)';
+    ctx.lineWidth=3;
+    for(let row=0;row<6;row++){
+      const base=surfaceY+row*7;
       ctx.beginPath();
-      for(let x=-20;x<=w+20;x+=18){
-        const y=baseY
-          +Math.sin(x*.018 + now*.0011 + row*.75)*6
-          +Math.sin(x*.007 - now*.0007 + row)*4;
-        if(x===-20)ctx.moveTo(x,y);
-        else ctx.lineTo(x,y);
+      for(let x=-20;x<=w+20;x+=14){
+        const y=base
+          +Math.sin(x*.022+now*.0015+row*.8)*3.8
+          +Math.sin(x*.008-now*.0010+row)*2.2;
+        if(x===-20)ctx.moveTo(x,y);else ctx.lineTo(x,y);
       }
-      ctx.stroke();
-    }
-
-    // 縦方向の薄い屈折筋
-    ctx.globalAlpha=.035;
-    ctx.lineWidth=8;
-    for(let i=0;i<8;i++){
-      const x=(i+.5)*w/8 + Math.sin(now*.0006+i)*20;
-      ctx.beginPath();
-      ctx.moveTo(x,0);
-      ctx.bezierCurveTo(
-        x+22*Math.sin(i),h*.25,
-        x-28*Math.cos(i),h*.55,
-        x+12*Math.sin(i*1.7),h*.80
-      );
       ctx.stroke();
     }
     ctx.restore();
 
-    // ガラス越しの観客席。
-    const standTop=h*.51;
-    ctx.globalAlpha=.065;
-    ctx.fillStyle='rgba(80,185,198,.52)';
-    ctx.fillRect(0,standTop,w,h*.27);
+    // 水槽上部のガラス枠・照明フレーム
+    ctx.globalAlpha=.55;
+    ctx.fillStyle='rgba(210,245,250,.30)';
+    ctx.fillRect(0,0,w,12);
+    ctx.fillStyle='rgba(255,255,255,.62)';
+    ctx.fillRect(0,12,w,2);
 
-    // 段差
-    ctx.globalAlpha=.13;
-    ctx.strokeStyle='rgba(245,255,255,.40)';
+    // ガラスの縦フレーム。奥行きを感じるよう少し本数を増やす。
+    ctx.globalAlpha=.16;
+    ctx.fillStyle='rgba(235,255,255,.65)';
+    const frameXs=[0,w*.14,w*.28,w*.42,w*.58,w*.72,w*.86,w-4];
+    frameXs.forEach(x=>ctx.fillRect(x,0,3,h*.90));
+
+    // ガラスの薄い反射膜
+    ctx.globalAlpha=.055;
+    const glass=ctx.createLinearGradient(0,0,w,0);
+    glass.addColorStop(0,'rgba(255,255,255,.50)');
+    glass.addColorStop(.12,'rgba(255,255,255,.03)');
+    glass.addColorStop(.88,'rgba(255,255,255,.03)');
+    glass.addColorStop(1,'rgba(255,255,255,.50)');
+    ctx.fillStyle=glass;
+    ctx.fillRect(0,0,w,h);
+
+    // 奥の水の歪み。観客席が水越しにゆらいで見える感覚。
+    ctx.save();
+    ctx.globalAlpha=.055;
+    ctx.strokeStyle='rgba(240,255,255,.92)';
+    ctx.lineWidth=2;
+    for(let row=0;row<8;row++){
+      const baseY=h*.18+row*h*.055;
+      ctx.beginPath();
+      for(let x=-15;x<=w+15;x+=16){
+        const y=baseY
+          +Math.sin(x*.016 + now*.0010 + row*.7)*5
+          +Math.sin(x*.006 - now*.00055 + row*.4)*3;
+        if(x===-15)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // --- 奥の観客席 ---
+    // 段状の観客席を明確に見せる。水槽越しなので薄め。
+    const standTop=h*.47;
+    const standBottom=h*.82;
+    ctx.save();
+    ctx.globalAlpha=.12;
+    const standGrad=ctx.createLinearGradient(0,standTop,0,standBottom);
+    standGrad.addColorStop(0,'rgba(41,128,145,.28)');
+    standGrad.addColorStop(1,'rgba(13,82,101,.42)');
+    ctx.fillStyle=standGrad;
+    ctx.fillRect(0,standTop,w,standBottom-standTop);
+
+    // 段差と手すり
+    ctx.globalAlpha=.24;
+    ctx.strokeStyle='rgba(230,252,255,.55)';
     ctx.lineWidth=2;
     for(let row=0;row<5;row++){
-      const y=standTop+row*23;
+      const y=standTop+row*(standBottom-standTop)/5;
       ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+
+      ctx.globalAlpha=.10;
+      ctx.fillStyle='rgba(235,255,255,.65)';
+      ctx.fillRect(0,y+4,w,3);
+      ctx.globalAlpha=.24;
     }
 
-    // 観客はカエルシルエット。緑多め＋カラフル。
+    // 観客カエル。緑多め、青・黄・紫・ピンクを混ぜる。
     const frogColors=[
-      'rgba(42,170,86,.52)',
-      'rgba(62,193,105,.50)',
-      'rgba(40,152,78,.50)',
-      'rgba(59,175,197,.42)',
-      'rgba(237,199,57,.42)',
-      'rgba(154,100,190,.40)',
-      'rgba(235,112,145,.36)'
+      'rgba(48,171,86,.58)',
+      'rgba(66,194,101,.56)',
+      'rgba(36,151,75,.55)',
+      'rgba(47,162,188,.46)',
+      'rgba(232,200,61,.46)',
+      'rgba(146,101,190,.44)',
+      'rgba(230,115,149,.40)'
     ];
-    ctx.globalAlpha=1;
-    for(let row=0;row<5;row++){
-      const y=standTop+9+row*23;
-      const offset=(row%2)*17;
-      for(let col=0,x=12+offset;x<w;x+=34,col++){
-        // 緑が選ばれやすいように先頭3色を多めに使う。
+    const rows=5;
+    for(let row=0;row<rows;row++){
+      const y=standTop+14+row*((standBottom-standTop-18)/rows);
+      const offset=(row%2)*16;
+      for(let col=0,x=12+offset;x<w;x+=32,col++){
         const pick=(col+row*3)%10;
         const ci=pick<6 ? pick%3 : 3+(pick-6)%4;
-        ctx.fillStyle=frogColors[ci];
+        const color=frogColors[ci];
+        ctx.fillStyle=color;
 
         // 頭
-        ctx.beginPath();
-        ctx.arc(x,y+5,7.5,0,Math.PI*2);
-        ctx.fill();
-
+        ctx.beginPath();ctx.arc(x,y+5,7.2,0,Math.PI*2);ctx.fill();
         // 目の出っ張り
         ctx.beginPath();
-        ctx.arc(x-4.5,y,3.4,0,Math.PI*2);
-        ctx.arc(x+4.5,y,3.4,0,Math.PI*2);
+        ctx.arc(x-4.3,y,3.1,0,Math.PI*2);
+        ctx.arc(x+4.3,y,3.1,0,Math.PI*2);
         ctx.fill();
-
         // 体
-        ctx.beginPath();
-        ctx.ellipse(x,y+14,7.5,9.5,0,0,Math.PI*2);
-        ctx.fill();
+        ctx.beginPath();ctx.ellipse(x,y+14,7.1,9,0,0,Math.PI*2);ctx.fill();
 
-        // 何匹かは手を上げて盛り上がる。
+        // 盛り上がっている観客
         const cheer=(col+row*2)%5===0;
         const wave=(col+row)%7===0;
         if(cheer||wave){
-          ctx.lineWidth=3;
-          ctx.strokeStyle=frogColors[ci];
-          ctx.lineCap='round';
-
+          ctx.strokeStyle=color;ctx.lineWidth=3;ctx.lineCap='round';
           if(cheer){
             ctx.beginPath();
-            ctx.moveTo(x-5,y+12);ctx.lineTo(x-10,y+2);ctx.lineTo(x-12,y-4);
-            ctx.moveTo(x+5,y+12);ctx.lineTo(x+10,y+2);ctx.lineTo(x+12,y-4);
+            ctx.moveTo(x-5,y+12);ctx.lineTo(x-10,y+2);ctx.lineTo(x-12,y-5);
+            ctx.moveTo(x+5,y+12);ctx.lineTo(x+10,y+2);ctx.lineTo(x+12,y-5);
             ctx.stroke();
           }else{
             const sway=Math.sin(now*.006+col+row)*2;
             ctx.beginPath();
-            ctx.moveTo(x+5,y+12);ctx.lineTo(x+11+sway,y+4);ctx.lineTo(x+13+sway,y-2);
+            ctx.moveTo(x+5,y+12);ctx.lineTo(x+11+sway,y+4);ctx.lineTo(x+13+sway,y-3);
             ctx.stroke();
           }
         }
       }
     }
+    ctx.restore();
 
-    // レフリーカエル。緑の肌＋白黒のレフリー服。
+    // --- レフリーカエル ---
     refereeFrog.t=(refereeFrog.t||0)+0.016;
     if(!refereeFrog.x)refereeFrog.x=w*.5;
     refereeFrog.x+=refereeFrog.dir*0.65;
@@ -6232,40 +6251,36 @@ function drawBackground(dt){
     ctx.save();
     ctx.translate(rx,ry);
     ctx.scale(refereeFrog.dir,1);
-    ctx.globalAlpha=.88;
+    ctx.globalAlpha=.90;
 
-    // 緑の体・頭
-    ctx.fillStyle='rgba(54,178,87,.96)';
+    // 黄色の肌
+    ctx.fillStyle='rgba(238,205,48,.98)';
     ctx.beginPath();ctx.ellipse(0,10,13,17,0,0,Math.PI*2);ctx.fill();
     ctx.beginPath();ctx.arc(-7,-3,7,0,Math.PI*2);ctx.arc(7,-3,7,0,Math.PI*2);ctx.fill();
 
-    // 白目
-    ctx.fillStyle='rgba(248,255,252,.98)';
+    // 白目・黒目
+    ctx.fillStyle='rgba(252,255,248,.98)';
     ctx.beginPath();ctx.arc(-7,-3,4.3,0,Math.PI*2);ctx.arc(7,-3,4.3,0,Math.PI*2);ctx.fill();
-
-    // 黒目
-    ctx.fillStyle='rgba(15,30,24,.98)';
+    ctx.fillStyle='rgba(20,28,24,.98)';
     ctx.beginPath();ctx.arc(-6,-3,1.8,0,Math.PI*2);ctx.arc(8,-3,1.8,0,Math.PI*2);ctx.fill();
 
-    // 白黒レフリーシャツ
+    // 白黒ストライプのレフリー服
     ctx.save();
     ctx.beginPath();ctx.ellipse(0,12,8.2,11,0,0,Math.PI*2);ctx.clip();
-    ctx.fillStyle='rgba(245,247,245,.98)';
+    ctx.fillStyle='rgba(247,248,245,.98)';
     ctx.fillRect(-9,1,18,22);
-    ctx.fillStyle='rgba(30,38,38,.95)';
-    for(let sx=-8;sx<9;sx+=5){
-      ctx.fillRect(sx,1,2.5,22);
-    }
+    ctx.fillStyle='rgba(28,34,34,.96)';
+    for(let sx=-8;sx<9;sx+=5)ctx.fillRect(sx,1,2.5,22);
     ctx.restore();
 
     // 黒い襟
-    ctx.fillStyle='rgba(25,32,32,.96)';
+    ctx.fillStyle='rgba(25,30,30,.96)';
     ctx.beginPath();
     ctx.moveTo(-5,3);ctx.lineTo(0,8);ctx.lineTo(5,3);ctx.lineTo(0,5);ctx.closePath();
     ctx.fill();
 
-    // 緑の腕。片手を上げたり下げたり。
-    ctx.strokeStyle='rgba(54,178,87,.96)';
+    // 黄色い腕。時々合図。
+    ctx.strokeStyle='rgba(238,205,48,.98)';
     ctx.lineWidth=4;ctx.lineCap='round';
     const armUp=Math.sin(refereeFrog.t*3)>0.2;
     ctx.beginPath();
@@ -6273,68 +6288,54 @@ function drawBackground(dt){
     if(armUp){ctx.lineTo(16,-1);ctx.lineTo(18,-9);}
     else{ctx.lineTo(16,12);ctx.lineTo(18,16);}
     ctx.stroke();
-
     ctx.restore();
 
-    // 上部照明レール。
-    ctx.globalAlpha=.68;
-    ctx.fillStyle='rgba(230,255,255,.28)';
-    ctx.fillRect(0,0,w,16);
-    ctx.fillStyle='rgba(255,255,255,.55)';
-    ctx.fillRect(0,16,w,2);
-
+    // --- 照明 ---
     const lampCount=Math.max(6,Math.floor(w/160));
     for(let i=0;i<lampCount;i++){
       const x=(i+.5)*w/lampCount;
-      let core='rgba(230,255,255,.92)',beam='rgba(220,255,255,.10)';
-      if(day2){core='rgba(232,228,255,.94)';beam='rgba(210,195,255,.11)';}
-      if(finalStage){core='rgba(255,249,205,.98)';beam='rgba(255,237,160,.13)';}
+      let core='rgba(245,255,255,.95)',beam='rgba(225,250,255,.075)';
+      if(day2){core='rgba(235,232,255,.95)';beam='rgba(215,205,255,.08)';}
+      if(finalStage){core='rgba(255,247,205,.98)';beam='rgba(255,236,165,.10)';}
 
       ctx.fillStyle=core;
-      ctx.beginPath();ctx.ellipse(x,17,16,5,0,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=.78;
+      ctx.beginPath();ctx.ellipse(x,16,15,4.5,0,0,Math.PI*2);ctx.fill();
 
-      const bg=ctx.createLinearGradient(x,18,x,h*.74);
+      const bg=ctx.createLinearGradient(x,18,x,h*.72);
       bg.addColorStop(0,beam);bg.addColorStop(1,'rgba(255,255,255,0)');
       ctx.fillStyle=bg;
       ctx.beginPath();
-      ctx.moveTo(x-13,20);ctx.lineTo(x+13,20);
-      ctx.lineTo(x+60,h*.73);ctx.lineTo(x-60,h*.73);
+      ctx.moveTo(x-12,19);ctx.lineTo(x+12,19);
+      ctx.lineTo(x+55,h*.71);ctx.lineTo(x-55,h*.71);
       ctx.closePath();ctx.fill();
     }
 
-    // 水槽底面。草なし、リングの大きな楕円線も無し。
-    const floorY=h*.86;
+    // --- 底面 ---
+    // 透明な水槽の底。大きなリングは無し。
+    const floorY=h*.87;
     const fg=ctx.createLinearGradient(0,floorY,w,floorY);
-    fg.addColorStop(0,'rgba(120,225,232,.40)');
-    fg.addColorStop(.5,finalStage?'rgba(242,224,150,.30)':'rgba(170,242,245,.44)');
-    fg.addColorStop(1,'rgba(120,225,232,.40)');
-    ctx.globalAlpha=.86;
+    fg.addColorStop(0,'rgba(180,240,245,.22)');
+    fg.addColorStop(.5,finalStage?'rgba(245,230,170,.20)':'rgba(210,250,252,.26)');
+    fg.addColorStop(1,'rgba(180,240,245,.22)');
+    ctx.globalAlpha=.75;
     ctx.fillStyle=fg;
     ctx.fillRect(0,floorY,w,h-floorY);
 
-    // 床にはごく薄い水平反射だけ。
-    ctx.globalAlpha=.18;
-    ctx.strokeStyle='rgba(245,255,255,.75)';
+    // 底の薄い反射
+    ctx.globalAlpha=.16;
+    ctx.strokeStyle='rgba(250,255,255,.85)';
     ctx.lineWidth=2;
-    ctx.beginPath();
-    ctx.moveTo(0,floorY+4);
-    ctx.lineTo(w,floorY+4);
-    ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,floorY+3);ctx.lineTo(w,floorY+3);ctx.stroke();
 
-    // ガラス支柱
-    ctx.globalAlpha=.24;
-    ctx.fillStyle='rgba(245,255,255,.68)';
-    ctx.fillRect(2,0,3,h);
-    ctx.fillRect(w-5,0,3,h);
-
-    // 決勝のみ豪華な円形装飾（中央奥）。床リングとは別物。
+    // 決勝のみ、奥に控えめな豪華装飾。
     if(finalStage){
-      ctx.globalAlpha=.22;
-      ctx.strokeStyle='rgba(255,235,150,.88)';
-      ctx.lineWidth=4;
-      ctx.beginPath();ctx.arc(w*.5,h*.39,Math.min(w,h)*.24,0,Math.PI*2);ctx.stroke();
-      ctx.lineWidth=2;
-      ctx.beginPath();ctx.arc(w*.5,h*.39,Math.min(w,h)*.29,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=.18;
+      ctx.strokeStyle='rgba(255,235,150,.85)';
+      ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(w*.5,h*.38,Math.min(w,h)*.23,0,Math.PI*2);ctx.stroke();
+      ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.arc(w*.5,h*.38,Math.min(w,h)*.28,0,Math.PI*2);ctx.stroke();
     }
 
     ctx.restore();
