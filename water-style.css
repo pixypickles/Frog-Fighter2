@@ -3617,3 +3617,63 @@ body.portrait-play #portraitOverlay{
 #portraitOverlay>strong{font-size:clamp(18px,5.4vw,29px)!important;max-width:92vw;line-height:1.35}
 #selectScreen.screen.active .select-right-panel .fighter-card{padding-left:140px!important}
 @media (orientation:landscape) and (max-height:600px){#selectScreen.screen.active .select-right-panel .fighter-card{padding-left:128px!important}}
+
+
+/* v1.9.6: use supplied FROG FIGHTER II artwork */
+#portraitOverlay .portrait-title-logo,
+#portraitOverlay .portrait-logo-top,
+#portraitOverlay .portrait-logo-bottom,
+#portraitOverlay .portrait-logo-bottom span,
+#portraitOverlay .portrait-logo-bottom b,
+#titleScreen .frog-fighter-logo{
+  display:none !important;
+}
+
+#portraitOverlay .portrait-logo-image-wrap{
+  position:relative;
+  z-index:20;
+  width:min(92vw,650px);
+  margin:0 auto 2px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+#portraitOverlay .portrait-logo-image{
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(5px 7px 0 rgba(0,20,75,.45));
+}
+#portraitOverlay .portrait-logo-sub{
+  margin:4px 0 4vh !important;
+}
+
+#titleScreen .title-logo-image-wrap{
+  position:relative;
+  z-index:20;
+  width:min(76vw,760px);
+  margin:-2vh auto 2px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+#titleScreen .title-logo-image{
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(6px 8px 0 rgba(0,13,58,.45));
+}
+
+@media (orientation:portrait){
+  #portraitOverlay .portrait-logo-image-wrap{
+    width:min(94vw,680px);
+  }
+}
+@media (orientation:landscape) and (max-height:520px){
+  #titleScreen .title-logo-image-wrap{
+    width:min(62vw,620px);
+    margin-top:-4vh;
+  }
+}
