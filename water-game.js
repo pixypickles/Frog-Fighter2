@@ -82,6 +82,7 @@
   let gamePaused=false;
   let last = performance.now();
   let bubbles = [];
+  let refereeFrog={x:0,dir:1,t:0};
   let particles = [];
   let hitRings = [];
   let guardWaves = [];
@@ -6194,8 +6195,71 @@ function drawBackground(dt){
         ctx.beginPath();
         ctx.ellipse(x,y+14,7.5,9.5,0,0,Math.PI*2);
         ctx.fill();
+
+        // 何匹かは手を上げて盛り上がる。
+        const cheer=(col+row*2)%5===0;
+        const wave=(col+row)%7===0;
+        if(cheer||wave){
+          ctx.lineWidth=3;
+          ctx.strokeStyle=frogColors[ci];
+          ctx.lineCap='round';
+
+          if(cheer){
+            ctx.beginPath();
+            ctx.moveTo(x-5,y+12);ctx.lineTo(x-10,y+2);ctx.lineTo(x-12,y-4);
+            ctx.moveTo(x+5,y+12);ctx.lineTo(x+10,y+2);ctx.lineTo(x+12,y-4);
+            ctx.stroke();
+          }else{
+            const sway=Math.sin(now*.006+col+row)*2;
+            ctx.beginPath();
+            ctx.moveTo(x+5,y+12);ctx.lineTo(x+11+sway,y+4);ctx.lineTo(x+13+sway,y-2);
+            ctx.stroke();
+          }
+        }
       }
     }
+
+    // レフリーカエル。水槽の手前側を左右にチョロチョロ移動する。
+    refereeFrog.t=(refereeFrog.t||0)+0.016;
+    if(!refereeFrog.x)refereeFrog.x=w*.5;
+    refereeFrog.x+=refereeFrog.dir*0.65;
+    const minRef=w*.12,maxRef=w*.88;
+    if(refereeFrog.x<minRef){refereeFrog.x=minRef;refereeFrog.dir=1;}
+    if(refereeFrog.x>maxRef){refereeFrog.x=maxRef;refereeFrog.dir=-1;}
+
+    const rx=refereeFrog.x;
+    const ry=h*.82 + Math.sin(refereeFrog.t*4)*2;
+    ctx.save();
+    ctx.translate(rx,ry);
+    ctx.scale(refereeFrog.dir,1);
+
+    // 小さめ、白黒ベースで審判らしく。
+    ctx.globalAlpha=.82;
+    ctx.fillStyle='rgba(35,48,58,.90)';
+    ctx.beginPath();ctx.ellipse(0,10,13,17,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(-7,-3,7,0,Math.PI*2);ctx.arc(7,-3,7,0,Math.PI*2);ctx.fill();
+
+    ctx.fillStyle='rgba(245,250,250,.95)';
+    ctx.beginPath();ctx.arc(-7,-3,4.2,0,Math.PI*2);ctx.arc(7,-3,4.2,0,Math.PI*2);ctx.fill();
+
+    ctx.fillStyle='rgba(15,24,28,.95)';
+    ctx.beginPath();ctx.arc(-6,-3,1.8,0,Math.PI*2);ctx.arc(8,-3,1.8,0,Math.PI*2);ctx.fill();
+
+    // 白い胸元
+    ctx.fillStyle='rgba(235,242,242,.92)';
+    ctx.beginPath();ctx.ellipse(0,12,6.5,9,0,0,Math.PI*2);ctx.fill();
+
+    // 片手を上げたり下げたりする。
+    ctx.strokeStyle='rgba(35,48,58,.90)';
+    ctx.lineWidth=4;ctx.lineCap='round';
+    const armUp=Math.sin(refereeFrog.t*3)>0.2;
+    ctx.beginPath();
+    ctx.moveTo(9,8);
+    if(armUp){ctx.lineTo(16,-1);ctx.lineTo(18,-9);}
+    else{ctx.lineTo(16,12);ctx.lineTo(18,16);}
+    ctx.stroke();
+
+    ctx.restore();
 
     // 上部照明レール。
     ctx.globalAlpha=.68;
