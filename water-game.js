@@ -6095,46 +6095,109 @@ function drawBackground(dt){
     const w=innerWidth,h=innerHeight;
     const finalStage=(gameMode==='story' && (enemy?.type==='samael' || enemy?.type==='seraphiel'));
     const day2=(gameMode==='story' && stageTheme===2);
+    const now=performance.now();
 
     ctx.save();
 
-    // 透明な大型水槽のガラス反射。
+    // 大型水槽のガラス反射。
     ctx.globalAlpha=.10;
     const glass=ctx.createLinearGradient(0,0,w,0);
-    glass.addColorStop(0,'rgba(255,255,255,.50)');
-    glass.addColorStop(.09,'rgba(255,255,255,.04)');
-    glass.addColorStop(.91,'rgba(255,255,255,.04)');
-    glass.addColorStop(1,'rgba(255,255,255,.50)');
+    glass.addColorStop(0,'rgba(255,255,255,.48)');
+    glass.addColorStop(.09,'rgba(255,255,255,.035)');
+    glass.addColorStop(.91,'rgba(255,255,255,.035)');
+    glass.addColorStop(1,'rgba(255,255,255,.48)');
     ctx.fillStyle=glass;
     ctx.fillRect(0,0,w,h);
 
-    // 水槽の外側にある観客席が、ガラス越しに透けて見える。
-    const standTop=h*.54;
-    ctx.globalAlpha=.16;
-    ctx.fillStyle='#0a6f83';
-    ctx.fillRect(0,standTop,w,h*.22);
-
-    // 段状の観客席ライン
-    ctx.strokeStyle='rgba(235,255,255,.28)';
+    // 奥の水がゆらいで見える屈折ライン。
+    // 強すぎない波紋を何本も重ねて、水槽越しの歪み感を出す。
+    ctx.save();
+    ctx.globalAlpha=.12;
+    ctx.strokeStyle='rgba(235,255,255,.85)';
     ctx.lineWidth=2;
-    for(let row=0;row<4;row++){
-      const y=standTop+row*22;
+    for(let row=0;row<9;row++){
+      const baseY=h*.10+row*h*.065;
+      ctx.beginPath();
+      for(let x=-20;x<=w+20;x+=18){
+        const y=baseY
+          +Math.sin(x*.018 + now*.0011 + row*.75)*6
+          +Math.sin(x*.007 - now*.0007 + row)*4;
+        if(x===-20)ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+
+    // 縦方向の薄い屈折筋
+    ctx.globalAlpha=.055;
+    ctx.lineWidth=8;
+    for(let i=0;i<8;i++){
+      const x=(i+.5)*w/8 + Math.sin(now*.0006+i)*20;
+      ctx.beginPath();
+      ctx.moveTo(x,0);
+      ctx.bezierCurveTo(
+        x+22*Math.sin(i),h*.25,
+        x-28*Math.cos(i),h*.55,
+        x+12*Math.sin(i*1.7),h*.80
+      );
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // ガラス越しの観客席。
+    const standTop=h*.51;
+    ctx.globalAlpha=.10;
+    ctx.fillStyle='rgba(20,115,126,.70)';
+    ctx.fillRect(0,standTop,w,h*.27);
+
+    // 段差
+    ctx.globalAlpha=.18;
+    ctx.strokeStyle='rgba(235,255,255,.34)';
+    ctx.lineWidth=2;
+    for(let row=0;row<5;row++){
+      const y=standTop+row*23;
       ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
     }
 
-    // 観客シルエット。以前より薄く、でも「後ろにいる」と分かる程度。
-    ctx.globalAlpha=.20;
-    ctx.fillStyle='rgba(10,62,77,.72)';
-    for(let row=0;row<4;row++){
-      const y=standTop+10+row*22;
-      const offset=(row%2)*16;
-      for(let x=14+offset;x<w;x+=32){
-        ctx.beginPath();ctx.arc(x,y,5.5,0,Math.PI*2);ctx.fill();
-        ctx.fillRect(x-4.5,y+5,9,10);
+    // 観客はカエルシルエット。緑多め＋カラフル。
+    const frogColors=[
+      'rgba(42,170,86,.52)',
+      'rgba(62,193,105,.50)',
+      'rgba(40,152,78,.50)',
+      'rgba(59,175,197,.42)',
+      'rgba(237,199,57,.42)',
+      'rgba(154,100,190,.40)',
+      'rgba(235,112,145,.36)'
+    ];
+    ctx.globalAlpha=1;
+    for(let row=0;row<5;row++){
+      const y=standTop+9+row*23;
+      const offset=(row%2)*17;
+      for(let col=0,x=12+offset;x<w;x+=34,col++){
+        // 緑が選ばれやすいように先頭3色を多めに使う。
+        const pick=(col+row*3)%10;
+        const ci=pick<6 ? pick%3 : 3+(pick-6)%4;
+        ctx.fillStyle=frogColors[ci];
+
+        // 頭
+        ctx.beginPath();
+        ctx.arc(x,y+5,7.5,0,Math.PI*2);
+        ctx.fill();
+
+        // 目の出っ張り
+        ctx.beginPath();
+        ctx.arc(x-4.5,y,3.4,0,Math.PI*2);
+        ctx.arc(x+4.5,y,3.4,0,Math.PI*2);
+        ctx.fill();
+
+        // 体
+        ctx.beginPath();
+        ctx.ellipse(x,y+14,7.5,9.5,0,0,Math.PI*2);
+        ctx.fill();
       }
     }
 
-    // 上部照明レールは明るめ。
+    // 上部照明レール。
     ctx.globalAlpha=.68;
     ctx.fillStyle='rgba(230,255,255,.28)';
     ctx.fillRect(0,0,w,16);
@@ -6151,47 +6214,48 @@ function drawBackground(dt){
       ctx.fillStyle=core;
       ctx.beginPath();ctx.ellipse(x,17,16,5,0,0,Math.PI*2);ctx.fill();
 
-      const bg=ctx.createLinearGradient(x,18,x,h*.75);
+      const bg=ctx.createLinearGradient(x,18,x,h*.74);
       bg.addColorStop(0,beam);bg.addColorStop(1,'rgba(255,255,255,0)');
       ctx.fillStyle=bg;
       ctx.beginPath();
       ctx.moveTo(x-13,20);ctx.lineTo(x+13,20);
-      ctx.lineTo(x+60,h*.74);ctx.lineTo(x-60,h*.74);
+      ctx.lineTo(x+60,h*.73);ctx.lineTo(x-60,h*.73);
       ctx.closePath();ctx.fill();
     }
 
-    // 水槽底面は明るく、植物は置かない。
+    // 水槽底面。草なし、リングの大きな楕円線も無し。
     const floorY=h*.86;
     const fg=ctx.createLinearGradient(0,floorY,w,floorY);
-    fg.addColorStop(0,'rgba(120,225,232,.44)');
-    fg.addColorStop(.5,finalStage?'rgba(242,224,150,.34)':'rgba(170,242,245,.50)');
-    fg.addColorStop(1,'rgba(120,225,232,.44)');
-    ctx.globalAlpha=.90;
+    fg.addColorStop(0,'rgba(120,225,232,.40)');
+    fg.addColorStop(.5,finalStage?'rgba(242,224,150,.30)':'rgba(170,242,245,.44)');
+    fg.addColorStop(1,'rgba(120,225,232,.40)');
+    ctx.globalAlpha=.86;
     ctx.fillStyle=fg;
     ctx.fillRect(0,floorY,w,h-floorY);
 
-    // リングライン
-    ctx.globalAlpha=.62;
-    ctx.strokeStyle=finalStage?'rgba(255,243,190,.95)':'rgba(242,255,255,.90)';
-    ctx.lineWidth=3;
+    // 床にはごく薄い水平反射だけ。
+    ctx.globalAlpha=.18;
+    ctx.strokeStyle='rgba(245,255,255,.75)';
+    ctx.lineWidth=2;
     ctx.beginPath();
-    ctx.ellipse(w*.5,floorY+18,w*.36,30,0,0,Math.PI*2);
+    ctx.moveTo(0,floorY+4);
+    ctx.lineTo(w,floorY+4);
     ctx.stroke();
 
     // ガラス支柱
-    ctx.globalAlpha=.26;
-    ctx.fillStyle='rgba(245,255,255,.70)';
+    ctx.globalAlpha=.24;
+    ctx.fillStyle='rgba(245,255,255,.68)';
     ctx.fillRect(2,0,3,h);
     ctx.fillRect(w-5,0,3,h);
 
-    // 決勝のみ豪華なリング装飾。暗くはしない。
+    // 決勝のみ豪華な円形装飾（中央奥）。床リングとは別物。
     if(finalStage){
-      ctx.globalAlpha=.26;
-      ctx.strokeStyle='rgba(255,235,150,.90)';
+      ctx.globalAlpha=.22;
+      ctx.strokeStyle='rgba(255,235,150,.88)';
       ctx.lineWidth=4;
-      ctx.beginPath();ctx.arc(w*.5,h*.40,Math.min(w,h)*.25,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.arc(w*.5,h*.39,Math.min(w,h)*.24,0,Math.PI*2);ctx.stroke();
       ctx.lineWidth=2;
-      ctx.beginPath();ctx.arc(w*.5,h*.40,Math.min(w,h)*.30,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.arc(w*.5,h*.39,Math.min(w,h)*.29,0,Math.PI*2);ctx.stroke();
     }
 
     ctx.restore();
