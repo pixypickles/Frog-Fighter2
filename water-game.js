@@ -72,6 +72,7 @@
   let storyPhase='tournament';
   let storyTournament=[];
   let storyDay=1;
+  let storyLastWon=true;
   let allBattleQueue=[];
   let allBattleIndex=0;
   let allBattleWins=0;
@@ -765,6 +766,9 @@
         restartButton.hidden=true;
         restartButton.textContent='もう一度';
         show('select');
+      }else if(!storyLastWon){
+        // 負けた試合は同じ相手に再挑戦。
+        startGame('story',storyQueue[storyFightIndex]);
       }else{
         continueStory();
       }
@@ -3271,7 +3275,7 @@
       'crayfish',
       'samael','seraphiel'
     ];
-    storyFightIndex=0;storyLosses=0;storyWins=0;storyFinished=false;storyPhase='tournament';storyDay=1;stageTheme=0;
+    storyFightIndex=0;storyLosses=0;storyWins=0;storyFinished=false;storyPhase='tournament';storyDay=1;storyLastWon=true;stageTheme=0;
 
     show('game');resize();
     showStoryNarrative([
@@ -5267,6 +5271,7 @@
     }
 
     if(gameMode==='story'){
+      storyLastWon=!!playerWon;
       if(playerWon)storyWins++;else storyLosses++;
 
       if(!playerWon&&storyLosses>=4){
@@ -5277,9 +5282,13 @@
         showStoryEnding();
         if(storyHud)storyHud.textContent=`STORY CLEAR　勝${storyWins} 敗${storyLosses}`;
         return;
+      }else if(!playerWon){
+        // 大会で負けたのに勝ち上がらない。同じ相手と再戦。
+        comboEl.textContent=`YOU LOSE　残り猶予 ${3-storyLosses}`;
+        restartButton.textContent='再戦';
       }else{
         const label=(storyFightIndex===2?'1日目終了':storyFightIndex===5?'2日目終了':storyFightIndex===7?'大会優勝':'次の試合へ');
-        comboEl.textContent=playerWon?`YOU WIN!　${label}`:`YOU LOSE　残り猶予 ${3-storyLosses}`;
+        comboEl.textContent=`YOU WIN!　${label}`;
         restartButton.textContent='次へ';
       }
       if(storyHud)storyHud.textContent=`STORY　勝${storyWins} 敗${storyLosses}/3`;
@@ -5719,6 +5728,46 @@
     enemy.guard=false;
 
     if(enemy.attackT<=0){
+      // ラファエルCPU：接近戦を避け、水圧カッター中心の距離戦。
+      if(enemy.type==='yellow'){
+        const idealMin=285, idealMax=430;
+        const away=-Math.sign(dx||enemy.face||1);
+
+        if(dist<idealMin){
+          // 近づかれたらまず距離を取る。かなり近い時は高速バブル移動も使う。
+          enemy.vx += away*enemy.speed*1.75*diff.move*dt;
+          enemy.vy += -Math.sign(dy||1)*enemy.speed*.42*diff.move*dt;
+          if(dist<155 && enemy.specialT<=0 && Math.random()<dt*.42){
+            specialRaphaelBubbleMove(enemy);return;
+          }
+        }else if(dist>idealMax){
+          // 遠すぎる時だけ少し寄る。密着するまで追いかけない。
+          enemy.vx += Math.sign(dx)*enemy.speed*.34*diff.move*dt;
+          enemy.vy += Math.sign(dy)*enemy.speed*.18*diff.move*dt;
+        }else{
+          // 射撃距離では横移動を弱め、上下だけ軽く合わせる。
+          enemy.vx*=.93;
+          enemy.vy += Math.sign(dy)*enemy.speed*.15*diff.move*dt;
+        }
+
+        if(enemy.specialT<=0){
+          const r=Math.random();
+          if(r<dt*.34*diff.special){
+            specialPressureBlade(enemy,0,'punch');return;
+          }
+          if(r<dt*.56*diff.special){
+            specialPressureBlade(enemy,15,'kick');return;
+          }
+          if(r<dt*.72*diff.special){
+            const upper=(player.y<enemy.y);
+            specialWater2Shot(enemy,{name:'カープ水圧カッター',attack:upper?'punch':'kick',color:'blade',style:'carpBlade',speed:285,angle:upper?-30:30,damage:3.7,r:12,charge:.40,curve:upper?105:-105,maxReflect:5});return;
+          }
+          if(enemy.hp<45 && r<dt*.78*diff.special){specialHealingBubble(enemy);return;}
+        }
+        // ラファエルは通常の接近・舌・近接AIへ流さない。
+        return;
+      }
+
       if(enemy.type==='beelzebub' && enemy.specialT<=0 && enemy.bossSpecialCooldown<=0){
         const roll=Math.random();
         if(roll<dt*.10){ specialVenomWater(enemy); return; }
