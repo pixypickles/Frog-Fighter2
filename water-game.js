@@ -6338,6 +6338,89 @@ function drawBackground(dt){
       ctx.lineTo(x+46,h*.68);ctx.lineTo(x-46,h*.68);ctx.closePath();ctx.fill();
     }
 
+    // 大会日程ごとの照明演出。
+    // 暗くするだけではなく、日が進むほど照明器具・光条・反射を増やして豪華にする。
+    const tournamentDay = (gameMode==='story') ? Math.max(1,Math.min(3,stageTheme||1)) : 1;
+
+    ctx.save();
+    if(tournamentDay===1){
+      // DAY 1: 開幕。透明感のある昼光色。会場全体が明るい。
+      const dayGlow=ctx.createLinearGradient(0,0,0,h);
+      dayGlow.addColorStop(0,'rgba(225,255,255,.075)');
+      dayGlow.addColorStop(.55,'rgba(125,239,247,.025)');
+      dayGlow.addColorStop(1,'rgba(255,255,255,.035)');
+      ctx.fillStyle=dayGlow;ctx.fillRect(0,0,w,h);
+    }else if(tournamentDay===2){
+      // DAY 2: 青白い大会照明。左右のライト列と床の光を追加。
+      const cool=ctx.createLinearGradient(0,0,0,h);
+      cool.addColorStop(0,'rgba(195,224,255,.075)');
+      cool.addColorStop(.55,'rgba(105,175,238,.035)');
+      cool.addColorStop(1,'rgba(205,242,255,.045)');
+      ctx.fillStyle=cool;ctx.fillRect(0,0,w,h);
+
+      ctx.globalAlpha=.30;
+      for(let side of [-1,1]){
+        const sx=side<0?w*.08:w*.92;
+        for(let j=0;j<3;j++){
+          const sy=h*(.16+j*.13);
+          ctx.fillStyle='rgba(230,246,255,.92)';
+          ctx.beginPath();ctx.ellipse(sx,sy,9,3.2,0,0,Math.PI*2);ctx.fill();
+        }
+      }
+      // 床を横切る淡いライト
+      ctx.globalAlpha=.11;
+      ctx.strokeStyle='rgba(215,247,255,.95)';
+      ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(w*.08,h*.91);ctx.lineTo(w*.92,h*.91);ctx.stroke();
+      ctx.restore(); ctx.save();
+    }else{
+      // DAY 3: 決勝日。深い青をほんの少し足しつつ、金色・白色の照明で最も豪華に。
+      const finalWash=ctx.createLinearGradient(0,0,0,h);
+      finalWash.addColorStop(0,'rgba(35,92,158,.055)');
+      finalWash.addColorStop(.55,'rgba(22,72,130,.025)');
+      finalWash.addColorStop(1,'rgba(12,57,105,.045)');
+      ctx.fillStyle=finalWash;ctx.fillRect(0,0,w,h);
+
+      // 天井の金白スポット列
+      const spots=9;
+      for(let i=0;i<spots;i++){
+        const x=(i+.5)*w/spots;
+        ctx.globalAlpha=.72;
+        ctx.fillStyle=(i%2===0)?'rgba(255,245,195,.98)':'rgba(239,250,255,.98)';
+        ctx.beginPath();ctx.ellipse(x,10,12,3.5,0,0,Math.PI*2);ctx.fill();
+
+        ctx.globalAlpha=.075;
+        const beam=ctx.createLinearGradient(x,14,x,h*.72);
+        beam.addColorStop(0,(i%2===0)?'rgba(255,223,125,.70)':'rgba(220,246,255,.68)');
+        beam.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle=beam;
+        ctx.beginPath();
+        ctx.moveTo(x-8,14);ctx.lineTo(x+8,14);
+        ctx.lineTo(x+58,h*.72);ctx.lineTo(x-58,h*.72);
+        ctx.closePath();ctx.fill();
+      }
+
+      // 観客席の上に決勝らしい光の帯
+      ctx.globalAlpha=.18;
+      ctx.strokeStyle='rgba(255,224,126,.92)';
+      ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.moveTo(0,h*.235);ctx.lineTo(w,h*.235);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,h*.475);ctx.lineTo(w,h*.475);ctx.stroke();
+
+      // 床の中央に薄い金色の反射。キャラを邪魔しない。
+      const floorSpot=ctx.createRadialGradient(w*.5,h*.86,5,w*.5,h*.86,w*.32);
+      floorSpot.addColorStop(0,'rgba(255,231,153,.115)');
+      floorSpot.addColorStop(1,'rgba(255,231,153,0)');
+      ctx.fillStyle=floorSpot;ctx.fillRect(0,h*.72,w,h*.28);
+
+      // ガラス端のハイライトも決勝だけ少し強化
+      ctx.globalAlpha=.15;
+      ctx.strokeStyle='rgba(255,245,207,.82)';
+      ctx.lineWidth=2;
+      ctx.strokeRect(3,3,w-6,h*.87);
+    }
+    ctx.restore();
+
     // ガラス面の最終ハイライト
     ctx.globalAlpha=.055;
     const glass=ctx.createLinearGradient(0,0,w,0);
