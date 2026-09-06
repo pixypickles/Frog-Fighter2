@@ -1741,11 +1741,13 @@
       ctx.fill();
 
       if(this.type==='flauros'){
-        // ヒョウ柄：黒い不規則な輪＋小さな斑点。均一な水玉にはしない。
-        ctx.save();ctx.strokeStyle='#241516';ctx.fillStyle='#241516';ctx.lineWidth=3.2;ctx.lineCap='round';ctx.lineJoin='round';
-        const rosettes=[[-19,18,7,5,.2],[18,23,8,5,-.35],[-17,42,7,6,-.2],[18,48,6,5,.35],[0,12,6,4,.1]];
-        rosettes.forEach(([x,y,rx,ry,r],i)=>{ctx.save();ctx.translate(x,y);ctx.rotate(r);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,.25,2.05);ctx.stroke();ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,3.15,5.35);ctx.stroke();if(i%2===0){ctx.beginPath();ctx.arc(rx*.15,ry*.05,1.8,0,Math.PI*2);ctx.fill();}ctx.restore();});
-        [[-27,30,3],[27,35,2.8],[-8,55,3.2],[10,58,2.4],[-6,21,2.3],[7,29,2.2]].forEach(([x,y,r])=>{ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();});
+        // v1.9.9 ヒョウ柄：参考画像のような「黒いロゼット＋暖色の芯」。汚れに見えるベタ斑点は使わない。
+        const drawRosette=(x,y,rx,ry,rot,open=0)=>{ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.lineCap='round';ctx.strokeStyle='#21120e';ctx.lineWidth=4.8;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,.25+open,2.55);ctx.stroke();ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,3.45,5.95-open);ctx.stroke();ctx.fillStyle='#9a542b';ctx.beginPath();ctx.ellipse(0,0,rx*.48,ry*.48,0,0,Math.PI*2);ctx.fill();ctx.restore();};
+        ctx.save();
+        drawRosette(-18,19,8,6,.20,.08); drawRosette(18,25,9,6,-.35,.16);
+        drawRosette(-16,43,8,7,-.18,.12); drawRosette(17,49,7,6,.32,.05);
+        drawRosette(1,12,7,5,.08,.18);
+        ctx.fillStyle='#21120e';[[-27,31,2.8],[27,37,2.6],[-6,57,2.8],[9,59,2.4]].forEach(([x,y,r])=>{ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();});
         ctx.restore();
       }
 
@@ -1962,10 +1964,9 @@
       ctx.fill();
 
       if(this.type==='flauros'){
-        // 赤いヒョウ柄。シンプルなカエル造形を壊さないよう黒斑を部分配置。
-        ctx.save();ctx.fillStyle='#351817';ctx.globalAlpha=.92;
-        [[-23,-11,7,5],[18,-17,8,5],[-5,4,6,4],[24,5,5,4],[-18,30,7,5],[13,42,6,5]].forEach(v=>{ctx.beginPath();ctx.ellipse(v[0],v[1],v[2],v[3],.35,0,Math.PI*2);ctx.fill();});
-        ctx.restore();
+        // 顔側もロゼット柄。輪の内側を茶色にしてヒョウ柄として読めるようにする。
+        const headRosette=(x,y,rx,ry,rot)=>{ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.strokeStyle='#21120e';ctx.lineWidth=4.2;ctx.lineCap='round';ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,.30,2.45);ctx.stroke();ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,3.55,5.75);ctx.stroke();ctx.fillStyle='#9a542b';ctx.beginPath();ctx.ellipse(0,0,rx*.45,ry*.44,0,0,Math.PI*2);ctx.fill();ctx.restore();};
+        ctx.save();headRosette(-23,-8,7,5,.15);headRosette(21,-14,8,5,-.25);headRosette(-5,7,6,4,.25);headRosette(25,5,5,4,-.2);ctx.fillStyle='#21120e';ctx.beginPath();ctx.arc(-29,7,2.5,0,Math.PI*2);ctx.fill();ctx.restore();
       }
 
       // 目のふくらみ
