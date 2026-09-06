@@ -1707,7 +1707,16 @@
         ctx.scale(1.08,.82);
       }
 
-      if(this.throwState || Math.abs(this.spinAngle)>.02) ctx.rotate(this.spinAngle);
+      // スピンキックカッター：フィギュアスケートのように高速3回転。
+      // 右向き時は画面上で反時計回り、左向き時は左右反転して逆回転。
+      if(this.type==='kawazu' && this.specialType==='kawazuSpinCutter' && this.specialT>0){
+        const total=.84;
+        const progress=Math.max(0,Math.min(1,(total-this.specialT)/total));
+        const spinDir=this.face>0?-1:1;
+        ctx.rotate(spinDir*progress*Math.PI*6);
+      }else if(this.throwState || Math.abs(this.spinAngle)>.02){
+        ctx.rotate(this.spinAngle);
+      }
       if(this.face<0) ctx.scale(-1,1);
       if(this.flash>0) ctx.globalAlpha=.55;
 
@@ -4344,21 +4353,50 @@
 
   function specialKawazuSpinCutter(f){
     if(gameOver || !f || f.type!=='kawazu' || f.stun>0 || f.guard || f.specialT>0) return false;
-    f.specialType='kawazuSpinCutter'; f.specialT=.72; f.attack='kick'; f.attackT=.72;
+
+    // フィギュアスケート風にその場で高速3回転し、1回転ごとにカッターを1発放つ。
+    const total=.84;
+    f.specialType='kawazuSpinCutter';
+    f.specialT=total;
+    f.attack='kick';
+    f.attackT=total;
     comboEl.textContent='スピンキックカッター!';
+
     const dir=f.face;
-    [0,120,240].forEach((delay,i)=>{
+    [90,330,570].forEach((delay,i)=>{
       setTimeout(()=>{
-        if(gameOver||!f)return;
-        const speed=330+i*18;
+        if(gameOver || !f || f.specialType!=='kawazuSpinCutter') return;
+
+        // 3発ともほぼ正面。わずかに高さをずらして刃が重なり過ぎないようにする。
+        const speed=390+i*16;
         water2Shots.push({
-          owner:f,x:f.x+dir*58,y:f.y+(-18+i*18),vx:dir*speed,vy:(i-1)*36,
-          r:10,t:1.55,life:1.55,damage:2.0,name:'スピンキックカッター',color:'blade',
-          reflected:0,hit:false,spin:0,style:'pressureBlade',poisonDuration:0,curve:0,wobble:0,baseVy:(i-1)*36,maxReflect:4
+          owner:f,
+          x:f.x+dir*62,
+          y:f.y-4+(i-1)*9,
+          vx:dir*speed,
+          vy:(i-1)*10,
+          r:15,
+          t:1.35,
+          life:1.35,
+          damage:2.0,
+          name:'スピンキックカッター',
+          color:'blade',
+          reflected:0,
+          hit:false,
+          spin:i*.65,
+          style:'spinCutterBlade',
+          poisonDuration:0,
+          curve:0,
+          wobble:0,
+          baseVy:(i-1)*10,
+          maxReflect:4
         });
+        spawnImpact(f.x+dir*54,f.y+8,'guard');
       },delay);
     });
-    clearCommand(); return true;
+
+    clearCommand();
+    return true;
   }
 
   function specialKawazuCyclone(f){
@@ -7745,6 +7783,52 @@ function drawBackground(dt){
         ctx.shadowColor='#b64cff';ctx.shadowBlur=25;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
         ctx.strokeStyle='rgba(205,116,255,.78)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();
         ctx.fillStyle='rgba(255,230,255,.75)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.33,q.r*.22,q.r*.11,-.6,0,Math.PI*2);ctx.fill();
+      }else if(q.style==='spinCutterBlade'){
+        // カワズさん専用：丸弾ではなく、回転する薄い三日月状の水圧カッター。
+        ctx.rotate(q.spin||0);
+        ctx.shadowColor='#8ff4ff';
+        ctx.shadowBlur=18;
+
+        // 外側の鋭い刃
+        ctx.globalAlpha=.72;
+        ctx.fillStyle='rgba(119,232,255,.34)';
+        ctx.beginPath();
+        ctx.moveTo(27,0);
+        ctx.quadraticCurveTo(4,-18,-23,-11);
+        ctx.quadraticCurveTo(-8,0,-23,11);
+        ctx.quadraticCurveTo(4,18,27,0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.globalAlpha=.95;
+        ctx.strokeStyle='#e9ffff';
+        ctx.lineWidth=3.2;
+        ctx.lineCap='round';
+        ctx.beginPath();
+        ctx.moveTo(27,0);
+        ctx.quadraticCurveTo(2,-17,-23,-11);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(27,0);
+        ctx.quadraticCurveTo(2,17,-23,11);
+        ctx.stroke();
+
+        // 中央の水圧芯
+        ctx.globalAlpha=.50;
+        ctx.strokeStyle='#67dfff';
+        ctx.lineWidth=2;
+        ctx.beginPath();
+        ctx.moveTo(18,0);
+        ctx.lineTo(-15,0);
+        ctx.stroke();
+
+        // 回転残像
+        ctx.globalAlpha=.20;
+        ctx.strokeStyle='#c9fbff';
+        ctx.lineWidth=2;
+        ctx.beginPath();
+        ctx.arc(0,0,22,-1.15,1.15);
+        ctx.stroke();
       }else if(q.style==='spinBlade'){
         // 水圧カッターを縦方向に潰した、薄い高速刃。
         ctx.rotate(q.spin||0);ctx.scale(1.35,.48);
