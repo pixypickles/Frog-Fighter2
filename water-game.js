@@ -6026,45 +6026,44 @@
   }
 
 function drawBackground(dt){
-    const themes=[
-      {top:'#42c7d6',mid:'#10849a',bottom:'#075469',floor:'#075047',plant:'#16855f',shaft:'rgba(255,255,220,.07)'},
-      {top:'#56b78f',mid:'#29786f',bottom:'#174f50',floor:'#3e5438',plant:'#718347',shaft:'rgba(255,245,190,.06)'},
-      {top:'#5a84a3',mid:'#345970',bottom:'#243d50',floor:'#3b4043',plant:'#596b67',shaft:'rgba(200,235,255,.055)'},
-      {top:'#34254a',mid:'#201d3b',bottom:'#11182d',floor:'#201826',plant:'#493151',shaft:'rgba(180,120,220,.055)'}
-    ];
-    const th=themes[Math.max(0,Math.min(themes.length-1,stageTheme||0))];
+    const th=stageThemeData();
+    const arenaActive=!(gameMode==='story' && (enemy?.type==='piranha' || enemy?.type==='crayfish'));
 
-    const grad=ctx.createLinearGradient(0,0,0,innerHeight);
-    grad.addColorStop(0,th.top);
-    grad.addColorStop(.52,th.mid);
-    grad.addColorStop(1,th.bottom);
-    ctx.fillStyle=grad;
-    ctx.fillRect(0,0,innerWidth,innerHeight);
+    // 水槽闘技場は高透明度・明るい水。以前の時間経過による暗転は使わない。
+    if(arenaActive){
+      const g=ctx.createLinearGradient(0,0,0,innerHeight);
+      g.addColorStop(0,'#43e4ee');
+      g.addColorStop(.48,'#22cedd');
+      g.addColorStop(1,'#15b7c8');
+      ctx.fillStyle=g;
+      ctx.fillRect(0,0,innerWidth,innerHeight);
 
-    ctx.fillStyle=th.shaft;
-    ctx.beginPath();
-    ctx.moveTo(innerWidth*.15,0);ctx.lineTo(innerWidth*.35,0);
-    ctx.lineTo(innerWidth*.55,innerHeight);ctx.lineTo(innerWidth*.42,innerHeight);
-    ctx.fill();
-
-    // 2つ目以降は岩や遠景を少し追加
-    if(stageTheme===1){
-      ctx.fillStyle='rgba(58,72,55,.36)';
-      for(let x=30;x<innerWidth;x+=170){
-        ctx.beginPath();ctx.ellipse(x,innerHeight-40,65,26,0,0,Math.PI*2);ctx.fill();
+      // 薄い水面光だけ。草・濁り・暗い深度表現は無し。
+      ctx.globalAlpha=.12;
+      ctx.fillStyle='#ffffff';
+      for(let i=0;i<7;i++){
+        const x=(i+.5)*innerWidth/7 + Math.sin(performance.now()/1700+i)*18;
+        ctx.beginPath();
+        ctx.ellipse(x,innerHeight*.16,innerWidth*.10,12,.08,0,Math.PI*2);
+        ctx.fill();
       }
-    }else if(stageTheme===2){
-      ctx.fillStyle='rgba(28,39,48,.42)';
-      for(let x=70;x<innerWidth;x+=220){
-        ctx.beginPath();ctx.moveTo(x,innerHeight-35);ctx.lineTo(x+45,innerHeight-135);ctx.lineTo(x+95,innerHeight-35);ctx.closePath();ctx.fill();
-      }
-    }else if(stageTheme===3){
-      ctx.fillStyle='rgba(60,20,72,.24)';
-      ctx.beginPath();ctx.arc(innerWidth*.78,innerHeight*.30,120,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=1;
+
+      // 泡は従来通り、ただし少し控えめに。
+      ctx.fillStyle='rgba(240,255,255,.34)';
+      bubbles.forEach(b=>{
+        b.y-=b.s*dt;
+        if(b.y<-12){b.y=innerHeight+10;b.x=Math.random()*innerWidth}
+        ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();
+      });
+      return;
     }
 
-    ctx.fillStyle=th.floor;
-    ctx.fillRect(0,innerHeight-35,innerWidth,35);
+    // 外の池イベントは従来の自然背景。
+    const g=ctx.createLinearGradient(0,0,0,innerHeight);
+    g.addColorStop(0,th.top);
+    g.addColorStop(1,th.bottom);
+    ctx.fillStyle=g;ctx.fillRect(0,0,innerWidth,innerHeight);
 
     ctx.strokeStyle=th.plant;ctx.lineWidth=8;ctx.lineCap='round';
     for(let x=20;x<innerWidth;x+=75){
@@ -6082,7 +6081,6 @@ function drawBackground(dt){
 
 
   function drawAquariumArena(){
-    // 外の池イベントでは闘技場を使わない。
     if(gameMode==='story' && (enemy?.type==='piranha' || enemy?.type==='crayfish')) return;
 
     const w=innerWidth,h=innerHeight;
@@ -6091,93 +6089,100 @@ function drawBackground(dt){
 
     ctx.save();
 
-    // 水槽の奥ガラス。透明感のある縦枠。
-    const glassGrad=ctx.createLinearGradient(0,0,w,0);
-    glassGrad.addColorStop(0,'rgba(255,255,255,.10)');
-    glassGrad.addColorStop(.08,'rgba(255,255,255,.015)');
-    glassGrad.addColorStop(.92,'rgba(255,255,255,.015)');
-    glassGrad.addColorStop(1,'rgba(255,255,255,.10)');
-    ctx.fillStyle=glassGrad;
+    // 透明な大型水槽のガラス反射。
+    ctx.globalAlpha=.10;
+    const glass=ctx.createLinearGradient(0,0,w,0);
+    glass.addColorStop(0,'rgba(255,255,255,.50)');
+    glass.addColorStop(.09,'rgba(255,255,255,.04)');
+    glass.addColorStop(.91,'rgba(255,255,255,.04)');
+    glass.addColorStop(1,'rgba(255,255,255,.50)');
+    ctx.fillStyle=glass;
     ctx.fillRect(0,0,w,h);
 
-    // 上部照明レール
-    ctx.globalAlpha=.72;
-    ctx.fillStyle='rgba(8,52,67,.62)';
-    ctx.fillRect(0,0,w,18);
-    ctx.fillStyle='rgba(210,250,255,.28)';
-    ctx.fillRect(0,18,w,3);
+    // 水槽の外側にある観客席が、ガラス越しに透けて見える。
+    const standTop=h*.54;
+    ctx.globalAlpha=.16;
+    ctx.fillStyle='#0a6f83';
+    ctx.fillRect(0,standTop,w,h*.22);
 
-    // 大会照明。1日目=青白、2日目=少し紫、決勝=金白。
-    const lampCount=Math.max(5,Math.floor(w/180));
+    // 段状の観客席ライン
+    ctx.strokeStyle='rgba(235,255,255,.28)';
+    ctx.lineWidth=2;
+    for(let row=0;row<4;row++){
+      const y=standTop+row*22;
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+    }
+
+    // 観客シルエット。以前より薄く、でも「後ろにいる」と分かる程度。
+    ctx.globalAlpha=.20;
+    ctx.fillStyle='rgba(10,62,77,.72)';
+    for(let row=0;row<4;row++){
+      const y=standTop+10+row*22;
+      const offset=(row%2)*16;
+      for(let x=14+offset;x<w;x+=32){
+        ctx.beginPath();ctx.arc(x,y,5.5,0,Math.PI*2);ctx.fill();
+        ctx.fillRect(x-4.5,y+5,9,10);
+      }
+    }
+
+    // 上部照明レールは明るめ。
+    ctx.globalAlpha=.68;
+    ctx.fillStyle='rgba(230,255,255,.28)';
+    ctx.fillRect(0,0,w,16);
+    ctx.fillStyle='rgba(255,255,255,.55)';
+    ctx.fillRect(0,16,w,2);
+
+    const lampCount=Math.max(6,Math.floor(w/160));
     for(let i=0;i<lampCount;i++){
       const x=(i+.5)*w/lampCount;
-      let core='rgba(205,247,255,.72)',beam='rgba(170,235,255,.08)';
-      if(day2){core='rgba(215,210,255,.78)';beam='rgba(175,160,255,.09)';}
-      if(finalStage){core='rgba(255,245,185,.88)';beam='rgba(255,225,120,.12)';}
+      let core='rgba(230,255,255,.92)',beam='rgba(220,255,255,.10)';
+      if(day2){core='rgba(232,228,255,.94)';beam='rgba(210,195,255,.11)';}
+      if(finalStage){core='rgba(255,249,205,.98)';beam='rgba(255,237,160,.13)';}
 
       ctx.fillStyle=core;
-      ctx.beginPath();ctx.ellipse(x,19,18,6,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(x,17,16,5,0,0,Math.PI*2);ctx.fill();
 
-      const g=ctx.createLinearGradient(x,20,x,h*.72);
-      g.addColorStop(0,beam);g.addColorStop(1,'rgba(255,255,255,0)');
-      ctx.fillStyle=g;
+      const bg=ctx.createLinearGradient(x,18,x,h*.75);
+      bg.addColorStop(0,beam);bg.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=bg;
       ctx.beginPath();
-      ctx.moveTo(x-18,24);ctx.lineTo(x+18,24);
-      ctx.lineTo(x+80,h*.72);ctx.lineTo(x-80,h*.72);
+      ctx.moveTo(x-13,20);ctx.lineTo(x+13,20);
+      ctx.lineTo(x+60,h*.74);ctx.lineTo(x-60,h*.74);
       ctx.closePath();ctx.fill();
     }
 
-    // 奥の観客席っぽいシルエット
-    ctx.globalAlpha=.22;
-    ctx.fillStyle='rgba(3,39,53,.85)';
-    ctx.fillRect(0,h*.70,w,h*.12);
-    ctx.globalAlpha=.30;
-    for(let x=18;x<w;x+=34){
-      const yy=h*.72 + ((x/34)%2)*8;
-      ctx.beginPath();ctx.arc(x,yy,7,0,Math.PI*2);ctx.fill();
-      ctx.fillRect(x-6,yy+6,12,16);
-    }
-
-    // 床のリング台
+    // 水槽底面は明るく、植物は置かない。
     const floorY=h*.86;
-    ctx.globalAlpha=.72;
     const fg=ctx.createLinearGradient(0,floorY,w,floorY);
-    fg.addColorStop(0,'rgba(25,115,130,.65)');
-    fg.addColorStop(.5, finalStage?'rgba(108,91,35,.66)':'rgba(36,139,151,.72)');
-    fg.addColorStop(1,'rgba(25,115,130,.65)');
+    fg.addColorStop(0,'rgba(120,225,232,.44)');
+    fg.addColorStop(.5,finalStage?'rgba(242,224,150,.34)':'rgba(170,242,245,.50)');
+    fg.addColorStop(1,'rgba(120,225,232,.44)');
+    ctx.globalAlpha=.90;
     ctx.fillStyle=fg;
     ctx.fillRect(0,floorY,w,h-floorY);
 
-    // リングの白ライン
-    ctx.globalAlpha=.58;
-    ctx.strokeStyle=finalStage?'rgba(255,236,160,.82)':'rgba(220,252,255,.76)';
+    // リングライン
+    ctx.globalAlpha=.62;
+    ctx.strokeStyle=finalStage?'rgba(255,243,190,.95)':'rgba(242,255,255,.90)';
     ctx.lineWidth=3;
     ctx.beginPath();
-    ctx.ellipse(w*.5,floorY+18,w*.36,34,0,0,Math.PI*2);
+    ctx.ellipse(w*.5,floorY+18,w*.36,30,0,0,Math.PI*2);
     ctx.stroke();
 
-    // 水槽ガラスの縦支柱
-    ctx.globalAlpha=.38;
-    ctx.fillStyle='rgba(225,250,255,.35)';
-    ctx.fillRect(2,0,4,h);
-    ctx.fillRect(w-6,0,4,h);
+    // ガラス支柱
+    ctx.globalAlpha=.26;
+    ctx.fillStyle='rgba(245,255,255,.70)';
+    ctx.fillRect(2,0,3,h);
+    ctx.fillRect(w-5,0,3,h);
 
-    // 決勝専用の豪華な円形装飾
+    // 決勝のみ豪華なリング装飾。暗くはしない。
     if(finalStage){
-      ctx.globalAlpha=.32;
-      ctx.strokeStyle='rgba(255,230,135,.88)';
-      ctx.lineWidth=5;
-      ctx.beginPath();ctx.arc(w*.5,h*.42,Math.min(w,h)*.26,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=.26;
+      ctx.strokeStyle='rgba(255,235,150,.90)';
+      ctx.lineWidth=4;
+      ctx.beginPath();ctx.arc(w*.5,h*.40,Math.min(w,h)*.25,0,Math.PI*2);ctx.stroke();
       ctx.lineWidth=2;
-      ctx.beginPath();ctx.arc(w*.5,h*.42,Math.min(w,h)*.31,0,Math.PI*2);ctx.stroke();
-
-      ctx.globalAlpha=.18;
-      ctx.fillStyle='rgba(255,224,120,.45)';
-      for(let a=0;a<Math.PI*2;a+=Math.PI/8){
-        const x=w*.5+Math.cos(a)*Math.min(w,h)*.31;
-        const y=h*.42+Math.sin(a)*Math.min(w,h)*.31;
-        ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();
-      }
+      ctx.beginPath();ctx.arc(w*.5,h*.40,Math.min(w,h)*.30,0,Math.PI*2);ctx.stroke();
     }
 
     ctx.restore();
