@@ -1740,6 +1740,15 @@
       ctx.ellipse(2,36,19,23,0,0,Math.PI*2);
       ctx.fill();
 
+      if(this.type==='flauros'){
+        // ヒョウ柄：黒い不規則な輪＋小さな斑点。均一な水玉にはしない。
+        ctx.save();ctx.strokeStyle='#241516';ctx.fillStyle='#241516';ctx.lineWidth=3.2;ctx.lineCap='round';ctx.lineJoin='round';
+        const rosettes=[[-19,18,7,5,.2],[18,23,8,5,-.35],[-17,42,7,6,-.2],[18,48,6,5,.35],[0,12,6,4,.1]];
+        rosettes.forEach(([x,y,rx,ry,r],i)=>{ctx.save();ctx.translate(x,y);ctx.rotate(r);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,.25,2.05);ctx.stroke();ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,3.15,5.35);ctx.stroke();if(i%2===0){ctx.beginPath();ctx.arc(rx*.15,ry*.05,1.8,0,Math.PI*2);ctx.fill();}ctx.restore();});
+        [[-27,30,3],[27,35,2.8],[-8,55,3.2],[10,58,2.4],[-6,21,2.3],[7,29,2.2]].forEach(([x,y,r])=>{ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();});
+        ctx.restore();
+      }
+
       if(this.type==='kawazu'){
         // 参考のアカメアマガエル風：胴体の左右に青い差し色
         ctx.save();
@@ -4822,8 +4831,15 @@
   }
   function specialFlameClaw(f){
     if(gameOver||!f||f.stun>0||f.guard||f.specialT>0)return false;
-    f.specialType='flameClaw';f.specialT=.46;f.attack='punch';f.attackT=.46;
-    [-18,0,18].forEach((a,i)=>setTimeout(()=>{if(!f||gameOver)return;specialWater2Shot(f,{name:'フレイムクロー',attack:'punch',style:'flameClaw',color:'fire',speed:300,angle:a,damage:3.1,r:16,charge:.18,maxReflect:4});},i*70));
+    // 専用技なので specialWater2Shot の再チェックを通さず、予備動作後に3本を直接生成する。
+    f.specialType='flameClaw';f.specialT=.62;f.attack='punch';f.attackT=.62;
+    comboEl.textContent='フレイムクロー…';
+    const fireOne=(deg)=>{
+      if(gameOver||!f)return;
+      const dir=f.face, speed=315, angle=deg*Math.PI/180;
+      water2Shots.push({owner:f,x:f.x+dir*58,y:f.y,vx:dir*Math.cos(angle)*speed,vy:Math.sin(angle)*speed,r:16,age:0,maxAge:18,t:1,life:1,damage:3.1,name:'フレイムクロー',color:'fire',reflected:0,hit:false,spin:0,style:'flameClaw',poisonDuration:0,curve:0,arcFlip:1,wobble:0,baseVy:Math.sin(angle)*speed,maxReflect:4});
+    };
+    setTimeout(()=>{[-20,0,20].forEach((a,i)=>setTimeout(()=>fireOne(a),i*65));comboEl.textContent='フレイムクロー!';},180);
     return true;
   }
   function specialLeopardRush(f){
@@ -4833,7 +4849,11 @@
   }
   function specialInfernoClaw(f){
     if(gameOver||!f||f.stun>0||f.guard||f.specialT>0)return false;
-    f.specialType='infernoClaw';f.specialT=1.08;f.attack='kick';f.attackT=1.08;f.infernoPhase=0;f.infernoHit=false;f.infernoStart=performance.now();
+    f.specialType='infernoClaw';f.specialT=1.10;f.attack='kick';f.attackT=1.10;f.infernoPhase=0;f.infernoHit=false;f.infernoStart=performance.now();
+    // まず「自分の後ろ側」の上壁へ飛ぶ。右向きなら左上、左向きなら右上。
+    f.infernoFromX=f.x;f.infernoFromY=f.y;
+    f.infernoWallX=f.face>0?62:innerWidth-62;f.infernoWallY=92;
+    f.infernoEndX=f.face>0?innerWidth-62:62;f.infernoEndY=innerHeight-76;
     comboEl.textContent='インフェルノクロー!';return true;
   }
 
@@ -6036,13 +6056,21 @@
       }
       if(f.specialType==='infernoClaw'&&f.specialT>0){
         const elapsed=(performance.now()-(f.infernoStart||performance.now()))/1000;
-        const startSide=f.face>0?1:-1;
-        if(elapsed<.30){ // まず上側の水槽壁へ飛びつく
-          f.vx=startSide*560;f.vy=-520;
+        const wallT=.25, diveT=.48;
+        f.vx=0;f.vy=0;
+        if(elapsed<wallT){
+          // 現在地→後ろ上の壁。少しイーズアウトして「壁へ飛びつく」動き。
+          let t=Math.max(0,Math.min(1,elapsed/wallT));t=1-Math.pow(1-t,2);
+          f.x=f.infernoFromX+(f.infernoWallX-f.infernoFromX)*t;
+          f.y=f.infernoFromY+(f.infernoWallY-f.infernoFromY)*t;
         }else{
-          if(f.infernoPhase===0){f.infernoPhase=1;f.x=startSide>0?innerWidth-55:55;f.y=92;}
-          const dir=-startSide;f.vx=dir*1080;f.vy=430;
-          if(o&&!f.infernoHit&&Math.abs(o.x-f.x)<82&&Math.abs(o.y-f.y)<82){
+          if(f.infernoPhase===0)f.infernoPhase=1;
+          // 壁から反対側の下端まで、軌道を曲げず対角線に一直線。
+          const t=Math.max(0,Math.min(1,(elapsed-wallT)/diveT));
+          f.x=f.infernoWallX+(f.infernoEndX-f.infernoWallX)*t;
+          f.y=f.infernoWallY+(f.infernoEndY-f.infernoWallY)*t;
+          const dir=Math.sign(f.infernoEndX-f.infernoWallX)||f.face;
+          if(o&&!f.infernoHit&&Math.abs(o.x-f.x)<76&&Math.abs(o.y-f.y)<70){
             f.infernoHit=true;const guarded=o.guard;spawnImpact(o.x,o.y,guarded?'guard':'hit');
             if(guarded){damageHit(f,o,1.0,55*dir,10);}else{
               const bx=o.x,by=o.y;for(let i=0;i<5;i++)flaurosClaws.push({owner:f,target:o,x:bx,y:by,t:.10+i*.065,life:.30,index:i,hit:false});
