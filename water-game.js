@@ -7075,37 +7075,200 @@ function drawBackground(dt){
 
       // サマエル：毒弾の発生地点。紫＋青白い渦を見せてから相手へ発射。
   
+
+    // サタナエル：技エフェクト（描画専用）
     satanaelFlares.forEach(q=>{
-      ctx.save();ctx.translate(q.x,q.y);ctx.globalCompositeOperation='lighter';
-      const pulse=1+.08*Math.sin(performance.now()/90);
-      ctx.scale(pulse,pulse);ctx.shadowColor='#ff2020';ctx.shadowBlur=26;
-      const g=ctx.createRadialGradient(0,0,3,0,0,q.r);
-      g.addColorStop(0,'#ff4a32');g.addColorStop(.35,'#8b1119');g.addColorStop(.72,'#17070b');g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
-      ctx.strokeStyle='rgba(255,45,30,.75)';ctx.lineWidth=4;
-      for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(0,0,12+i*7,performance.now()/250+i,performance.now()/250+i+2.4);ctx.stroke();}
-      ctx.restore();
-    });
-    satanaelRays.forEach(r=>{
-      const elapsed=r.life-r.t;ctx.save();
-      if(elapsed<.32){
-        const p=elapsed/.32;ctx.globalAlpha=.28+.32*p;ctx.strokeStyle='#5b0a13';ctx.lineWidth=2+5*p;ctx.shadowColor='#ff1828';ctx.shadowBlur=14;
-      }else{
-        const fade=Math.max(0,Math.min(1,r.t/.12));ctx.globalAlpha=.88*fade;ctx.strokeStyle='#090208';ctx.lineWidth=30;ctx.shadowColor='#c41428';ctx.shadowBlur=32;
+      ctx.save();
+      ctx.translate(q.x,q.y);
+      ctx.globalCompositeOperation='lighter';
+
+      const pulse=1+.10*Math.sin(performance.now()/85);
+      ctx.scale(pulse,pulse);
+
+      // 外周の黒炎
+      ctx.shadowColor='#ff1c20';
+      ctx.shadowBlur=28;
+      const outer=ctx.createRadialGradient(0,0,4,0,0,q.r*1.35);
+      outer.addColorStop(0,'rgba(255,72,45,.98)');
+      outer.addColorStop(.25,'rgba(168,17,28,.95)');
+      outer.addColorStop(.60,'rgba(28,2,8,.96)');
+      outer.addColorStop(.86,'rgba(5,0,4,.72)');
+      outer.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=outer;
+      ctx.beginPath();ctx.arc(0,0,q.r*1.3,0,Math.PI*2);ctx.fill();
+
+      // 炎が後ろへ尾を引く
+      const dir=Math.sign(q.vx)||1;
+      ctx.scale(dir,1);
+      const tail=ctx.createLinearGradient(-82,0,10,0);
+      tail.addColorStop(0,'rgba(0,0,0,0)');
+      tail.addColorStop(.28,'rgba(20,0,6,.72)');
+      tail.addColorStop(.66,'rgba(125,7,20,.72)');
+      tail.addColorStop(1,'rgba(255,52,34,.42)');
+      ctx.fillStyle=tail;
+      ctx.beginPath();
+      ctx.moveTo(-86,0);
+      ctx.quadraticCurveTo(-45,-25,9,-16);
+      ctx.quadraticCurveTo(-10,0,9,16);
+      ctx.quadraticCurveTo(-45,25,-86,0);
+      ctx.fill();
+
+      // 赤い渦
+      ctx.scale(dir,1);
+      ctx.rotate(performance.now()/340);
+      ctx.strokeStyle='rgba(255,55,42,.86)';
+      ctx.lineWidth=4;
+      for(let i=0;i<3;i++){
+        ctx.beginPath();
+        ctx.arc(0,0,12+i*8,-1.05+i*.3,1.65+i*.3);
+        ctx.stroke();
       }
-      ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.dir*innerWidth,r.y);ctx.stroke();
-      if(elapsed>=.32){ctx.globalAlpha=.85;ctx.strokeStyle='#72101d';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.dir*innerWidth,r.y);ctx.stroke();}
       ctx.restore();
     });
-    satanaelPressures.forEach(p=>{
-      const elapsed=p.life-p.t;const y=Math.max(-30,Math.min(innerHeight,((elapsed-.12)/.56)*innerHeight));
-      ctx.save();const g=ctx.createLinearGradient(0,y-120,0,y+80);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,'rgba(8,0,12,.42)');g.addColorStop(.72,'rgba(110,0,24,.18)');g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=g;ctx.fillRect(0,y-140,innerWidth,220);ctx.restore();
+
+    // ダークレイ：セラフィックレイの黒／赤版
+    satanaelRays.forEach(r=>{
+      const elapsed=r.life-r.t;
+      ctx.save();
+
+      if(elapsed<.32){
+        // 発射前：細い暗赤色の照準線
+        const p=Math.max(0,Math.min(1,elapsed/.32));
+        ctx.globalAlpha=.25+.50*p;
+        ctx.strokeStyle='#641020';
+        ctx.lineWidth=2+4*p;
+        ctx.shadowColor='#e21b32';
+        ctx.shadowBlur=12+10*p;
+        ctx.beginPath();
+        ctx.moveTo(r.x,r.y);
+        ctx.lineTo(r.x+r.dir*innerWidth,r.y);
+        ctx.stroke();
+
+        // 発射点に黒い光球
+        ctx.globalCompositeOperation='lighter';
+        const rg=ctx.createRadialGradient(r.x,r.y,1,r.x,r.y,18+8*p);
+        rg.addColorStop(0,'rgba(255,75,75,.75)');
+        rg.addColorStop(.35,'rgba(95,5,20,.65)');
+        rg.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=rg;
+        ctx.beginPath();ctx.arc(r.x,r.y,25,0,Math.PI*2);ctx.fill();
+      }else{
+        const fade=Math.max(0,Math.min(1,r.t/.12));
+        // 太い黒い本体
+        ctx.globalAlpha=.92*fade;
+        ctx.strokeStyle='#030105';
+        ctx.lineWidth=34;
+        ctx.shadowColor='#b31329';
+        ctx.shadowBlur=30;
+        ctx.beginPath();
+        ctx.moveTo(r.x,r.y);
+        ctx.lineTo(r.x+r.dir*innerWidth,r.y);
+        ctx.stroke();
+
+        // 赤紫の縁
+        ctx.globalAlpha=.88*fade;
+        ctx.strokeStyle='#72101f';
+        ctx.lineWidth=13;
+        ctx.beginPath();
+        ctx.moveTo(r.x,r.y);
+        ctx.lineTo(r.x+r.dir*innerWidth,r.y);
+        ctx.stroke();
+
+        // 中心に細い白赤の芯
+        ctx.globalAlpha=.75*fade;
+        ctx.strokeStyle='#e65259';
+        ctx.lineWidth=3;
+        ctx.beginPath();
+        ctx.moveTo(r.x,r.y);
+        ctx.lineTo(r.x+r.dir*innerWidth,r.y);
+        ctx.stroke();
+      }
+      ctx.restore();
     });
+
+    // ダークプレッシャー：画面上から降りる巨大な黒い光の層
+    satanaelPressures.forEach(p=>{
+      const elapsed=p.life-p.t;
+      const progress=Math.max(0,Math.min(1,(elapsed-.10)/.58));
+      const frontY=-110 + progress*(innerHeight+150);
+
+      ctx.save();
+
+      // 上側を暗く覆う半透明の闇
+      const dark=ctx.createLinearGradient(0,frontY-230,0,frontY+70);
+      dark.addColorStop(0,'rgba(2,0,8,.62)');
+      dark.addColorStop(.55,'rgba(9,0,18,.52)');
+      dark.addColorStop(.83,'rgba(80,0,28,.24)');
+      dark.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=dark;
+      ctx.fillRect(0,Math.min(-20,frontY-250),innerWidth,Math.max(0,frontY+320));
+
+      // 降下する境界線
+      ctx.globalCompositeOperation='lighter';
+      ctx.globalAlpha=.50;
+      ctx.strokeStyle='#6e1125';
+      ctx.lineWidth=7;
+      ctx.shadowColor='#b51734';
+      ctx.shadowBlur=28;
+      ctx.beginPath();
+      ctx.moveTo(0,frontY);
+      for(let x=0;x<=innerWidth;x+=50){
+        ctx.lineTo(x,frontY+Math.sin(x*.018+performance.now()/180)*8);
+      }
+      ctx.stroke();
+
+      // 上から垂れる黒い光筋
+      ctx.globalAlpha=.10;
+      for(let i=0;i<8;i++){
+        const x=(i+.5)*innerWidth/8;
+        const g=ctx.createLinearGradient(x,0,x,frontY);
+        g.addColorStop(0,'rgba(80,0,28,.65)');
+        g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=g;
+        ctx.fillRect(x-22,0,44,Math.max(0,frontY));
+      }
+      ctx.restore();
+    });
+
+    // インフェルノウェーブ：底を走る連続黒炎
     satanaelWaves.forEach(p=>{
-      if(!p.fired)return;ctx.save();ctx.globalCompositeOperation='lighter';
-      const g=ctx.createLinearGradient(p.x,p.y,p.x,p.y-175);g.addColorStop(0,'#250006');g.addColorStop(.35,'#7c0b18');g.addColorStop(.68,'#090006');g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=g;ctx.shadowColor='#a80d20';ctx.shadowBlur=20;ctx.beginPath();ctx.moveTo(p.x-28,p.y);ctx.quadraticCurveTo(p.x-20,p.y-105,p.x,p.y-175);ctx.quadraticCurveTo(p.x+22,p.y-95,p.x+28,p.y);ctx.fill();ctx.restore();
+      if(!p.fired)return;
+
+      ctx.save();
+      ctx.globalCompositeOperation='lighter';
+
+      const lifeAlpha=Math.max(0,Math.min(1,p.t/(p.life||.34)));
+      ctx.globalAlpha=.86*lifeAlpha;
+
+      // 黒い火柱本体
+      const g=ctx.createLinearGradient(p.x,p.y,p.x,p.y-185);
+      g.addColorStop(0,'rgba(20,0,5,.98)');
+      g.addColorStop(.22,'rgba(93,5,18,.96)');
+      g.addColorStop(.55,'rgba(28,0,8,.92)');
+      g.addColorStop(.78,'rgba(138,8,24,.65)');
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g;
+      ctx.shadowColor='#b20d28';
+      ctx.shadowBlur=24;
+
+      ctx.beginPath();
+      ctx.moveTo(p.x-31,p.y);
+      ctx.bezierCurveTo(p.x-28,p.y-58,p.x-20,p.y-115,p.x-4,p.y-182);
+      ctx.bezierCurveTo(p.x+9,p.y-148,p.x+29,p.y-70,p.x+31,p.y);
+      ctx.closePath();
+      ctx.fill();
+
+      // 内側の赤い炎
+      ctx.globalAlpha=.55*lifeAlpha;
+      ctx.fillStyle='#a60f25';
+      ctx.beginPath();
+      ctx.moveTo(p.x-11,p.y);
+      ctx.quadraticCurveTo(p.x-8,p.y-75,p.x+2,p.y-132);
+      ctx.quadraticCurveTo(p.x+12,p.y-66,p.x+12,p.y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
     });
 
     samaelGates.forEach(g=>{
