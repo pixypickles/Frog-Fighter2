@@ -3493,3 +3493,112 @@ body.portrait-play #portraitOverlay{
   color:#dfff79 !important;
   text-shadow:0 2px 4px #00114b,0 0 8px rgba(77,255,147,.22) !important;
 }
+
+
+/* v1.9.4 critical title + roster corrections */
+#titleScreen.screen.active{
+  background:
+    radial-gradient(ellipse at 50% 28%,rgba(34,88,194,.34),transparent 54%),
+    linear-gradient(180deg,#10258d 0%,#081c75 52%,#051155 100%) !important;
+}
+#titleScreen .title-frog,
+#titleScreen > h1,
+#titleScreen > .subtitle{
+  display:none !important;
+}
+#titleScreen .frog-fighter-logo{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  position:relative !important;
+  z-index:20 !important;
+}
+#titleScreen .frog-logo-top,
+#titleScreen .frog-logo-bottom span,
+#titleScreen .frog-logo-bottom b{
+  background:linear-gradient(
+    180deg,
+    #f7ff75 0%,
+    #c8ff3e 13%,
+    #58e769 30%,
+    #15c9a0 47%,
+    #19afe8 67%,
+    #0875d7 100%
+  ) !important;
+  -webkit-background-clip:text !important;
+  background-clip:text !important;
+  -webkit-text-fill-color:transparent !important;
+  color:#34d98d !important;
+  -webkit-text-stroke:2px rgba(1,29,79,.82) !important;
+  text-shadow:5px 7px 0 rgba(0,12,55,.76) !important;
+}
+#titleScreen .frog-fighter-logo::before,
+#titleScreen .frog-fighter-logo::after{
+  background:linear-gradient(
+    90deg,
+    transparent,
+    #efff70 12%,
+    #57e66c 34%,
+    #14c1c8 58%,
+    #0875db 83%,
+    transparent
+  ) !important;
+}
+#titleScreen .frog-logo-sub{
+  color:#a9e8ff !important;
+}
+#titleScreen .build-marker{
+  position:relative;
+  z-index:30;
+  margin-top:4px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.14em;
+  opacity:.42;
+}
+
+/* Completely separate portrait and name zones in roster cards. */
+#selectScreen.screen.active .select-right-panel .fighter-card{
+  position:relative !important;
+  padding-left:128px !important;
+  overflow:hidden !important;
+}
+#selectScreen.screen.active .select-right-panel .fighter-card .fighter-emoji{
+  position:absolute !important;
+  left:10px !important;
+  top:50% !important;
+  width:88px !important;
+  height:68px !important;
+  max-width:88px !important;
+  transform:translateY(-50%) scale(.66) !important;
+  transform-origin:left center !important;
+  overflow:visible !important;
+}
+#selectScreen.screen.active .select-right-panel .fighter-card > strong{
+  position:relative !important;
+  left:0 !important;
+  z-index:10 !important;
+  display:block !important;
+  width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  font-size:11px !important;
+  line-height:1.2 !important;
+  text-align:left !important;
+  white-space:normal !important;
+  word-break:keep-all !important;
+  overflow:visible !important;
+  text-indent:0 !important;
+}
+@media (orientation:landscape) and (max-height:600px){
+  #selectScreen.screen.active .select-right-panel .fighter-card{
+    padding-left:116px !important;
+  }
+  #selectScreen.screen.active .select-right-panel .fighter-card .fighter-emoji{
+    width:80px !important;
+    height:62px !important;
+    max-width:80px !important;
+    transform:translateY(-50%) scale(.61) !important;
+  }
+}
