@@ -3302,3 +3302,194 @@ body.portrait-play #portraitOverlay{
     transform:translateY(-50%) scale(.64) !important;
   }
 }
+
+
+/* v1.9.2 title logo */
+#titleScreen{
+  background:
+    radial-gradient(circle at 50% 30%,rgba(15,99,113,.23),rgba(2,20,29,.92) 72%),
+    linear-gradient(#063d4b,#031820 68%,#02090d) !important;
+  overflow:hidden;
+}
+#titleScreen::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px);
+  opacity:.35;
+}
+#titleScreen .title-frog,
+#titleScreen h1,
+#titleScreen .subtitle{
+  display:none !important;
+}
+.frog-fighter-logo{
+  position:relative;
+  z-index:2;
+  width:min(88vw,820px);
+  margin:-2vh auto 0;
+  font-family:Impact,"Arial Black","Hiragino Kaku Gothic ProN",sans-serif;
+  font-weight:1000;
+  font-style:italic;
+  line-height:.77;
+  letter-spacing:-.055em;
+  transform:skewX(-7deg) rotate(-1deg);
+  filter:drop-shadow(7px 9px 0 rgba(0,0,0,.72)) drop-shadow(0 0 12px rgba(255,92,0,.18));
+  user-select:none;
+}
+.frog-logo-top,
+.frog-logo-bottom span,
+.frog-logo-bottom b{
+  color:#ffaf23;
+  background:linear-gradient(180deg,#fff176 0%,#ffc52d 26%,#ff6819 64%,#df250d 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  paint-order:stroke fill;
+  -webkit-text-stroke:2px rgba(73,17,7,.62);
+  text-shadow:0 4px 0 rgba(83,15,5,.46);
+}
+.frog-logo-top{
+  font-size:clamp(64px,12vw,142px);
+  padding-right:19%;
+  text-align:center;
+  transform:translateX(-3%);
+}
+.frog-logo-bottom{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  margin-top:.02em;
+  white-space:nowrap;
+}
+.frog-logo-bottom span{
+  font-size:clamp(72px,14vw,166px);
+}
+.frog-logo-bottom b{
+  display:inline-block;
+  font-family:Georgia,"Times New Roman",serif;
+  font-style:italic;
+  font-size:clamp(75px,15vw,178px);
+  font-weight:900;
+  line-height:.72;
+  margin-left:.04em;
+  transform:skewX(4deg) translateY(.02em);
+}
+.frog-fighter-logo::before,
+.frog-fighter-logo::after{
+  content:"";
+  position:absolute;
+  height:13px;
+  border-radius:50%;
+  background:linear-gradient(90deg,transparent,#ffcf3c 16%,#f04110 74%,transparent);
+  opacity:.86;
+  z-index:-1;
+}
+.frog-fighter-logo::before{
+  width:62%;
+  left:4%;
+  top:31%;
+  transform:rotate(-8deg);
+}
+.frog-fighter-logo::after{
+  width:76%;
+  left:3%;
+  bottom:-5%;
+  transform:rotate(-6deg);
+}
+.frog-logo-sub{
+  position:relative;
+  z-index:2;
+  margin:22px 0 2px;
+  color:#88ddff;
+  font-family:"Arial Black",system-ui,sans-serif;
+  font-size:clamp(13px,2.2vw,24px);
+  font-weight:1000;
+  letter-spacing:.20em;
+  text-shadow:0 3px 3px #001921,0 0 10px rgba(70,195,255,.32);
+}
+#titleScreen .rotate-note{
+  position:relative;
+  z-index:2;
+  margin:12px 0 6px;
+  font-size:clamp(17px,2.5vw,28px);
+  color:#fff7c7;
+  text-shadow:0 2px 5px #000;
+}
+#titleScreen .start-version,
+#titleScreen .title-start-actions,
+#titleScreen .portrait-start-note{
+  position:relative;
+  z-index:2;
+}
+@media (orientation:portrait){
+  .frog-fighter-logo{
+    width:92vw;
+    margin-top:-4vh;
+  }
+  .frog-logo-top{font-size:clamp(62px,20vw,112px)}
+  .frog-logo-bottom span{font-size:clamp(60px,19vw,108px)}
+  .frog-logo-bottom b{font-size:clamp(66px,21vw,118px)}
+  .frog-logo-sub{font-size:clamp(11px,3.5vw,18px);letter-spacing:.12em;margin-top:18px}
+  #titleScreen .rotate-note{font-size:clamp(18px,5vw,27px);margin-top:18px}
+}
+@media (orientation:landscape) and (max-height:520px){
+  .frog-fighter-logo{width:min(68vw,680px);margin-top:-2vh}
+  .frog-logo-top{font-size:clamp(52px,9.5vw,92px)}
+  .frog-logo-bottom span{font-size:clamp(58px,10.7vw,106px)}
+  .frog-logo-bottom b{font-size:clamp(62px,11.5vw,114px)}
+  .frog-logo-sub{margin-top:13px;font-size:clamp(11px,1.8vw,18px)}
+  #titleScreen .rotate-note{font-size:clamp(15px,2vw,20px);margin:8px 0 2px}
+  #titleScreen .title-start-actions{margin-top:5px}
+}
+
+
+/* v1.9.3 FROG FIGHTER II - frog / water palette */
+#titleScreen{
+  background:
+    radial-gradient(ellipse at 50% 28%,rgba(31,85,190,.32),transparent 55%),
+    linear-gradient(180deg,#10278f 0%,#081d78 50%,#06135d 100%) !important;
+}
+.frog-logo-top,
+.frog-logo-bottom span,
+.frog-logo-bottom b{
+  background:linear-gradient(
+    180deg,
+    #f4ff72 0%,
+    #bfff3d 14%,
+    #48e56d 30%,
+    #18c6a5 48%,
+    #18a9e8 68%,
+    #0874d8 100%
+  ) !important;
+  -webkit-background-clip:text !important;
+  background-clip:text !important;
+  -webkit-text-fill-color:transparent !important;
+  -webkit-text-stroke:2px rgba(1,33,83,.78) !important;
+  text-shadow:5px 7px 0 rgba(1,15,58,.78) !important;
+}
+.frog-fighter-logo{
+  filter:drop-shadow(7px 9px 0 rgba(0,8,45,.76)) drop-shadow(0 0 12px rgba(66,255,171,.13)) !important;
+}
+.frog-fighter-logo::before,
+.frog-fighter-logo::after{
+  background:linear-gradient(
+    90deg,
+    transparent,
+    #edff6a 13%,
+    #5ae66b 34%,
+    #12bcd2 58%,
+    #0875db 82%,
+    transparent
+  ) !important;
+}
+.frog-logo-sub{
+  color:#ffb16b !important;
+  text-shadow:0 3px 3px #25103d,0 0 8px rgba(255,100,100,.22) !important;
+}
+#titleScreen .rotate-note{
+  color:#dfff79 !important;
+  text-shadow:0 2px 4px #00114b,0 0 8px rgba(77,255,147,.22) !important;
+}
