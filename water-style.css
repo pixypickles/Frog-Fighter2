@@ -3619,7 +3619,7 @@ body.portrait-play #portraitOverlay{
 @media (orientation:landscape) and (max-height:600px){#selectScreen.screen.active .select-right-panel .fighter-card{padding-left:128px!important}}
 
 
-/* v1.9.6: use supplied FROG FIGHTER II artwork */
+/* v1.9.7: use supplied FROG FIGHTER II artwork */
 #portraitOverlay .portrait-title-logo,
 #portraitOverlay .portrait-logo-top,
 #portraitOverlay .portrait-logo-bottom,

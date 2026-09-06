@@ -105,6 +105,8 @@
   let abyssShocks=[];
   let kawazuShots=[];
   let kawazuGhosts=[];
+  let flaurosPillars=[];
+  let flaurosClaws=[];
   let siltClouds = [];
   let catfishCharges = [];
   let pressureBlades = [];
@@ -839,6 +841,9 @@
   }
 
   function fighterPalette(type){
+    if(type==='flauros'){
+      return {body:'#c92825',limb:'#b91f20',light:'#ff6a3d',belly:'#ef9b58',eyeBump:'#e64631'};
+    }
     if(type==='kawazu'){
       return {
         body:'#4fbd55',
@@ -1947,6 +1952,13 @@
       ctx.ellipse(0,-6,35,30,0,0,Math.PI*2);
       ctx.fill();
 
+      if(this.type==='flauros'){
+        // 赤いヒョウ柄。シンプルなカエル造形を壊さないよう黒斑を部分配置。
+        ctx.save();ctx.fillStyle='#351817';ctx.globalAlpha=.92;
+        [[-23,-11,7,5],[18,-17,8,5],[-5,4,6,4],[24,5,5,4],[-18,30,7,5],[13,42,6,5]].forEach(v=>{ctx.beginPath();ctx.ellipse(v[0],v[1],v[2],v[3],.35,0,Math.PI*2);ctx.fill();});
+        ctx.restore();
+      }
+
       // 目のふくらみ
       ctx.fillStyle=pal.eyeBump;
       ctx.beginPath();
@@ -2744,7 +2756,7 @@
     }));
 
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; lunarSlashes=[]; bloodMoons=[]; gravityBalls=[]; gravityZones=[]; meteorDrops=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; flaurosPillars=[]; flaurosClaws=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; lunarSlashes=[]; bloodMoons=[]; gravityBalls=[]; gravityZones=[]; meteorDrops=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
 
     for(let i=0;i<12;i++){
       spawnLeafTarget(i,true);
@@ -3044,7 +3056,7 @@
 
 
   function currentPlayableTypes(){
-    const base=['green','blue','black','purple','yellow','orange','piranha','crayfish','sariel','kokabiel','jihal','remiel'];
+    const base=['green','blue','black','purple','flauros','yellow','orange','piranha','crayfish','sariel','kokabiel','jihal','remiel'];
     if(isKawazuUnlocked())base.push('kawazu');
     if(isStoryCleared())base.push('samael','seraphiel');
     return base;
@@ -3064,6 +3076,7 @@
       jihal:['前 ＋ パンチ：ボルトショット','前 ＋ キック：ライトニングダッシュ','後ろ ＋ キック長押し → 離す：サンダーチャージ','下 ＋ パンチ：スパークバースト'],
       remiel:['上 ＋ ガード：ミラージュ（上）','下 ＋ ガード：ミラージュ（下）','後ろ ＋ ガード：ミラージュカウンター','前 ＋ ガード：アクアパリィ','前 ＋ パンチ：フロストショット','前 ＋ キック：ミラージュキック'],
       seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
+      flauros:['上 ＋ パンチ：ヘルフレイム（相手の足元から火柱）','前 ＋ パンチ：フレイムクロー（3方向の炎爪）','前 ＋ キック：レオパードラッシュ','上 ＋ キック：インフェルノクロー（壁から急降下→時間差5連斬）'],
       samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
@@ -3127,6 +3140,7 @@
       'ルシファー':'black','ルシファーさん':'black','リリス':'purple','リリスさん':'purple',
       'ラファエル':'yellow','ラファエルさん':'yellow','ウリエル':'orange','ウリエルさん':'orange',
       'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael','セラフィエル':'seraphiel','セラフィエルさん':'seraphiel','レミエル':'remiel','レミエルさん':'remiel','ジィハル':'jihal','ジィハルさん':'jihal','コカビエル':'kokabiel','コカビエルさん':'kokabiel','サリエル':'sariel','サリエルさん':'sariel',
+      'フラウロス':'flauros','フラウロスさん':'flauros',
       'リヴァイア':'piranha','リヴァイアさん':'piranha','アスモデウス':'crayfish','アスモデウスさん':'crayfish',
       'アザゼル':'piranha','アザゼルさん':'piranha','ベリアル':'crayfish','ベリアルさん':'crayfish'
     };
@@ -3158,13 +3172,13 @@
       green:'ミカエルさん', blue:'ガブリエルさん', black:'ルシファーさん',
       purple:'リリスさん', yellow:'ラファエルさん', orange:'ウリエルさん',
       piranha:'リヴァイアさん', crayfish:'アスモデウスさん',
-      beelzebub:'ベルゼブブさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', remiel:'レミエルさん', jihal:'ジィハルさん', kokabiel:'コカビエルさん', sariel:'サリエルさん', kawazu:'カワズさん'
+      beelzebub:'ベルゼブブさん', flauros:'フラウロスさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', remiel:'レミエルさん', jihal:'ジィハルさん', kokabiel:'コカビエルさん', sariel:'サリエルさん', kawazu:'カワズさん'
     }[type]||type;
   }
 
   function resetBattleEffects(){
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; flaurosPillars=[]; flaurosClaws=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
     leafTargets=[]; guardTargets=[]; toxicWaters=[]; bossFish=[]; abyssShocks=[]; kawazuShots=[]; kawazuGhosts=[];
   }
 
@@ -3260,7 +3274,7 @@
   function buildTournamentStory(){
     // 本大会はセラフィエル主催。サマエルは反対ブロックから決勝へ上がってくる。
     // 大会参加枠から操作キャラ・サマエル・セラフィエルを除き、5人を主人公側の対戦相手にする。
-    const tournamentPool=['green','blue','yellow','orange','black','purple','remiel','jihal','kokabiel','sariel','beelzebub','kawazu']
+    const tournamentPool=['green','blue','yellow','orange','black','purple','remiel','jihal','kokabiel','sariel','beelzebub','kawazu','flauros']
       .filter(t=>t!==selectedFighter && t!=='samael' && t!=='seraphiel');
     let picked=shuffleStory(tournamentPool).slice(0,5);
 
@@ -4799,6 +4813,30 @@
     return false;
   }
 
+  function specialHellFlame(f){
+    if(gameOver||!f||f.stun>0||f.guard||f.specialT>0)return false;
+    const target=f.isPlayer?enemy:player;if(!target)return false;
+    f.specialType='hellFlame';f.specialT=.58;f.attack='punch';f.attackT=.58;
+    flaurosPillars.push({owner:f,x:target.x,y:Math.min(innerHeight-62,target.y+70),t:.48,life:.95,fired:false,hit:false});
+    comboEl.textContent='ヘルフレイム…';return true;
+  }
+  function specialFlameClaw(f){
+    if(gameOver||!f||f.stun>0||f.guard||f.specialT>0)return false;
+    f.specialType='flameClaw';f.specialT=.46;f.attack='punch';f.attackT=.46;
+    [-18,0,18].forEach((a,i)=>setTimeout(()=>{if(!f||gameOver)return;specialWater2Shot(f,{name:'フレイムクロー',attack:'punch',style:'flameClaw',color:'fire',speed:300,angle:a,damage:3.1,r:16,charge:.18,maxReflect:4});},i*70));
+    return true;
+  }
+  function specialLeopardRush(f){
+    if(gameOver||!f||f.stun>0||f.guard||f.specialT>0)return false;
+    f.specialType='leopardRush';f.specialT=.46;f.attack='kick';f.attackT=.46;f.flaurosRushHit=false;f.flaurosRushDir=f.face;f.vx=f.face*760;f.vy=-55;
+    comboEl.textContent='レオパードラッシュ!';return true;
+  }
+  function specialInfernoClaw(f){
+    if(gameOver||!f||f.stun>0||f.guard||f.specialT>0)return false;
+    f.specialType='infernoClaw';f.specialT=1.08;f.attack='kick';f.attackT=1.08;f.infernoPhase=0;f.infernoHit=false;f.infernoStart=performance.now();
+    comboEl.textContent='インフェルノクロー!';return true;
+  }
+
   function trySpecial(f,kind){
     if(!f) return false;
     const forward=f.face>0?'right':'left';
@@ -4808,6 +4846,13 @@
       return specialEngineerMiniVortex(f);
     }
 
+
+    if(f.type==='flauros'){
+      if(kind==='punch'&&water2HeldDir(f,'up')){clearCommand();return specialHellFlame(f);}
+      if(kind==='punch'&&water2HeldDir(f,'forward')){clearCommand();return specialFlameClaw(f);}
+      if(kind==='kick'&&water2HeldDir(f,'up')){clearCommand();return specialInfernoClaw(f);}
+      if(kind==='kick'&&water2HeldDir(f,'forward')){clearCommand();return specialLeopardRush(f);}
+    }
 
     if(f.type==='sariel'){
       if(kind==='punch'&&water2HeldDir(f,'up')){clearCommand();return specialLunaSlash(f,'up');}
@@ -5813,6 +5858,7 @@
         if(roll<dt*.26){ specialAbyssShock(enemy,dy<0?'upper':'lower'); return; }
         if(dist>150 && roll<dt*.46){ specialWater2Shot(enemy,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.5,r:16,charge:.50,poisonDuration:2.2,maxReflect:4}); return; }
       }
+      if(enemy.type==='flauros'&&enemy.specialT<=0){const r=Math.random();if(dist>180&&r<dt*.20){specialHellFlame(enemy);return;}if(dist>170&&r<dt*.38){specialFlameClaw(enemy);return;}if(dist<250&&r<dt*.52){specialLeopardRush(enemy);return;}if(dist>130&&r<dt*.59){specialInfernoClaw(enemy);return;}}
       if(enemy.type==='sariel'&&enemy.specialT<=0){const r=Math.random();if(dist>170&&r<dt*.18){specialLunaSlash(enemy,Math.random()<.5?'up':'down');return;}if(dist<160&&r<dt*.12){specialMoonSaltKick(enemy);return;}if(dist<360&&r<dt*.07){specialEvilEye(enemy);return;}if(dist>180&&r<dt*.035){specialBloodMoon(enemy);return;}}
       if(enemy.type==='kokabiel'&&enemy.specialT<=0){const r=Math.random();if(dist>180&&r<dt*.24){specialGravityBall(enemy);return;}if(dist<260&&r<dt*.10){specialGravityZone(enemy);return;}if(dist>130&&r<dt*.08){specialMeteorRain(enemy);return;}}
       if(enemy.type==='jihal'&&enemy.specialT<=0&&!enemy.jihalCharging){const r=Math.random();if(dist>210&&r<dt*.28){specialJihalBolt(enemy);return;}if(dist<175&&r<dt*.18){specialLightningDash(enemy);return;}if(dist<110&&r<dt*.10){specialSparkBurst(enemy);return;}if(dist>250&&r<dt*.05){startThunderCharge(enemy);setTimeout(()=>{if(enemy&&enemy.jihalCharging)releaseThunderCharge(enemy);},650);return;}}
@@ -5981,6 +6027,30 @@
 
   function updateNewSpecialMoves(f,dt){
     if(!f) return;
+
+    if(f.type==='flauros'){
+      const o=f.isPlayer?enemy:player;
+      if(f.specialType==='leopardRush'&&f.specialT>0){
+        f.vx=(f.flaurosRushDir||f.face)*760;
+        if(o&&!f.flaurosRushHit&&Math.abs(o.x-f.x)<76&&Math.abs(o.y-f.y)<72){f.flaurosRushHit=true;damageHit(f,o,8.0*f.damageMul,300*(f.flaurosRushDir||f.face),-55);spawnImpact(o.x,o.y,'hit');}
+      }
+      if(f.specialType==='infernoClaw'&&f.specialT>0){
+        const elapsed=(performance.now()-(f.infernoStart||performance.now()))/1000;
+        const startSide=f.face>0?1:-1;
+        if(elapsed<.30){ // まず上側の水槽壁へ飛びつく
+          f.vx=startSide*560;f.vy=-520;
+        }else{
+          if(f.infernoPhase===0){f.infernoPhase=1;f.x=startSide>0?innerWidth-55:55;f.y=92;}
+          const dir=-startSide;f.vx=dir*1080;f.vy=430;
+          if(o&&!f.infernoHit&&Math.abs(o.x-f.x)<82&&Math.abs(o.y-f.y)<82){
+            f.infernoHit=true;const guarded=o.guard;spawnImpact(o.x,o.y,guarded?'guard':'hit');
+            if(guarded){damageHit(f,o,1.0,55*dir,10);}else{
+              const bx=o.x,by=o.y;for(let i=0;i<5;i++)flaurosClaws.push({owner:f,target:o,x:bx,y:by,t:.10+i*.065,life:.30,index:i,hit:false});
+            }
+          }
+        }
+      }
+    }
 
     if(f.specialType==='burningCyclone'){
       const other=f.isPlayer?enemy:player;
@@ -6858,6 +6928,15 @@ function drawBackground(dt){
       });
       samaelGates=samaelGates.filter(g=>g.t>-.08 && !g.fired);
 
+      flaurosPillars.forEach(p=>{
+        p.t-=dt;const target=p.owner&&p.owner.isPlayer?enemy:player;if(!target)return;
+        if(!p.fired&&p.t<=0){p.fired=true;p.t=.42;comboEl.textContent='ヘルフレイム!';}
+        if(p.fired&&!p.hit&&Math.abs(target.x-p.x)<48&&Math.abs(target.y-(p.y-75))<115){p.hit=true;damageHit(p.owner,target,7.2*p.owner.damageMul,45*Math.sign(target.x-p.x||1),-175);spawnImpact(target.x,target.y,'hit');}
+      });
+      flaurosPillars=flaurosPillars.filter(p=>p.t>0||!p.fired);
+      flaurosClaws.forEach(c=>{c.t-=dt;if(c.t<=0&&!c.hit&&c.target&&c.target.hp>0){c.hit=true;const last=c.index===4;damageHit(c.owner,c.target,(last?2.5:1.55)*c.owner.damageMul,(last?145:20)*c.owner.face,last?-75:-8);spawnImpact(c.target.x,c.target.y,'hit');}});
+      flaurosClaws=flaurosClaws.filter(c=>!c.hit);
+
       // 水中格闘2 共通飛び道具：シャボンガードに触れると自動反射。
       water2Shots.forEach(q=>{
         q.age=(q.age||0)+dt;
@@ -7730,6 +7809,9 @@ function drawBackground(dt){
       ctx.restore();
     });
 
+    flaurosPillars.forEach(p=>{ctx.save();const armed=!p.fired;ctx.globalCompositeOperation='lighter';if(armed){ctx.globalAlpha=.65;ctx.strokeStyle='#ff5138';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(p.x,p.y,42,12,0,0,Math.PI*2);ctx.stroke();}else{const g=ctx.createLinearGradient(p.x,p.y,p.x,p.y-170);g.addColorStop(0,'#ff281d');g.addColorStop(.45,'#ff7a28');g.addColorStop(1,'rgba(255,235,120,0)');ctx.fillStyle=g;ctx.shadowColor='#ff5a20';ctx.shadowBlur=25;ctx.beginPath();ctx.moveTo(p.x-30,p.y);ctx.quadraticCurveTo(p.x-18,p.y-100,p.x,p.y-175);ctx.quadraticCurveTo(p.x+22,p.y-95,p.x+30,p.y);ctx.fill();}ctx.restore();});
+    flaurosClaws.forEach(c=>{if(c.t>.08)return;ctx.save();ctx.translate(c.x,c.y);ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#ff3028';ctx.shadowColor='#ff1f18';ctx.shadowBlur=16;ctx.lineWidth=5;ctx.globalAlpha=.8;for(let j=-1;j<=1;j++){ctx.beginPath();ctx.moveTo(-34,-22+j*15);ctx.lineTo(36,18+j*15);ctx.stroke();}ctx.restore();});
+
     water2Shots.forEach(q=>{
       const a=1;
       if(q.style==='iceChargeOrb'&&q.trail){
@@ -7740,7 +7822,8 @@ function drawBackground(dt){
       const ang=Math.atan2(q.vy,q.vx);
       ctx.rotate(ang);
 
-      if(q.style==='burning'){
+      if(q.style==='flameClaw'){ctx.rotate(q.spin||0);ctx.shadowColor='#ff3a20';ctx.shadowBlur=20;ctx.strokeStyle='#ff4028';ctx.lineWidth=6;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(-18,i*8);ctx.quadraticCurveTo(0,-15+i*7,24,i*5);ctx.stroke();}ctx.strokeStyle='#ffd05a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(27,0);ctx.stroke();
+      }else if(q.style==='burning'){
         // 円形の核＋後方へ長く伸びる炎オーラ。
         const tail=34+Math.min(26,(q.reflected||0)*5);
         const g=ctx.createLinearGradient(-tail,0,q.r,0);
