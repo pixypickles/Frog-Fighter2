@@ -3602,3 +3602,18 @@ body.portrait-play #portraitOverlay{
     transform:translateY(-50%) scale(.61) !important;
   }
 }
+
+/* v1.9.5 portrait first-screen correction */
+#portraitOverlay{overflow:hidden!important;justify-content:center!important;padding:4vh 18px!important}
+#portraitOverlay .portrait-title-logo{position:relative;width:min(88vw,560px);margin:0 auto 4px;line-height:.72;transform:skew(-8deg) rotate(-2deg);filter:drop-shadow(6px 8px 0 rgba(0,20,75,.62))}
+#portraitOverlay .portrait-logo-top,#portraitOverlay .portrait-logo-bottom span,#portraitOverlay .portrait-logo-bottom b{display:inline-block;font-family:Impact,"Arial Black",sans-serif;font-style:italic;font-weight:1000;letter-spacing:-.06em;background:linear-gradient(180deg,#f5ff70 0%,#aaff36 14%,#35df73 34%,#08c6ad 52%,#11a9ea 70%,#0869d4 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:2px rgba(0,30,83,.9);text-shadow:4px 5px 0 rgba(0,13,58,.72)}
+#portraitOverlay .portrait-logo-top{display:block;font-size:clamp(58px,20vw,118px);transform:translateX(-5%)}
+#portraitOverlay .portrait-logo-bottom{display:flex;align-items:flex-end;justify-content:center;white-space:nowrap;margin-top:8px}
+#portraitOverlay .portrait-logo-bottom span{font-size:clamp(54px,18vw,108px)}
+#portraitOverlay .portrait-logo-bottom b{font-size:clamp(82px,27vw,154px);line-height:.58;margin-left:7px}
+#portraitOverlay .portrait-title-logo:before,#portraitOverlay .portrait-title-logo:after{content:"";position:absolute;left:2%;right:1%;height:9px;border-radius:50%;background:linear-gradient(90deg,transparent,#eaff6d 15%,#43e66c 36%,#0bc4bd 59%,#0873db 84%,transparent);transform:skew(-18deg)}
+#portraitOverlay .portrait-title-logo:before{top:2%} #portraitOverlay .portrait-title-logo:after{bottom:2%}
+#portraitOverlay .portrait-logo-sub{margin:10px 0 4vh;color:#d5f5ff;font:900 clamp(12px,3.6vw,20px)/1.1 system-ui,sans-serif;letter-spacing:.20em;text-shadow:0 2px 3px rgba(0,37,72,.5)}
+#portraitOverlay>strong{font-size:clamp(18px,5.4vw,29px)!important;max-width:92vw;line-height:1.35}
+#selectScreen.screen.active .select-right-panel .fighter-card{padding-left:140px!important}
+@media (orientation:landscape) and (max-height:600px){#selectScreen.screen.active .select-right-panel .fighter-card{padding-left:128px!important}}
