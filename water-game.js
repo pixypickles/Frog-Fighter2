@@ -16,6 +16,7 @@
   const bossTeaser=document.getElementById('bossTeaser');
   const samaelCard=document.querySelector('#selectScreen .fighter-card[data-fighter="samael"]');
   const seraphielCard=document.querySelector('#selectScreen .fighter-card[data-fighter="seraphiel"]');
+  const satanaelCard=document.querySelector('#selectScreen .fighter-card[data-fighter="satanael"]');
   let kawazuCard=document.getElementById('kawazuCard');
   let kawazuOpponent=document.getElementById('kawazuOpponent');
   const storyNarrative=document.getElementById('storyNarrative');
@@ -107,6 +108,10 @@
   let kawazuGhosts=[];
   let flaurosPillars=[];
   let flaurosClaws=[];
+  let satanaelFlares=[];
+  let satanaelRays=[];
+  let satanaelPressures=[];
+  let satanaelWaves=[];
   let siltClouds = [];
   let catfishCharges = [];
   let pressureBlades = [];
@@ -144,6 +149,7 @@
     remiel:{speed: 170, tongue: 205, damage: .98, defense:1.00, sink:5, hue:0, scale:1.00},
     seraphiel:{speed: 178, tongue: 205, damage: 1.24, defense:.84, sink:5, hue:0, scale:1.02},
     samael: {speed: 158, tongue: 235, damage: 1.10, defense:1.06, sink:7, hue:0, scale:1.08},
+    satanael:{speed:166,tongue:225,damage:1.20,defense:1.10,sink:8,hue:0,scale:1.10},
     kawazu: {speed: 205, tongue: 225, damage: 0.98, defense:0.90, sink:4, hue:0, scale:0.90},
     pascal: {speed: 176, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78},
     malphas:{speed: 174, tongue: 185, damage: 0.68, defense:0.86, sink:4, hue:0, scale:0.78}
@@ -410,6 +416,12 @@
       'セラフィックサイクロン：下 → 後ろ ＋ キック',
       'セラフィックレイ：下 → 前 ＋ パンチ（セラフィエル独自技）'
     ],
+    satanael:[
+      'ディザスターフレア：後ろ ＋ パンチ',
+      'ダークレイ：前 ＋ パンチ',
+      'ダークプレッシャー：下 ＋ ガード',
+      'インフェルノウェーブ：下 ＋ キック'
+    ],
     samael:[
       'ポイズンゲート：方向 ＋ パンチ（指定方向に発生点 → 相手へ毒弾）',
       'ヴェノムタン：舌（舌先から毒弾）',
@@ -448,21 +460,21 @@
 
   function refreshStoryClearUnlock(){
     const unlocked=isStoryCleared();
-    [samaelCard,seraphielCard].forEach(card=>{
+    [samaelCard,seraphielCard,satanaelCard].forEach(card=>{
       if(!card)return;
       card.hidden=!unlocked;
       card.style.display=unlocked?'':'none';
       card.setAttribute('aria-hidden',unlocked?'false':'true');
     });
     if(opponentSelect){
-      ['samael','seraphiel'].forEach(type=>{
+      ['samael','seraphiel','satanael'].forEach(type=>{
         const opt=opponentSelect.querySelector(`option[value="${type}"]`);
         if(!opt)return;
         opt.hidden=!unlocked;
         opt.disabled=!unlocked;
         opt.style.display=unlocked?'':'none';
       });
-      if(!unlocked && ['samael','seraphiel'].includes(opponentSelect.value)){
+      if(!unlocked && ['samael','seraphiel','satanael'].includes(opponentSelect.value)){
         opponentSelect.value='blue';
         selectedOpponent='blue';
       }
@@ -901,6 +913,9 @@
         belly:'#fff9df',
         eyeBump:'#ffe88a'
       };
+    }
+    if(type==='satanael'){
+      return {body:'#4b0c12',limb:'#31070c',light:'#a52628',belly:'#8b6727',eyeBump:'#16090c'};
     }
     if(type==='samael'){
       return {
@@ -1740,6 +1755,15 @@
       ctx.ellipse(2,36,19,23,0,0,Math.PI*2);
       ctx.fill();
 
+      if(this.type==='satanael'){
+        // 真ボス：黒赤い体に金の腹、赤く光る瞳。
+        ctx.save();
+        ctx.globalCompositeOperation='lighter';
+        ctx.globalAlpha=.22+.08*Math.sin(performance.now()/180);
+        ctx.fillStyle='#ff2028';ctx.shadowColor='#ff1720';ctx.shadowBlur=18;
+        ctx.beginPath();ctx.arc(0,-8,48,0,Math.PI*2);ctx.fill();
+        ctx.restore();
+      }
       if(this.type==='flauros'){
         // v1.9.9 ヒョウ柄：参考画像のような「黒いロゼット＋暖色の芯」。汚れに見えるベタ斑点は使わない。
         const drawRosette=(x,y,rx,ry,rot,open=0)=>{ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.lineCap='round';ctx.strokeStyle='#21120e';ctx.lineWidth=4.8;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,.25+open,2.55);ctx.stroke();ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,3.45,5.95-open);ctx.stroke();ctx.fillStyle='#9a542b';ctx.beginPath();ctx.ellipse(0,0,rx*.48,ry*.48,0,0,Math.PI*2);ctx.fill();ctx.restore();};
@@ -2766,7 +2790,7 @@
     }));
 
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; flaurosPillars=[]; flaurosClaws=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; lunarSlashes=[]; bloodMoons=[]; gravityBalls=[]; gravityZones=[]; meteorDrops=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; flaurosPillars=[]; flaurosClaws=[]; satanaelFlares=[]; satanaelRays=[]; satanaelPressures=[]; satanaelWaves=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; lunarSlashes=[]; bloodMoons=[]; gravityBalls=[]; gravityZones=[]; meteorDrops=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
 
     for(let i=0;i<12;i++){
       spawnLeafTarget(i,true);
@@ -3066,9 +3090,9 @@
 
 
   function currentPlayableTypes(){
-    const base=['green','blue','black','purple','flauros','yellow','orange','piranha','crayfish','sariel','kokabiel','jihal','remiel'];
+    const base=['green','blue','black','purple','flauros','satanael','yellow','orange','piranha','crayfish','sariel','kokabiel','jihal','remiel'];
     if(isKawazuUnlocked())base.push('kawazu');
-    if(isStoryCleared())base.push('samael','seraphiel');
+    if(isStoryCleared())base.push('samael','seraphiel','satanael');
     return base;
   }
 
@@ -3087,7 +3111,13 @@
       remiel:['上 ＋ ガード：ミラージュ（上）','下 ＋ ガード：ミラージュ（下）','後ろ ＋ ガード：ミラージュカウンター','前 ＋ ガード：アクアパリィ','前 ＋ パンチ：フロストショット','前 ＋ キック：ミラージュキック'],
       seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
       flauros:['上 ＋ パンチ：ヘルフレイム（相手の足元から火柱）','前 ＋ パンチ：フレイムクロー（3方向の炎爪）','前 ＋ キック：レオパードラッシュ','上 ＋ キック：インフェルノクロー（壁から急降下→時間差5連斬）'],
-      samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
+      satanael:[
+      'ディザスターフレア：後ろ ＋ パンチ',
+      'ダークレイ：前 ＋ パンチ',
+      'ダークプレッシャー：下 ＋ ガード',
+      'インフェルノウェーブ：下 ＋ キック'
+    ],
+    samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
       kawazu:['パンチ連打：水圧ラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
     return map[type] || ['専用必殺技：練習対象外'];
@@ -3150,7 +3180,7 @@
       'ルシファー':'black','ルシファーさん':'black','リリス':'purple','リリスさん':'purple',
       'ラファエル':'yellow','ラファエルさん':'yellow','ウリエル':'orange','ウリエルさん':'orange',
       'ベルゼブブ':'beelzebub','ベルゼブブさん':'beelzebub','サマエル':'samael','サマエルさん':'samael','セラフィエル':'seraphiel','セラフィエルさん':'seraphiel','レミエル':'remiel','レミエルさん':'remiel','ジィハル':'jihal','ジィハルさん':'jihal','コカビエル':'kokabiel','コカビエルさん':'kokabiel','サリエル':'sariel','サリエルさん':'sariel',
-      'フラウロス':'flauros','フラウロスさん':'flauros',
+      'フラウロス':'flauros','フラウロスさん':'flauros','サタナエル':'satanael','サタナエルさん':'satanael',
       'リヴァイア':'piranha','リヴァイアさん':'piranha','アスモデウス':'crayfish','アスモデウスさん':'crayfish',
       'アザゼル':'piranha','アザゼルさん':'piranha','ベリアル':'crayfish','ベリアルさん':'crayfish'
     };
@@ -3182,13 +3212,13 @@
       green:'ミカエルさん', blue:'ガブリエルさん', black:'ルシファーさん',
       purple:'リリスさん', yellow:'ラファエルさん', orange:'ウリエルさん',
       piranha:'リヴァイアさん', crayfish:'アスモデウスさん',
-      beelzebub:'ベルゼブブさん', flauros:'フラウロスさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', remiel:'レミエルさん', jihal:'ジィハルさん', kokabiel:'コカビエルさん', sariel:'サリエルさん', kawazu:'カワズさん'
+      beelzebub:'ベルゼブブさん', flauros:'フラウロスさん', satanael:'サタナエルさん', samael:'サマエルさん', seraphiel:'セラフィエルさん', remiel:'レミエルさん', jihal:'ジィハルさん', kokabiel:'コカビエルさん', sariel:'サリエルさん', kawazu:'カワズさん'
     }[type]||type;
   }
 
   function resetBattleEffects(){
     particles=[]; hitRings=[]; guardWaves=[]; aquaTornadoes=[]; aquaVortices=[];
-    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; flaurosPillars=[]; flaurosClaws=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
+    siltClouds=[]; catfishCharges=[]; pressureBlades=[]; water2Shots=[]; flaurosPillars=[]; flaurosClaws=[]; satanaelFlares=[]; satanaelRays=[]; satanaelPressures=[]; satanaelWaves=[]; samaelGates=[]; seraphielRays=[]; remielMirages=[]; remielFakeShots=[]; jihalBolts=[]; jihalBursts=[]; burstWaves=[];
     leafTargets=[]; guardTargets=[]; toxicWaters=[]; bossFish=[]; abyssShocks=[]; kawazuShots=[]; kawazuGhosts=[];
   }
 
@@ -3253,7 +3283,7 @@
   function startAllBattleMode(){
     allBattleQueue=currentPlayableTypes().filter(t=>t!==selectedFighter && t!=='seraphiel');
     // ボスクラスは後半へ。セラフィエルは最後。
-    const bosses=['beelzebub','samael'];
+    const bosses=['beelzebub','samael','satanael'];
     const normal=allBattleQueue.filter(t=>!bosses.includes(t));
     const late=allBattleQueue.filter(t=>bosses.includes(t));
     allBattleQueue=normal.concat(late);
@@ -3307,7 +3337,7 @@
       'piranha',
       storyTournament[3],storyTournament[4],
       'crayfish',
-      'samael','seraphiel'
+      'samael','seraphiel','satanael'
     ];
     storyFightIndex=0;storyLosses=0;storyWins=0;storyFinished=false;storyPhase='tournament';storyDay=1;storyLastWon=true;stageTheme=0;
 
@@ -3370,6 +3400,16 @@
         'SPECIAL MATCH\nVS 大会主催者'
       ],callback);return true;
     }
+    if(nextIndex===9){
+      showStoryNarrative([
+        'セラフィエルさんとの特別試合も終わり、今度こそ大会は幕を閉じる――はずだった。',
+        'その瞬間、水槽の照明が一斉に落ちた。\n\n観客席の歓声が止まり、水の奥に赤黒い火だけが揺れる。',
+        '？？？「……これで終わりか？」',
+        '大会主催者「まさか……あなたが、ここへ……」',
+        'トーナメント表には存在しない乱入者。\n\nその名は――サタナエル。',
+        'TRUE FINAL BATTLE\nVS サタナエルさん'
+      ],callback);return true;
+    }
     return false;
   }
 
@@ -3378,7 +3418,8 @@
     comboEl.textContent=`STORY CLEAR!　${storyWins}勝 ${storyLosses}敗`;
     restartButton.hidden=true;
     showStoryNarrative([
-      'セラフィエルさん「……参りました。いやあ、実に楽しかった！」',
+      'サタナエルさんは赤黒い炎を消し、何も言わず水槽の闇へ姿を消した。',
+      'セラフィエルさん「……いやあ。最後の最後に、とんでもない方が来ましたね」',
       'こうして、水中格闘大会は今度こそ本当に終了した。\n\n優勝者を称える泡が水槽いっぱいに舞い、みんなは勝った負けたと好き勝手に騒いでいる。',
       'ベルゼブブさん「次はもっとルールを減らそう」\n\n誰か「増やすんじゃなくて！？」\n\nカワズさんは隅で静かに首を振った。',
       'そして外の池では――。\n\nリヴァイアさんとアスモデウスさんが、何事もなかったような顔で泳いでいた。',
@@ -3396,7 +3437,7 @@
 
     // 水槽照明：1日目→2日目→決勝。外の池は別テーマ。
     if(nextType==='piranha'||nextType==='crayfish')stageTheme=0;
-    else if(nextType==='samael'||nextType==='seraphiel')stageTheme=3;
+    else if(nextType==='samael'||nextType==='seraphiel'||nextType==='satanael')stageTheme=3;
     else stageTheme=storyFightIndex>=4?2:1;
 
     const go=()=>startGame('story',nextType);
@@ -4673,6 +4714,37 @@
     return true;
   }
 
+
+  function specialDisasterFlare(f){
+    if(gameOver||!f||f.type!=='satanael'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='disasterFlare';f.specialT=.62;f.attack='punch';f.attackT=.62;
+    satanaelFlares.push({owner:f,x:f.x+f.face*58,y:f.y-6,vx:f.face*118,r:31,t:6,hit:false});
+    comboEl.textContent='ディザスターフレア…';
+    return true;
+  }
+  function specialDarkRay(f){
+    if(gameOver||!f||f.type!=='satanael'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='darkRay';f.specialT=.92;f.attack='punch';f.attackT=.92;
+    satanaelRays.push({owner:f,x:f.x+f.face*55,y:f.y-8,dir:f.face,t:.62,life:.62,active:false,hit:false});
+    comboEl.textContent='ダークレイ…';
+    return true;
+  }
+  function specialDarkPressure(f){
+    if(gameOver||!f||f.type!=='satanael'||f.stun>0||f.specialT>0||f.attackT>0)return false;
+    f.guard=false;f.specialType='darkPressure';f.specialT=.82;
+    satanaelPressures.push({owner:f,t:.78,life:.78});
+    comboEl.textContent='ダークプレッシャー…';
+    return true;
+  }
+  function specialInfernoWave(f){
+    if(gameOver||!f||f.type!=='satanael'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    f.specialType='infernoWave';f.specialT=.78;f.attack='kick';f.attackT=.78;
+    const dir=f.face, floorY=innerHeight-58;
+    for(let i=0;i<9;i++)satanaelWaves.push({owner:f,x:f.x+dir*(70+i*78),y:floorY,t:.12+i*.085,life:.34,hit:false});
+    comboEl.textContent='インフェルノウェーブ!';
+    return true;
+  }
+
   function specialDeadlyAqua(f){
     if(gameOver || !f || f.type!=='samael' || f.stun>0 || f.guard || f.specialT>0 || f.attackT>0) return false;
     const target=f.isPlayer?enemy:player;
@@ -4859,6 +4931,7 @@
   }
 
   function trySpecial(f,kind){
+    if(kind==='guard'&&f&&f.type==='satanael'&&water2HeldDir(f,'down')){clearCommand();return specialDarkPressure(f);}
     if(!f) return false;
     const forward=f.face>0?'right':'left';
     const back=f.face>0?'left':'right';
@@ -4868,6 +4941,11 @@
     }
 
 
+    if(f.type==='satanael'){
+      if(kind==='punch'&&water2HeldDir(f,'back')){clearCommand();return specialDisasterFlare(f);}
+      if(kind==='punch'&&water2HeldDir(f,'forward')){clearCommand();return specialDarkRay(f);}
+      if(kind==='kick'&&water2HeldDir(f,'down')){clearCommand();return specialInfernoWave(f);}
+    }
     if(f.type==='flauros'){
       if(kind==='punch'&&water2HeldDir(f,'up')){clearCommand();return specialHellFlame(f);}
       if(kind==='punch'&&water2HeldDir(f,'forward')){clearCommand();return specialFlameClaw(f);}
@@ -5392,7 +5470,7 @@
         comboEl.textContent=`YOU LOSE　残り猶予 ${3-storyLosses}`;
         restartButton.textContent='再戦';
       }else{
-        const label=(storyFightIndex===2?'1日目終了':storyFightIndex===5?'2日目終了':storyFightIndex===7?'大会優勝':'次の試合へ');
+        const label=(storyFightIndex===2?'1日目終了':storyFightIndex===5?'2日目終了':storyFightIndex===7?'大会優勝':storyFightIndex===8?'特別試合勝利':'次の試合へ');
         comboEl.textContent=`YOU WIN!　${label}`;
         restartButton.textContent='次へ';
       }
@@ -5657,7 +5735,7 @@
             player.guardTapTimes.push(now);
 
             // ガード開始直後 約0.28秒はジャストガード受付。
-            player.guard=true;
+            if(player.type==='satanael'&&water2HeldDir(player,'down')){specialDarkPressure(player);}else player.guard=true;
             player.guardStartT=.28;
             if(guardMiniActive) guardMiniGuardTapTime=performance.now();
 
@@ -5762,7 +5840,7 @@
       else if(backHeld){ specialIceWall(player); }
       else{
         if(player.type==='orange'&&!player.urielGuardHoldStart)player.urielGuardHoldStart=performance.now();
-        player.guard=true;
+        if(player.type==='satanael'&&water2HeldDir(player,'down')){specialDarkPressure(player);}else player.guard=true;
         player.guardStartT=.28;
         if(guardMiniActive) guardMiniGuardTapTime=performance.now();
       }
@@ -5879,6 +5957,7 @@
         if(roll<dt*.26){ specialAbyssShock(enemy,dy<0?'upper':'lower'); return; }
         if(dist>150 && roll<dt*.46){ specialWater2Shot(enemy,{name:'ベノムショット',attack:'punch',color:'venom',style:'venomGloss',speed:235,damage:4.5,r:16,charge:.50,poisonDuration:2.2,maxReflect:4}); return; }
       }
+      if(enemy.type==='satanael'&&enemy.specialT<=0){const r=Math.random();if(dist>190&&r<dt*.16){specialDisasterFlare(enemy);return;}if(dist>220&&r<dt*.28){specialDarkRay(enemy);return;}if(r<dt*.38){specialDarkPressure(enemy);return;}if(r<dt*.50){specialInfernoWave(enemy);return;}}
       if(enemy.type==='flauros'&&enemy.specialT<=0){const r=Math.random();if(dist>180&&r<dt*.20){specialHellFlame(enemy);return;}if(dist>170&&r<dt*.38){specialFlameClaw(enemy);return;}if(dist<250&&r<dt*.52){specialLeopardRush(enemy);return;}if(dist>130&&r<dt*.59){specialInfernoClaw(enemy);return;}}
       if(enemy.type==='sariel'&&enemy.specialT<=0){const r=Math.random();if(dist>170&&r<dt*.18){specialLunaSlash(enemy,Math.random()<.5?'up':'down');return;}if(dist<160&&r<dt*.12){specialMoonSaltKick(enemy);return;}if(dist<360&&r<dt*.07){specialEvilEye(enemy);return;}if(dist>180&&r<dt*.035){specialBloodMoon(enemy);return;}}
       if(enemy.type==='kokabiel'&&enemy.specialT<=0){const r=Math.random();if(dist>180&&r<dt*.24){specialGravityBall(enemy);return;}if(dist<260&&r<dt*.10){specialGravityZone(enemy);return;}if(dist>130&&r<dt*.08){specialMeteorRain(enemy);return;}}
@@ -6231,7 +6310,7 @@ function drawBackground(dt){
     if(gameMode==='story' && (enemy?.type==='piranha' || enemy?.type==='crayfish')) return;
 
     const w=innerWidth,h=innerHeight;
-    const finalStage=(gameMode==='story' && (enemy?.type==='samael' || enemy?.type==='seraphiel'));
+    const finalStage=(gameMode==='story' && (enemy?.type==='samael' || enemy?.type==='seraphiel' || enemy?.type==='satanael'));
     const day2=(gameMode==='story' && stageTheme===2);
     const now=performance.now();
 
@@ -6935,8 +7014,101 @@ function drawBackground(dt){
       });
       seraphielRays=seraphielRays.filter(r=>r.t>0);
 
+
+      // サタナエル：ディザスターフレア。遅い赤黒炎は通常弾を飲み込み、ガードでも消滅しない。
+      satanaelFlares.forEach(q=>{
+        q.t-=dt;q.x+=q.vx*dt;
+        for(const p of water2Shots){
+          if(p.owner!==q.owner&&p.t>0&&Math.abs(p.x-q.x)<q.r+(p.r||12)&&Math.abs(p.y-q.y)<q.r+(p.r||12)){
+            p.t=0;spawnImpact(p.x,p.y,'guard');
+          }
+        }
+        const target=q.owner.isPlayer?enemy:player;
+        if(target&&!q.hit&&Math.abs(target.x-q.x)<q.r+target.radius*.65&&Math.abs(target.y-q.y)<q.r+target.radius*.65){
+          if(target.guard){damageHit(q.owner,target,3.4*q.owner.damageMul,38*Math.sign(q.vx),-8);spawnImpact(target.x,target.y,'guard');}
+          else{damageHit(q.owner,target,12.5*q.owner.damageMul,185*Math.sign(q.vx),-45);spawnImpact(target.x,target.y,'hit');}
+          q.hit=true; // 本体への多段防止。弾そのものは画面外まで残る。
+        }
+      });
+      satanaelFlares=satanaelFlares.filter(q=>q.t>0&&q.x>-100&&q.x<innerWidth+100);
+
+      // ダークレイ：セラフィックレイの黒版。
+      satanaelRays.forEach(r=>{
+        r.t-=dt;const elapsed=r.life-r.t;r.active=elapsed>.32&&elapsed<.50;
+        const target=r.owner.isPlayer?enemy:player;
+        if(r.active&&target&&!r.hit){
+          const ahead=(target.x-r.x)*r.dir;
+          if(ahead>0&&ahead<innerWidth&&Math.abs(target.y-r.y)<34+target.radius*.45){
+            if(target.guard){damageHit(r.owner,target,3.2*r.owner.damageMul,80*r.dir,-15);spawnImpact(target.x,target.y,'guard');}
+            else{damageHit(r.owner,target,16.2*r.owner.damageMul,275*r.dir,-55);spawnImpact(target.x,target.y,'hit');}
+            r.hit=true;
+          }
+        }
+      });
+      satanaelRays=satanaelRays.filter(r=>r.t>0);
+
+      // ダークプレッシャー：上から降りる黒い光。0ダメージで相手を底へ押し下げる。
+      satanaelPressures.forEach(p=>{
+        p.t-=dt;const elapsed=p.life-p.t;const target=p.owner.isPlayer?enemy:player;
+        if(target&&elapsed>.18&&elapsed<.68){
+          const floorY=innerHeight-72;
+          target.y+=(floorY-target.y)*Math.min(1,dt*7.5);
+          target.vy=Math.max(target.vy,240);
+        }
+      });
+      satanaelPressures=satanaelPressures.filter(p=>p.t>0);
+
+      // インフェルノウェーブ：底を黒炎の火柱が連続して走る。
+      satanaelWaves.forEach(p=>{
+        p.t-=dt;
+        if(p.t<=0&&!p.fired){p.fired=true;p.t=p.life;}
+        if(p.fired){
+          const target=p.owner.isPlayer?enemy:player;
+          if(target&&!p.hit&&Math.abs(target.x-p.x)<38&&target.y>innerHeight-205){
+            p.hit=true;
+            if(target.guard){damageHit(p.owner,target,1.6*p.owner.damageMul,45*p.owner.face,-25);spawnImpact(target.x,target.y,'guard');}
+            else{damageHit(p.owner,target,5.0*p.owner.damageMul,115*p.owner.face,-95);spawnImpact(target.x,target.y,'hit');}
+          }
+        }
+      });
+      satanaelWaves=satanaelWaves.filter(p=>p.t>0);
+
       // サマエル：毒弾の発生地点。紫＋青白い渦を見せてから相手へ発射。
-      samaelGates.forEach(g=>{
+  
+    satanaelFlares.forEach(q=>{
+      ctx.save();ctx.translate(q.x,q.y);ctx.globalCompositeOperation='lighter';
+      const pulse=1+.08*Math.sin(performance.now()/90);
+      ctx.scale(pulse,pulse);ctx.shadowColor='#ff2020';ctx.shadowBlur=26;
+      const g=ctx.createRadialGradient(0,0,3,0,0,q.r);
+      g.addColorStop(0,'#ff4a32');g.addColorStop(.35,'#8b1119');g.addColorStop(.72,'#17070b');g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,q.r,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(255,45,30,.75)';ctx.lineWidth=4;
+      for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(0,0,12+i*7,performance.now()/250+i,performance.now()/250+i+2.4);ctx.stroke();}
+      ctx.restore();
+    });
+    satanaelRays.forEach(r=>{
+      const elapsed=r.life-r.t;ctx.save();
+      if(elapsed<.32){
+        const p=elapsed/.32;ctx.globalAlpha=.28+.32*p;ctx.strokeStyle='#5b0a13';ctx.lineWidth=2+5*p;ctx.shadowColor='#ff1828';ctx.shadowBlur=14;
+      }else{
+        const fade=Math.max(0,Math.min(1,r.t/.12));ctx.globalAlpha=.88*fade;ctx.strokeStyle='#090208';ctx.lineWidth=30;ctx.shadowColor='#c41428';ctx.shadowBlur=32;
+      }
+      ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.dir*innerWidth,r.y);ctx.stroke();
+      if(elapsed>=.32){ctx.globalAlpha=.85;ctx.strokeStyle='#72101d';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.dir*innerWidth,r.y);ctx.stroke();}
+      ctx.restore();
+    });
+    satanaelPressures.forEach(p=>{
+      const elapsed=p.life-p.t;const y=Math.max(-30,Math.min(innerHeight,((elapsed-.12)/.56)*innerHeight));
+      ctx.save();const g=ctx.createLinearGradient(0,y-120,0,y+80);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,'rgba(8,0,12,.42)');g.addColorStop(.72,'rgba(110,0,24,.18)');g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g;ctx.fillRect(0,y-140,innerWidth,220);ctx.restore();
+    });
+    satanaelWaves.forEach(p=>{
+      if(!p.fired)return;ctx.save();ctx.globalCompositeOperation='lighter';
+      const g=ctx.createLinearGradient(p.x,p.y,p.x,p.y-175);g.addColorStop(0,'#250006');g.addColorStop(.35,'#7c0b18');g.addColorStop(.68,'#090006');g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g;ctx.shadowColor='#a80d20';ctx.shadowBlur=20;ctx.beginPath();ctx.moveTo(p.x-28,p.y);ctx.quadraticCurveTo(p.x-20,p.y-105,p.x,p.y-175);ctx.quadraticCurveTo(p.x+22,p.y-95,p.x+28,p.y);ctx.fill();ctx.restore();
+    });
+
+    samaelGates.forEach(g=>{
         g.t-=dt;
         if(g.t<=0 && !g.fired){
           g.fired=true;
