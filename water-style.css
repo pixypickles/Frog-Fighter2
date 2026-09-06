@@ -3274,3 +3274,31 @@ body.portrait-play #portraitOverlay{
   font-size:11px !important;
   text-align:left !important;
 }
+
+
+/* v1.8.5 roster name spacing */
+#selectScreen .select-right-panel .fighter-card{
+  padding-left:112px !important;
+}
+#selectScreen .select-right-panel .fighter-card .fighter-emoji{
+  left:8px !important;
+  width:82px !important;
+  height:64px !important;
+  transform:translateY(-50%) scale(.70) !important;
+}
+#selectScreen .select-right-panel .fighter-card > strong{
+  padding-left:2px !important;
+  white-space:normal !important;
+  overflow:visible !important;
+  text-indent:0 !important;
+}
+@media (orientation:landscape) and (max-height:600px){
+  #selectScreen .select-right-panel .fighter-card{
+    padding-left:102px !important;
+  }
+  #selectScreen .select-right-panel .fighter-card .fighter-emoji{
+    width:76px !important;
+    height:60px !important;
+    transform:translateY(-50%) scale(.64) !important;
+  }
+}

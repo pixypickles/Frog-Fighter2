@@ -6032,15 +6032,15 @@ function drawBackground(dt){
     if(arenaActive){
       // 明るく透明度の高い大会水槽。草や暗転は使わない。
       const grad=ctx.createLinearGradient(0,0,0,innerHeight);
-      grad.addColorStop(0,'#58edf3');
-      grad.addColorStop(.48,'#31d9e5');
-      grad.addColorStop(1,'#20c4d3');
+      grad.addColorStop(0,'#bdf9ff');
+      grad.addColorStop(.48,'#78eaf4');
+      grad.addColorStop(1,'#48d5e3');
       ctx.fillStyle=grad;
       ctx.fillRect(0,0,innerWidth,innerHeight);
 
       // 薄い水面の光
       ctx.save();
-      ctx.globalAlpha=.11;
+      ctx.globalAlpha=.08;
       ctx.fillStyle='#ffffff';
       for(let i=0;i<7;i++){
         const x=(i+.5)*innerWidth/7 + Math.sin(performance.now()/1700+i)*18;
@@ -6101,7 +6101,7 @@ function drawBackground(dt){
     ctx.save();
 
     // 大型水槽のガラス反射。
-    ctx.globalAlpha=.10;
+    ctx.globalAlpha=.07;
     const glass=ctx.createLinearGradient(0,0,w,0);
     glass.addColorStop(0,'rgba(255,255,255,.48)');
     glass.addColorStop(.09,'rgba(255,255,255,.035)');
@@ -6113,8 +6113,8 @@ function drawBackground(dt){
     // 奥の水がゆらいで見える屈折ライン。
     // 強すぎない波紋を何本も重ねて、水槽越しの歪み感を出す。
     ctx.save();
-    ctx.globalAlpha=.12;
-    ctx.strokeStyle='rgba(235,255,255,.85)';
+    ctx.globalAlpha=.075;
+    ctx.strokeStyle='rgba(245,255,255,.88)';
     ctx.lineWidth=2;
     for(let row=0;row<9;row++){
       const baseY=h*.10+row*h*.065;
@@ -6130,7 +6130,7 @@ function drawBackground(dt){
     }
 
     // 縦方向の薄い屈折筋
-    ctx.globalAlpha=.055;
+    ctx.globalAlpha=.035;
     ctx.lineWidth=8;
     for(let i=0;i<8;i++){
       const x=(i+.5)*w/8 + Math.sin(now*.0006+i)*20;
@@ -6147,13 +6147,13 @@ function drawBackground(dt){
 
     // ガラス越しの観客席。
     const standTop=h*.51;
-    ctx.globalAlpha=.10;
-    ctx.fillStyle='rgba(20,115,126,.70)';
+    ctx.globalAlpha=.065;
+    ctx.fillStyle='rgba(80,185,198,.52)';
     ctx.fillRect(0,standTop,w,h*.27);
 
     // 段差
-    ctx.globalAlpha=.18;
-    ctx.strokeStyle='rgba(235,255,255,.34)';
+    ctx.globalAlpha=.13;
+    ctx.strokeStyle='rgba(245,255,255,.40)';
     ctx.lineWidth=2;
     for(let row=0;row<5;row++){
       const y=standTop+row*23;
@@ -6219,7 +6219,7 @@ function drawBackground(dt){
       }
     }
 
-    // レフリーカエル。水槽の手前側を左右にチョロチョロ移動する。
+    // レフリーカエル。緑の肌＋白黒のレフリー服。
     refereeFrog.t=(refereeFrog.t||0)+0.016;
     if(!refereeFrog.x)refereeFrog.x=w*.5;
     refereeFrog.x+=refereeFrog.dir*0.65;
@@ -6232,25 +6232,40 @@ function drawBackground(dt){
     ctx.save();
     ctx.translate(rx,ry);
     ctx.scale(refereeFrog.dir,1);
+    ctx.globalAlpha=.88;
 
-    // 小さめ、白黒ベースで審判らしく。
-    ctx.globalAlpha=.82;
-    ctx.fillStyle='rgba(35,48,58,.90)';
+    // 緑の体・頭
+    ctx.fillStyle='rgba(54,178,87,.96)';
     ctx.beginPath();ctx.ellipse(0,10,13,17,0,0,Math.PI*2);ctx.fill();
     ctx.beginPath();ctx.arc(-7,-3,7,0,Math.PI*2);ctx.arc(7,-3,7,0,Math.PI*2);ctx.fill();
 
-    ctx.fillStyle='rgba(245,250,250,.95)';
-    ctx.beginPath();ctx.arc(-7,-3,4.2,0,Math.PI*2);ctx.arc(7,-3,4.2,0,Math.PI*2);ctx.fill();
+    // 白目
+    ctx.fillStyle='rgba(248,255,252,.98)';
+    ctx.beginPath();ctx.arc(-7,-3,4.3,0,Math.PI*2);ctx.arc(7,-3,4.3,0,Math.PI*2);ctx.fill();
 
-    ctx.fillStyle='rgba(15,24,28,.95)';
+    // 黒目
+    ctx.fillStyle='rgba(15,30,24,.98)';
     ctx.beginPath();ctx.arc(-6,-3,1.8,0,Math.PI*2);ctx.arc(8,-3,1.8,0,Math.PI*2);ctx.fill();
 
-    // 白い胸元
-    ctx.fillStyle='rgba(235,242,242,.92)';
-    ctx.beginPath();ctx.ellipse(0,12,6.5,9,0,0,Math.PI*2);ctx.fill();
+    // 白黒レフリーシャツ
+    ctx.save();
+    ctx.beginPath();ctx.ellipse(0,12,8.2,11,0,0,Math.PI*2);ctx.clip();
+    ctx.fillStyle='rgba(245,247,245,.98)';
+    ctx.fillRect(-9,1,18,22);
+    ctx.fillStyle='rgba(30,38,38,.95)';
+    for(let sx=-8;sx<9;sx+=5){
+      ctx.fillRect(sx,1,2.5,22);
+    }
+    ctx.restore();
 
-    // 片手を上げたり下げたりする。
-    ctx.strokeStyle='rgba(35,48,58,.90)';
+    // 黒い襟
+    ctx.fillStyle='rgba(25,32,32,.96)';
+    ctx.beginPath();
+    ctx.moveTo(-5,3);ctx.lineTo(0,8);ctx.lineTo(5,3);ctx.lineTo(0,5);ctx.closePath();
+    ctx.fill();
+
+    // 緑の腕。片手を上げたり下げたり。
+    ctx.strokeStyle='rgba(54,178,87,.96)';
     ctx.lineWidth=4;ctx.lineCap='round';
     const armUp=Math.sin(refereeFrog.t*3)>0.2;
     ctx.beginPath();
