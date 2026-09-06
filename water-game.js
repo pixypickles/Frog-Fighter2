@@ -6026,31 +6026,31 @@
   }
 
 function drawBackground(dt){
-    const th=stageThemeData();
     const arenaActive=!(gameMode==='story' && (enemy?.type==='piranha' || enemy?.type==='crayfish'));
 
-    // 水槽闘技場は高透明度・明るい水。以前の時間経過による暗転は使わない。
     if(arenaActive){
-      const g=ctx.createLinearGradient(0,0,0,innerHeight);
-      g.addColorStop(0,'#43e4ee');
-      g.addColorStop(.48,'#22cedd');
-      g.addColorStop(1,'#15b7c8');
-      ctx.fillStyle=g;
+      // 明るく透明度の高い大会水槽。草や暗転は使わない。
+      const grad=ctx.createLinearGradient(0,0,0,innerHeight);
+      grad.addColorStop(0,'#58edf3');
+      grad.addColorStop(.48,'#31d9e5');
+      grad.addColorStop(1,'#20c4d3');
+      ctx.fillStyle=grad;
       ctx.fillRect(0,0,innerWidth,innerHeight);
 
-      // 薄い水面光だけ。草・濁り・暗い深度表現は無し。
-      ctx.globalAlpha=.12;
+      // 薄い水面の光
+      ctx.save();
+      ctx.globalAlpha=.11;
       ctx.fillStyle='#ffffff';
       for(let i=0;i<7;i++){
         const x=(i+.5)*innerWidth/7 + Math.sin(performance.now()/1700+i)*18;
         ctx.beginPath();
-        ctx.ellipse(x,innerHeight*.16,innerWidth*.10,12,.08,0,Math.PI*2);
+        ctx.ellipse(x,innerHeight*.15,innerWidth*.10,11,.08,0,Math.PI*2);
         ctx.fill();
       }
-      ctx.globalAlpha=1;
+      ctx.restore();
 
-      // 泡は従来通り、ただし少し控えめに。
-      ctx.fillStyle='rgba(240,255,255,.34)';
+      // 泡
+      ctx.fillStyle='rgba(242,255,255,.34)';
       bubbles.forEach(b=>{
         b.y-=b.s*dt;
         if(b.y<-12){b.y=innerHeight+10;b.x=Math.random()*innerWidth}
@@ -6059,11 +6059,20 @@ function drawBackground(dt){
       return;
     }
 
-    // 外の池イベントは従来の自然背景。
-    const g=ctx.createLinearGradient(0,0,0,innerHeight);
-    g.addColorStop(0,th.top);
-    g.addColorStop(1,th.bottom);
-    ctx.fillStyle=g;ctx.fillRect(0,0,innerWidth,innerHeight);
+    // リヴァイア／アスモデウス戦のみ、自然の池背景。
+    const themes=[
+      {top:'#56b78f',mid:'#29786f',bottom:'#174f50',floor:'#3e5438',plant:'#718347'}
+    ];
+    const th=themes[0];
+    const grad=ctx.createLinearGradient(0,0,0,innerHeight);
+    grad.addColorStop(0,th.top);
+    grad.addColorStop(.52,th.mid);
+    grad.addColorStop(1,th.bottom);
+    ctx.fillStyle=grad;
+    ctx.fillRect(0,0,innerWidth,innerHeight);
+
+    ctx.fillStyle=th.floor;
+    ctx.fillRect(0,innerHeight-35,innerWidth,35);
 
     ctx.strokeStyle=th.plant;ctx.lineWidth=8;ctx.lineCap='round';
     for(let x=20;x<innerWidth;x+=75){
