@@ -6080,6 +6080,109 @@ function drawBackground(dt){
     });
   }
 
+
+  function drawAquariumArena(){
+    // 外の池イベントでは闘技場を使わない。
+    if(gameMode==='story' && (enemy?.type==='piranha' || enemy?.type==='crayfish')) return;
+
+    const w=innerWidth,h=innerHeight;
+    const finalStage=(gameMode==='story' && (enemy?.type==='samael' || enemy?.type==='seraphiel'));
+    const day2=(gameMode==='story' && stageTheme===2);
+
+    ctx.save();
+
+    // 水槽の奥ガラス。透明感のある縦枠。
+    const glassGrad=ctx.createLinearGradient(0,0,w,0);
+    glassGrad.addColorStop(0,'rgba(255,255,255,.10)');
+    glassGrad.addColorStop(.08,'rgba(255,255,255,.015)');
+    glassGrad.addColorStop(.92,'rgba(255,255,255,.015)');
+    glassGrad.addColorStop(1,'rgba(255,255,255,.10)');
+    ctx.fillStyle=glassGrad;
+    ctx.fillRect(0,0,w,h);
+
+    // 上部照明レール
+    ctx.globalAlpha=.72;
+    ctx.fillStyle='rgba(8,52,67,.62)';
+    ctx.fillRect(0,0,w,18);
+    ctx.fillStyle='rgba(210,250,255,.28)';
+    ctx.fillRect(0,18,w,3);
+
+    // 大会照明。1日目=青白、2日目=少し紫、決勝=金白。
+    const lampCount=Math.max(5,Math.floor(w/180));
+    for(let i=0;i<lampCount;i++){
+      const x=(i+.5)*w/lampCount;
+      let core='rgba(205,247,255,.72)',beam='rgba(170,235,255,.08)';
+      if(day2){core='rgba(215,210,255,.78)';beam='rgba(175,160,255,.09)';}
+      if(finalStage){core='rgba(255,245,185,.88)';beam='rgba(255,225,120,.12)';}
+
+      ctx.fillStyle=core;
+      ctx.beginPath();ctx.ellipse(x,19,18,6,0,0,Math.PI*2);ctx.fill();
+
+      const g=ctx.createLinearGradient(x,20,x,h*.72);
+      g.addColorStop(0,beam);g.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath();
+      ctx.moveTo(x-18,24);ctx.lineTo(x+18,24);
+      ctx.lineTo(x+80,h*.72);ctx.lineTo(x-80,h*.72);
+      ctx.closePath();ctx.fill();
+    }
+
+    // 奥の観客席っぽいシルエット
+    ctx.globalAlpha=.22;
+    ctx.fillStyle='rgba(3,39,53,.85)';
+    ctx.fillRect(0,h*.70,w,h*.12);
+    ctx.globalAlpha=.30;
+    for(let x=18;x<w;x+=34){
+      const yy=h*.72 + ((x/34)%2)*8;
+      ctx.beginPath();ctx.arc(x,yy,7,0,Math.PI*2);ctx.fill();
+      ctx.fillRect(x-6,yy+6,12,16);
+    }
+
+    // 床のリング台
+    const floorY=h*.86;
+    ctx.globalAlpha=.72;
+    const fg=ctx.createLinearGradient(0,floorY,w,floorY);
+    fg.addColorStop(0,'rgba(25,115,130,.65)');
+    fg.addColorStop(.5, finalStage?'rgba(108,91,35,.66)':'rgba(36,139,151,.72)');
+    fg.addColorStop(1,'rgba(25,115,130,.65)');
+    ctx.fillStyle=fg;
+    ctx.fillRect(0,floorY,w,h-floorY);
+
+    // リングの白ライン
+    ctx.globalAlpha=.58;
+    ctx.strokeStyle=finalStage?'rgba(255,236,160,.82)':'rgba(220,252,255,.76)';
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.ellipse(w*.5,floorY+18,w*.36,34,0,0,Math.PI*2);
+    ctx.stroke();
+
+    // 水槽ガラスの縦支柱
+    ctx.globalAlpha=.38;
+    ctx.fillStyle='rgba(225,250,255,.35)';
+    ctx.fillRect(2,0,4,h);
+    ctx.fillRect(w-6,0,4,h);
+
+    // 決勝専用の豪華な円形装飾
+    if(finalStage){
+      ctx.globalAlpha=.32;
+      ctx.strokeStyle='rgba(255,230,135,.88)';
+      ctx.lineWidth=5;
+      ctx.beginPath();ctx.arc(w*.5,h*.42,Math.min(w,h)*.26,0,Math.PI*2);ctx.stroke();
+      ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(w*.5,h*.42,Math.min(w,h)*.31,0,Math.PI*2);ctx.stroke();
+
+      ctx.globalAlpha=.18;
+      ctx.fillStyle='rgba(255,224,120,.45)';
+      for(let a=0;a<Math.PI*2;a+=Math.PI/8){
+        const x=w*.5+Math.cos(a)*Math.min(w,h)*.31;
+        const y=h*.42+Math.sin(a)*Math.min(w,h)*.31;
+        ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();
+      }
+    }
+
+    ctx.restore();
+  }
+
   function loop(now){
     requestAnimationFrame(loop);
     if(!screens.game.classList.contains('active')||!player||!enemy)return;
@@ -6892,6 +6995,7 @@ function drawBackground(dt){
     }
 
     drawBackground(dt);
+    drawAquariumArena();
     ctx.globalAlpha=1;
     ctx.globalCompositeOperation='source-over';
 
