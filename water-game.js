@@ -4739,7 +4739,9 @@
   function specialInfernoWave(f){
     if(gameOver||!f||f.type!=='satanael'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
     f.specialType='infernoWave';f.specialT=.78;f.attack='kick';f.attackT=.78;
-    const dir=f.face, floorY=innerHeight-58;
+    const dir=f.face;
+    // 常に画面の最下端から噴き上がる。上側は完全な安全地帯。
+    const floorY=innerHeight+4;
     for(let i=0;i<9;i++)satanaelWaves.push({owner:f,x:f.x+dir*(70+i*78),y:floorY,t:.12+i*.085,life:.34,hit:false});
     comboEl.textContent='インフェルノウェーブ!';
     return true;
@@ -7064,7 +7066,8 @@ function drawBackground(dt){
         if(p.t<=0&&!p.fired){p.fired=true;p.t=p.life;}
         if(p.fired){
           const target=p.owner.isPlayer?enemy:player;
-          if(target&&!p.hit&&Math.abs(target.x-p.x)<38&&target.y>innerHeight-205){
+          // 炎柱は底から約150pxまで。画面上側にいる相手には絶対に当たらない。
+          if(target&&!p.hit&&Math.abs(target.x-p.x)<38&&target.y>innerHeight-150){
             p.hit=true;
             if(target.guard){damageHit(p.owner,target,1.6*p.owner.damageMul,45*p.owner.face,-25);spawnImpact(target.x,target.y,'guard');}
             else{damageHit(p.owner,target,5.0*p.owner.damageMul,115*p.owner.face,-95);spawnImpact(target.x,target.y,'hit');}
@@ -8122,7 +8125,7 @@ function drawBackground(dt){
       ctx.globalAlpha=.92*a;
 
       // インフェルノウェーブ：底から黒炎柱
-      const fg=ctx.createLinearGradient(p.x,p.y,p.x,p.y-190);
+      const fg=ctx.createLinearGradient(p.x,p.y,p.x,p.y-150);
       fg.addColorStop(0,'#160006');
       fg.addColorStop(.20,'#8d0a20');
       fg.addColorStop(.48,'#250008');
@@ -8133,15 +8136,15 @@ function drawBackground(dt){
       ctx.shadowBlur=26;
       ctx.beginPath();
       ctx.moveTo(p.x-32,p.y);
-      ctx.bezierCurveTo(p.x-31,p.y-58,p.x-19,p.y-128,p.x-4,p.y-190);
-      ctx.bezierCurveTo(p.x+14,p.y-145,p.x+30,p.y-66,p.x+32,p.y);
+      ctx.bezierCurveTo(p.x-31,p.y-58,p.x-19,p.y-102,p.x-4,p.y-150);
+      ctx.bezierCurveTo(p.x+14,p.y-116,p.x+30,p.y-52,p.x+32,p.y);
       ctx.closePath();ctx.fill();
 
       ctx.globalAlpha=.62*a;
       ctx.fillStyle='#d31a2f';
       ctx.beginPath();
       ctx.moveTo(p.x-10,p.y);
-      ctx.quadraticCurveTo(p.x-8,p.y-82,p.x+1,p.y-142);
+      ctx.quadraticCurveTo(p.x-8,p.y-82,p.x+1,p.y-116);
       ctx.quadraticCurveTo(p.x+13,p.y-78,p.x+11,p.y);
       ctx.closePath();ctx.fill();
       ctx.restore();
