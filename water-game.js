@@ -4630,6 +4630,70 @@
     comboEl.textContent='スパークバースト!';return true;
   }
 
+  function remielActiveMirage(f){
+    return remielMirages.find(m=>m.owner===f&&m.t>0);
+  }
+  function remielGhostPos(m){
+    if(!m||!m.owner)return null;
+    if((m.age||0)<.28 && m.originY!=null){
+      const p=Math.max(0,Math.min(1,(m.age||0)/.28));
+      const e=p*p*(3-2*p);
+      return {x:m.owner.x,y:m.originY+(m.ghostTargetY-m.originY)*e};
+    }
+    return {x:m.owner.x,y:m.owner.y+m.offsetY};
+  }
+  function remielConsumeMirage(m,x,y,kind='hit'){
+    if(!m||m.t<=0)return;
+    m.t=0;
+    spawnImpact(x,y,kind);
+  }
+  function remielGhostNormalAttack(f,kind,variant='mid'){
+    const m=remielActiveMirage(f),target=f.isPlayer?enemy:player;
+    if(!m||!target)return;
+    const g=remielGhostPos(m); if(!g)return;
+    const dir=f.face,dx=(target.x-g.x)*dir,dy=target.y-g.y;
+    let hit=false,dmg=0,kx=0,ky=0,delay=0;
+    if(kind==='punch'){
+      const yAim=variant==='up'?-34:0;
+      hit=dx>0&&dx<88&&Math.abs(dy-yAim)<58;dmg=1.3*f.damageMul;kx=26*dir;ky=variant==='up'?-36:-3;delay=125;
+    }else if(kind==='kick'){
+      const yAim=variant==='down'?42:0;
+      hit=dx>0&&dx<106&&Math.abs(dy-yAim)<72;dmg=2.6*f.damageMul;kx=71*dir;ky=variant==='down'?63:-11;delay=175;
+    }else if(kind==='tongue'){
+      hit=dx>0&&dx<f.tongueRange&&Math.abs(dy)<82;dmg=.9*f.damageMul;kx=0;ky=0;delay=70;
+    }
+    if(!hit)return;
+    setTimeout(()=>{
+      if(gameOver||m.t<=0||!target)return;
+      const gg=remielGhostPos(m);if(!gg)return;
+      // 幻影攻撃は半分ダメージ。舌はダメージのみで引き寄せ・絡め・投げなし。
+      if(target.guard){
+        spawnImpact(target.x,target.y,'guard');
+      }else{
+        damageHit(f,target,dmg,kx,ky);
+        spawnImpact(target.x,target.y,'hit');
+      }
+      remielConsumeMirage(m,gg.x,gg.y,'guard');
+    },delay);
+  }
+  function remielGhostMirageKick(f){
+    const m=remielActiveMirage(f),target=f.isPlayer?enemy:player;
+    if(!m||!target)return;
+    const g=remielGhostPos(m);if(!g)return;
+    const dir=f.face;
+    // 幻影も本体と同じ前進技を行ったものとして広めに判定。命中/ガードで消える。
+    setTimeout(()=>{
+      if(gameOver||m.t<=0||!target)return;
+      const gg=remielGhostPos(m);if(!gg)return;
+      const dx=(target.x-gg.x)*dir;
+      if(dx>0&&dx<250&&Math.abs(target.y-gg.y)<82){
+        if(target.guard)spawnImpact(target.x,target.y,'guard');
+        else{damageHit(f,target,4.9*f.damageMul,158*dir,-25);spawnImpact(target.x,target.y,'hit');}
+        remielConsumeMirage(m,gg.x,gg.y,'guard');
+      }
+    },180);
+  }
+
   function remielMakeMirage(f,where){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
     remielMirages=remielMirages.filter(m=>m.owner!==f);
@@ -4654,7 +4718,9 @@
   }
   function specialMirageCounter(f){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
-    f.guard=false;f.specialType='mirageCounter';f.specialT=.48;f.remielCounterT=.30;comboEl.textContent='ミラージュカウンター…';return true;
+    f.guard=false;f.specialType='mirageCounter';f.specialT=.48;f.remielCounterT=.30;
+    const mir=remielActiveMirage(f);if(mir)mir.counterT=.30;
+    comboEl.textContent='ミラージュカウンター…';return true;
   }
   function specialAquaParry(f,just=false){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.specialT>0)return false;
@@ -4663,13 +4729,15 @@
   function specialRemielFrostShot(f){
     if(!specialWater2Shot(f,{name:'フロストショット',attack:'punch',color:'ice',style:'iceOrb',speed:270,damage:4.8,r:15,charge:.40,maxReflect:5})) return false;
     const mir=remielMirages.find(m=>m.owner===f&&m.t>0),target=f.isPlayer?enemy:player;
-    if(mir&&target){const sx=f.x+f.face*42,sy=f.y+mir.offsetY-12,dx=target.x-sx,dy=target.y-sy,d=Math.hypot(dx,dy)||1,sp=265;remielFakeShots.push({owner:f,x:sx,y:sy,vx:dx/d*sp,vy:dy/d*sp,r:14,t:1.15,life:1.15});}
+    if(mir&&target){const g=remielGhostPos(mir),sx=g.x+f.face*42,sy=g.y-12,dx=target.x-sx,dy=target.y-sy,d=Math.hypot(dx,dy)||1,sp=265;remielFakeShots.push({owner:f,mirage:mir,x:sx,y:sy,vx:dx/d*sp,vy:dy/d*sp,r:14,t:1.15,life:1.15,damage:2.4*f.damageMul,hit:false});}
     return true;
   }
   function specialMirageKick(f){
     if(gameOver||!f||f.type!=='remiel'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
     f.specialType='mirageKick';f.specialT=.72;f.attack='kick';f.attackT=.72;f.remielKickStartX=f.x;f.vx=f.face*360;
-    const other=f.isPlayer?enemy:player,dir=f.face;setTimeout(()=>{if(other&&Math.abs(other.x-f.x)<132&&Math.abs(other.y-f.y)<82){damageHit(f,other,9.8*f.damageMul,315*dir,-50);spawnImpact(other.x,other.y,'hit');}},180);comboEl.textContent='ミラージュキック!';return true;
+    const other=f.isPlayer?enemy:player,dir=f.face;
+    remielGhostMirageKick(f);
+    setTimeout(()=>{if(other&&Math.abs(other.x-f.x)<132&&Math.abs(other.y-f.y)<82){damageHit(f,other,9.8*f.damageMul,315*dir,-50);spawnImpact(other.x,other.y,'hit');}},180);comboEl.textContent='ミラージュキック!';return true;
   }
 
   function specialSeraphicUpper(f){
@@ -5240,6 +5308,10 @@
       f.attackVariant=chooseAttackVariant(f,other,kind);
     }
 
+    if(f.type==='remiel'&&(kind==='punch'||kind==='kick')){
+      remielGhostNormalAttack(f,kind,f.attackVariant);
+    }
+
     if(kind==='punch'){
       f.attack='punch';f.attackT=.34;
       const v=f.attackVariant;
@@ -5257,6 +5329,7 @@
         setTimeout(()=>damageHit(f,other,5.2*f.damageMul,142*dir,ky),175);
       }
     } else if(kind==='tongue'){
+      if(f.type==='remiel')remielGhostNormalAttack(f,'tongue','mid');
       // 自分が舌で引き寄せられている最中に舌を押すと「投げ抜け」。
       // お互いの舌が伸びたままになり、投げには移行せず中央へ接近する。
       const puller = f.isPlayer ? enemy : player;
@@ -6990,7 +7063,7 @@ function drawBackground(dt){
       jihalBursts=jihalBursts.filter(b=>b.t>0);
 
       remielMirages.forEach(m=>{
-        m.t-=dt;m.age=(m.age||0)+dt;
+        m.t-=dt;m.age=(m.age||0)+dt;m.counterT=Math.max(0,(m.counterT||0)-dt);
         const splitTime=.28;
         if(m.owner && m.age<=splitTime && m.originY!=null){
           const p=Math.max(0,Math.min(1,m.age/splitTime));
@@ -6998,9 +7071,39 @@ function drawBackground(dt){
           m.owner.y=m.originY+(m.bodyTargetY-m.originY)*e;
           m.owner.vy=0;
         }
-        const foe=m.owner.isPlayer?enemy:player;if(foe&&foe.attackT>0&&Math.abs(foe.x-m.owner.x)<105&&Math.abs(foe.y-((m.age||0)<.28 ? (m.originY+(m.ghostTargetY-m.originY)*Math.max(0,Math.min(1,(m.age||0)/.28))) : (m.owner.y+m.offsetY)))<72){m.t=0;spawnImpact(m.owner.x,(m.age||0)<.28 ? (m.originY+(m.ghostTargetY-m.originY)*Math.max(0,Math.min(1,(m.age||0)/.28))) : m.owner.y+m.offsetY,'guard');}for(const q of water2Shots){if(q.owner!==m.owner&&Math.abs(q.x-m.owner.x)<48&&Math.abs(q.y-((m.age||0)<.28 ? (m.originY+(m.ghostTargetY-m.originY)*Math.max(0,Math.min(1,(m.age||0)/.28))) : (m.owner.y+m.offsetY)))<58){m.t=0;q.t=0;spawnImpact(q.x,q.y,'guard');break;}}});
+        const foe=m.owner.isPlayer?enemy:player;
+        const g=remielGhostPos(m);
+        if(foe&&g&&foe.attackT>0&&Math.abs(foe.x-g.x)<105&&Math.abs(foe.y-g.y)<72){
+          // ミラージュカウンター中なら、幻影を殴っても半威力の反撃。
+          if(m.counterT>0){
+            m.counterT=0;
+            damageHit(m.owner,foe,3.6*m.owner.damageMul,-Math.sign(g.x-foe.x||1)*115,-38,true);
+            spawnImpact(foe.x,foe.y,'hit');
+            comboEl.textContent='幻影ミラージュカウンター!';
+          }else{
+            spawnImpact(g.x,g.y,'guard');
+          }
+          m.t=0;
+        }
+        if(m.t>0&&g){
+          for(const q of water2Shots){
+            if(q.owner!==m.owner&&Math.abs(q.x-g.x)<48&&Math.abs(q.y-g.y)<58){
+              m.t=0;q.t=0;spawnImpact(q.x,q.y,'guard');break;
+            }
+          }
+        }
+      });
       remielMirages=remielMirages.filter(m=>m.t>0);
-      remielFakeShots.forEach(q=>{q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;});
+      remielFakeShots.forEach(q=>{
+        q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;
+        const target=q.owner.isPlayer?enemy:player;
+        if(target&&!q.hit&&Math.abs(q.x-target.x)<(q.r||14)+target.radius*.62&&Math.abs(q.y-target.y)<(q.r||14)+target.radius*.62){
+          q.hit=true;q.t=0;
+          if(target.guard)spawnImpact(target.x,target.y,'guard');
+          else{damageHit(q.owner,target,q.damage||2.4*q.owner.damageMul,75*Math.sign(q.vx||q.owner.face),-18);spawnImpact(target.x,target.y,'hit');}
+          if(q.mirage&&q.mirage.t>0)remielConsumeMirage(q.mirage,q.x,q.y,'guard');
+        }
+      });
       remielFakeShots=remielFakeShots.filter(q=>q.t>0&&q.x>-50&&q.x<innerWidth+50&&q.y>-50&&q.y<innerHeight+50);
 
       // セラフィエル：セラフィックレイ。予告0.32秒後に短時間だけ攻撃判定。
