@@ -1958,6 +1958,20 @@
             ctx.restore();
           };
 
+          const drawRemielGhostTongue=(gy)=>{
+            if((mir.ghostTongueT||0)<=0)return;
+            const target=this.isPlayer?enemy:player;
+            const ghostAbsY=this.y+gy;
+            const len=target?Math.min(this.tongueRange,Math.abs(target.x-this.x)):this.tongueRange*.75;
+            const ty=target?Math.max(-72,Math.min(72,target.y-ghostAbsY)):0;
+            ctx.save();ctx.translate(0,gy);
+            ctx.globalAlpha=.82*Math.min(1,(mir.ghostTongueT||0)/.07);
+            ctx.strokeStyle='#ff718e';ctx.lineWidth=8;ctx.lineCap='round';
+            ctx.shadowColor='#c9f6ff';ctx.shadowBlur=5;
+            ctx.beginPath();ctx.moveTo(0,8);ctx.lineTo(len,8+ty);ctx.stroke();
+            ctx.restore();
+          };
+
           const splitTime=.28;
           if((mir.age||0)<splitTime){
             const p=Math.max(0,Math.min(1,(mir.age||0)/splitTime));
@@ -1971,6 +1985,7 @@
 
             drawRemielCopy(bodyRel,.90);
             drawRemielCopy(ghostRel,.90);
+            drawRemielGhostTongue(ghostRel);
 
             // この間は後で描かれる実体を隠し、3体に見えないようにする。
             ctx.globalAlpha=0;
@@ -1978,6 +1993,7 @@
             // 分裂後は実体を通常描画し、幻影だけ追加。
             const settle=Math.min(1,((mir.age||0)-splitTime)/.10);
             drawRemielCopy(mir.offsetY,.82*settle*Math.min(1,mir.t/.22));
+            drawRemielGhostTongue(mir.offsetY);
           }
         }
       }
@@ -4660,6 +4676,9 @@
       const yAim=variant==='down'?42:0;
       hit=dx>0&&dx<106&&Math.abs(dy-yAim)<72;dmg=2.6*f.damageMul;kx=71*dir;ky=variant==='down'?63:-11;delay=175;
     }else if(kind==='tongue'){
+      // 分身側にも実際に舌が伸びる見た目を出す。空振りでも舌は表示する。
+      m.ghostTongueT=.22;
+      m.ghostTongueTargetY=target.y;
       hit=dx>0&&dx<f.tongueRange&&Math.abs(dy)<82;dmg=.9*f.damageMul;kx=0;ky=0;delay=70;
     }
     if(!hit)return;
@@ -7063,7 +7082,7 @@ function drawBackground(dt){
       jihalBursts=jihalBursts.filter(b=>b.t>0);
 
       remielMirages.forEach(m=>{
-        m.t-=dt;m.age=(m.age||0)+dt;m.counterT=Math.max(0,(m.counterT||0)-dt);
+        m.t-=dt;m.age=(m.age||0)+dt;m.counterT=Math.max(0,(m.counterT||0)-dt);m.ghostTongueT=Math.max(0,(m.ghostTongueT||0)-dt);
         const splitTime=.28;
         if(m.owner && m.age<=splitTime && m.originY!=null){
           const p=Math.max(0,Math.min(1,m.age/splitTime));
