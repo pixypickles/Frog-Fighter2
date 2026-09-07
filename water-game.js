@@ -7381,7 +7381,7 @@ function drawBackground(dt){
       // 水中格闘2 共通飛び道具：シャボンガードに触れると自動反射。
       water2Shots.forEach(q=>{
         q.age=(q.age||0)+dt;
-        q.spin=(q.spin||0)+dt*(q.style==='aquaSpin'?10:4);
+        q.spin=(q.spin||0)+dt*(q.style==='spinCutterBlade'?18:(q.style==='aquaSpin'?10:4));
         if(q.curve){ q.vy += q.curve*dt; }
         if(q.style==='iceChargeOrb'){ q.trail=q.trail||[]; q.trail.push({x:q.x,y:q.y,t:.75}); if(q.trail.length>22)q.trail.shift(); q.trail.forEach(v=>v.t-=dt); q.trail=q.trail.filter(v=>v.t>0); }
         q.x+=q.vx*dt;
@@ -8474,50 +8474,57 @@ function drawBackground(dt){
         ctx.strokeStyle='rgba(205,116,255,.78)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();
         ctx.fillStyle='rgba(255,230,255,.75)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.33,q.r*.22,q.r*.11,-.6,0,Math.PI*2);ctx.fill();
       }else if(q.style==='spinCutterBlade'){
-        // カワズさん専用：丸弾ではなく、回転する薄い三日月状の水圧カッター。
+        // カワズさん専用：矢印っぽい形は廃止。
+        // 参考画像のような、太く丸い「C字／フック状」の水圧光を高速回転させる。
         ctx.rotate(q.spin||0);
-        ctx.shadowColor='#8ff4ff';
-        ctx.shadowBlur=18;
-
-        // 外側の鋭い刃
-        ctx.globalAlpha=.72;
-        ctx.fillStyle='rgba(119,232,255,.34)';
-        ctx.beginPath();
-        ctx.moveTo(27,0);
-        ctx.quadraticCurveTo(4,-18,-23,-11);
-        ctx.quadraticCurveTo(-8,0,-23,11);
-        ctx.quadraticCurveTo(4,18,27,0);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.globalAlpha=.95;
-        ctx.strokeStyle='#e9ffff';
-        ctx.lineWidth=3.2;
         ctx.lineCap='round';
+        ctx.lineJoin='round';
+
+        // 外側の大きな水色フック
+        ctx.globalAlpha=.34;
+        ctx.strokeStyle='#5cc8ff';
+        ctx.lineWidth=17;
+        ctx.shadowColor='#86efff';
+        ctx.shadowBlur=22;
         ctx.beginPath();
-        ctx.moveTo(27,0);
-        ctx.quadraticCurveTo(2,-17,-23,-11);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(27,0);
-        ctx.quadraticCurveTo(2,17,-23,11);
+        ctx.moveTo(-20,13);
+        ctx.bezierCurveTo(-30,-3,-22,-23,-3,-27);
+        ctx.bezierCurveTo(15,-31,29,-19,30,-2);
+        ctx.bezierCurveTo(31,10,27,19,21,27);
         ctx.stroke();
 
-        // 中央の水圧芯
-        ctx.globalAlpha=.50;
-        ctx.strokeStyle='#67dfff';
-        ctx.lineWidth=2;
+        // 中央の濃い青い芯。先端は尖らせず、丸いまま。
+        ctx.globalAlpha=.76;
+        ctx.strokeStyle='#27a5ef';
+        ctx.lineWidth=10;
+        ctx.shadowColor='#63dcff';
+        ctx.shadowBlur=14;
         ctx.beginPath();
-        ctx.moveTo(18,0);
-        ctx.lineTo(-15,0);
+        ctx.moveTo(-18,11);
+        ctx.bezierCurveTo(-25,-4,-18,-18,-2,-21);
+        ctx.bezierCurveTo(13,-24,23,-14,24,-1);
+        ctx.bezierCurveTo(25,8,22,15,17,21);
         ctx.stroke();
 
-        // 回転残像
-        ctx.globalAlpha=.20;
-        ctx.strokeStyle='#c9fbff';
-        ctx.lineWidth=2;
+        // 内側に短い巻き込みの光。水が丸まりながら回転している感じ。
+        ctx.globalAlpha=.58;
+        ctx.strokeStyle='#dffcff';
+        ctx.lineWidth=4.2;
+        ctx.shadowColor='#ffffff';
+        ctx.shadowBlur=12;
         ctx.beginPath();
-        ctx.arc(0,0,22,-1.15,1.15);
+        ctx.moveTo(-13,8);
+        ctx.bezierCurveTo(-18,-2,-12,-11,-2,-13);
+        ctx.bezierCurveTo(5,-14,10,-10,12,-6);
+        ctx.stroke();
+
+        // 先端の白いハイライト
+        ctx.globalAlpha=.72;
+        ctx.strokeStyle='#ffffff';
+        ctx.lineWidth=3;
+        ctx.beginPath();
+        ctx.moveTo(-18,8);
+        ctx.bezierCurveTo(-23,-4,-17,-15,-6,-19);
         ctx.stroke();
       }else if(q.style==='spinBlade'){
         // 水圧カッターを縦方向に潰した、薄い高速刃。
