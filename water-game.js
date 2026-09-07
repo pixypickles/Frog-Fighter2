@@ -429,6 +429,7 @@
     ],
     kawazu:[
       '水圧ラッシュ：パンチ連打',
+      'クロスラッシュ：前 ＋ パンチ（背後→反対→背後からアッパー）',
       'ミラージュキック：前 ＋ キック',
       'スピンキックカッター：後ろ ＋ キック（カッター3連発）'
     ],
@@ -1412,6 +1413,18 @@
         const elapsed=(performance.now()-(this.lilithSpinStartTime||performance.now()))/1000;
         ctx.rotate(elapsed*18*(this.face>0?-1:1));
       }
+      if(this.specialType==='lilithDropKick'){
+        // 足を相手側、頭を後ろ側へ向けて90度横倒し。
+        // ヒットしたら同じ回転方向へさらに270度回って通常姿勢へ戻る。
+        const rotDir=this.face>0?-1:1;
+        let angle=rotDir*Math.PI/2;
+        if(this.lilithDropHitAt){
+          const p=Math.max(0,Math.min(1,(performance.now()-this.lilithDropHitAt)/280));
+          const e=1-Math.pow(1-p,2);
+          angle=rotDir*(Math.PI/2 + Math.PI*1.5*e);
+        }
+        ctx.rotate(angle);
+      }
 
 
       // ピラニア：リヴァイアサンさん
@@ -2179,6 +2192,16 @@
       if(this.specialType==='lilithBackSpin'){
         ctx.save(); ctx.filter='none'; ctx.strokeStyle=pal.limb; ctx.lineWidth=13; ctx.lineCap='round';
         ctx.beginPath(); ctx.moveTo(-13,45); ctx.lineTo(-58,46); ctx.moveTo(13,45); ctx.lineTo(58,46); ctx.stroke();
+        ctx.restore();
+      }
+
+      if(this.specialType==='lilithDropKick'){
+        // 横倒し後のローカル座標では、両脚を下方向へ強く伸ばすと進行方向へ揃う。
+        ctx.save();ctx.filter='none';ctx.strokeStyle=pal.limb;ctx.lineWidth=13;ctx.lineCap='round';
+        ctx.beginPath();
+        ctx.moveTo(-12,44);ctx.lineTo(-12,82);
+        ctx.moveTo(12,44);ctx.lineTo(12,82);
+        ctx.stroke();
         ctx.restore();
       }
 
@@ -3119,12 +3142,12 @@
       yellow:['前 ＋ パンチ：水圧カッター（正面）','前 ＋ キック：水圧カッター（下15度）','後ろ ＋ パンチ：カープ水圧カッター（上から弧）','後ろ ＋ キック：カープ水圧カッター（下から弧）','ガード ×2：ヒーリングバブル','後ろ → 下 ＋ ガード：高速バブル移動'],
       orange:['下 → 後ろ ＋ ガード：ホワイトカウンター','後ろ → 前 ＋ ガード：ガーディアンタックル','ガード長押し：ホワイトオーラ','オーラ中 パンチ / キック：白い長リーチ攻撃','ガード ＋ パンチ：ホワイトショット'],
       black:['前 ＋ キック：ヘルクラッシュ（氷オーラの蹴り・特大ノックバック）','後ろ ＋ パンチ長押し → 離す：アビスチャージ（周囲を一瞬凍結）','前 ＋ パンチ：アイスショット','後ろ ＋ ガード：アイスウォール'],
-      purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）'],
+      purple:['舌連打：舌ラッシュ','後ろ ＋ 舌：バブルショット','後ろ ＋ キック：バックスピンキック（追加入力で追加回転）','前 ＋ キック：ドロップキック'],
       beelzebub:['下 → 後ろ ＋ ガード：ヴェノム・ウォーター','上 ＋ パンチ：アビスショック（上弧）','下 ＋ キック：アビスショック（下弧）','前 ＋ パンチ：ベノムショット'],
       sariel:['上 ＋ パンチ：ルナ・スラッシュ（上弧）','下 ＋ パンチ：ルナ・スラッシュ（下弧）','前 ＋ ガード：イーブルアイ','後ろ ＋ ガード：ブラッドムーン','上 ＋ キック：ムーンサルトキック'],
       kokabiel:['前 ＋ パンチ：グラビティボール','後ろ ＋ ガード：グラビティゾーン','下 ＋ パンチ：メテオレイン','下 ＋ キック：グラビティダイブ'],
       jihal:['前 ＋ パンチ：ボルトショット','前 ＋ キック：ライトニングダッシュ','後ろ ＋ キック長押し → 離す：サンダーチャージ','下 ＋ パンチ：スパークバースト'],
-      remiel:['上 ＋ ガード：ミラージュ（上）','下 ＋ ガード：ミラージュ（下）','後ろ ＋ ガード：ミラージュカウンター','前 ＋ ガード：アクアパリィ','前 ＋ パンチ：フロストショット','前 ＋ キック：ミラージュキック'],
+      remiel:['上 ＋ ガード：ミラージュ（上）','下 ＋ ガード：ミラージュ（下）','後ろ ＋ ガード：ミラージュカウンター','前 ＋ ガード：アクアパリィ','前 ＋ パンチ：フロストショット','前 ＋ パンチ：クロスラッシュ','前 ＋ キック：ミラージュキック'],
       seraphiel:['上 ＋ パンチ：セラフィックアッパー','前 ＋ キック：セラフィックキック','後ろ ＋ パンチ：セラフィックショット','下 → 後ろ ＋ キック：セラフィックサイクロン','下 → 前 ＋ パンチ：セラフィックレイ'],
       flauros:['上 ＋ パンチ：ヘルフレイム（相手の足元から火柱）','前 ＋ パンチ：フレイムクロー（3方向の炎爪）','前 ＋ キック：レオパードラッシュ','上 ＋ キック：インフェルノクロー（壁から急降下→時間差5連斬）'],
       satanael:[
@@ -3868,6 +3891,44 @@
     return true;
   }
 
+  function specialLilithDropKick(f){
+    if(gameOver||!f||f.type!=='purple'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    const target=f.isPlayer?enemy:player;
+    if(!target)return false;
+
+    f.specialType='lilithDropKick';
+    f.specialT=.72;
+    f.attack='kick';
+    f.attackT=.72;
+    f.attackVariant='mid';
+    f.lilithDropStart=performance.now();
+    f.lilithDropHitAt=0;
+    f.lilithDropHitDone=false;
+    f.vx=f.face*520;
+    f.vy*=.15;
+
+    setTimeout(()=>{
+      if(gameOver||!target||f.specialType!=='lilithDropKick'||f.lilithDropHitDone)return;
+      const dx=(target.x-f.x)*f.face;
+      if(dx>-28&&dx<120&&Math.abs(target.y-f.y)<82){
+        f.lilithDropHitDone=true;
+        f.lilithDropHitAt=performance.now();
+        f.vx*=.22;
+        if(target.guard){
+          spawnImpact(target.x,target.y,'guard');
+          target.vx+=f.face*55;
+        }else{
+          damageHit(f,target,8.2*f.damageMul,245*f.face,-38);
+          spawnImpact(target.x,target.y,'hit');
+        }
+      }
+    },135);
+
+    comboEl.textContent='ドロップキック!';
+    setTimeout(()=>{if(comboEl.textContent==='ドロップキック!')comboEl.textContent='';},620);
+    return true;
+  }
+
   function specialLilithBackSpin(f,additional=false){
     if(gameOver || !f || f.type!=='purple' || f.stun>0 || f.throwState) return false;
     if(additional && f.specialType==='lilithBackSpin'){
@@ -4414,6 +4475,66 @@
     }
     comboEl.textContent='水圧ラッシュ!';
     clearCommand();return true;
+  }
+
+  function specialKawazuCrossRush(f){
+    if(gameOver||!f||f.type!=='kawazu'||f.stun>0||f.guard||f.specialT>0||f.attackT>0)return false;
+    const target=f.isPlayer?enemy:player;
+    if(!target)return false;
+
+    f.specialType='kawazuCrossRush';
+    f.specialT=.78;
+    f.attack='punch';
+    f.attackVariant='mid';
+    f.attackT=.78;
+    f.vx=0;f.vy*=.15;
+
+    const dashToSide=(side,finalHit=false)=>{
+      if(gameOver||!target||f.specialType!=='kawazuCrossRush')return;
+
+      // 移動前の位置に薄い残像を残す。
+      kawazuGhosts.push({x:f.x,y:f.y,t:.18,life:.18,angle:0});
+
+      // 相手の左右をすり抜け、必ず相手側へ向き直る。
+      const margin=82;
+      f.x=Math.max(58,Math.min(innerWidth-58,target.x+side*margin));
+      f.y=Math.max(72,Math.min(innerHeight-72,target.y+(finalHit?-6:4)));
+      f.face=target.x>=f.x?1:-1;
+      f.attack='punch';
+      f.attackVariant=finalHit?'up':'mid';
+
+      // 移動先にも短い残光。
+      kawazuGhosts.push({x:f.x-f.face*34,y:f.y,t:.15,life:.15,angle:0});
+
+      const close=Math.abs(target.x-f.x)<125&&Math.abs(target.y-f.y)<86;
+      if(close){
+        if(target.guard){
+          spawnImpact(target.x,target.y,'guard');
+          target.vx+=f.face*(finalHit?70:38);
+        }else{
+          damageHit(
+            f,target,
+            (finalHit?4.8:3.0)*f.damageMul,
+            (finalHit?145:55)*f.face,
+            finalHit?-235:-18
+          );
+          spawnImpact(target.x,target.y,'hit');
+        }
+      }
+    };
+
+    // 1回目：相手の背後へ抜けてパンチ
+    const firstSide=f.face>0?1:-1;
+    setTimeout(()=>dashToSide(firstSide,false),95);
+    // 2回目：反対側へ抜けてパンチ
+    setTimeout(()=>dashToSide(-firstSide,false),265);
+    // 3回目：もう一度反対へ抜けてアッパー
+    setTimeout(()=>dashToSide(firstSide,true),435);
+
+    comboEl.textContent='クロスラッシュ!';
+    setTimeout(()=>{if(comboEl.textContent==='クロスラッシュ!')comboEl.textContent='';},720);
+    clearCommand();
+    return true;
   }
 
   function specialKawazuMirageKick(f){
@@ -5120,6 +5241,10 @@
 
     // カワズさん：4キャラ運用を前提に入力を短く。
     if(f.type==='kawazu'){
+      if(kind==='punch' && water2HeldDir(f,'forward')){
+        clearCommand();
+        return specialKawazuCrossRush(f);
+      }
       if(kind==='kick' && water2HeldDir(f,'back')){
         clearCommand();
         return specialKawazuSpinCutter(f);
@@ -5191,6 +5316,11 @@
       const justGuarded=performance.now()-(input.lastSimpleGuardTapTime||0)<=650;
       if(justGuarded){ input.lastSimpleGuardTapTime=0; clearCommand(); return specialWater2Shot(f,{name:'ホワイトショット',attack:'punch',color:'white',style:'whiteOrb',speed:250,damage:3.7,r:17,charge:.38,maxReflect:5}); }
     }
+    // リリス：前＋キックで体を横倒しにしたドロップキック。
+    if(f.type==='purple' && kind==='kick' && water2HeldDir(f,'forward')){
+      clearCommand(); return specialLilithDropKick(f);
+    }
+
     // リリス：後ろ＋舌で遅いバブルショット。
     if(f.type==='purple' && kind==='tongue' && hasCommand([back],560)){
       clearCommand(); return specialWater2Shot(f,{name:'バブルショット',attack:'tongue',color:'bubble',style:'bubble',speed:175,damage:3.0,r:20,charge:.34,wobble:.18,maxReflect:4});
@@ -6086,9 +6216,13 @@
       }
       if(enemy.type==='kawazu' && enemy.specialT<=0){
         const roll=Math.random();
-        if(dist>135 && roll<dt*.24){ specialKawazuPressureRush(enemy); return; }
-        if(dist<250 && roll<dt*.42){ specialKawazuMirageKick(enemy); return; }
-        if(dist>120 && roll<dt*.58){ specialKawazuSpinCutter(enemy); return; }
+        if(dist<320 && roll<dt*.18){ specialKawazuCrossRush(enemy); return; }
+        if(dist>135 && roll<dt*.30){ specialKawazuPressureRush(enemy); return; }
+        if(dist<250 && roll<dt*.46){ specialKawazuMirageKick(enemy); return; }
+        if(dist>120 && roll<dt*.60){ specialKawazuSpinCutter(enemy); return; }
+      }
+      if(enemy.type==='purple' && enemy.specialT<=0 && dist<250 && Math.random()<dt*.13){
+        specialLilithDropKick(enemy);return;
       }
 
       if(dist>105){ enemy.vx += Math.sign(dx)*enemy.speed*.9*diff.move*dt; enemy.vy += Math.sign(dy)*enemy.speed*.55*diff.move*dt; }
