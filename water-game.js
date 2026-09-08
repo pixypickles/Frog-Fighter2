@@ -488,10 +488,7 @@
     refreshStoryClearUnlock();
   }
 
-  function isBeelzebubUnlocked(){
-    try{return localStorage.getItem('kaeru_beelzebub_unlocked')==='1';}
-    catch(e){return false;}
-  }
+  function isBeelzebubUnlocked(){ return true; }
 
   function refreshBossUnlock(){
     const unlocked=isBeelzebubUnlocked();
@@ -3132,7 +3129,7 @@
 
 
   function currentPlayableTypes(){
-    const base=['green','blue','black','purple','flauros','satanael','yellow','orange','piranha','crayfish','sariel','kokabiel','jihal','remiel'];
+    const base=['green','blue','black','purple','beelzebub','flauros','satanael','yellow','orange','piranha','crayfish','sariel','kokabiel','jihal','remiel'];
     if(isKawazuUnlocked())base.push('kawazu');
     if(isStoryCleared())base.push('samael','seraphiel','satanael');
     return base;
