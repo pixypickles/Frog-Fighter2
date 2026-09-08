@@ -894,8 +894,8 @@
         body:'#17121d',
         limb:'#1d1625',
         light:'#6f587d',
-        belly:'#b8ff68',
-        eyeBump:'#72ff2d'
+        belly:'#9cff3d',
+        eyeBump:'#35ff00'
       };
     }
     if(type==='sariel')return {body:'#5d6488',limb:'#68709a',light:'#f2efff',belly:'#a7acd0',eyeBump:'#d8ddf5'};
