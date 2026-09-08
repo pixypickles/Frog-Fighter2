@@ -5901,43 +5901,6 @@
           }
 
           // リリスさん：後ろを入れたまま、または直前に後ろ入力してガード×2。
-          if(player.type==='purple' && !player.throwState){
-            const now=performance.now();
-
-            // 現在のスティック方向も直接見る。
-            const backNow =
-              (player.face>0 && input.x<-.35) ||
-              (player.face<0 && input.x>.35);
-
-            const recentlyBack = now-(input.lastBackInputTime||0) <= 1200;
-
-            if(backNow || recentlyBack){
-              if(now-(input.purpleGuardLastTime||0) <= 700){
-                input.purpleGuardCount=(input.purpleGuardCount||0)+1;
-              }else{
-                input.purpleGuardCount=1;
-              }
-              input.purpleGuardLastTime=now;
-
-              if(input.purpleGuardCount>=2){
-                input.purpleGuardCount=0;
-                input.purpleGuardLastTime=0;
-                input.lastBackInputTime=0;
-                clearCommand();
-
-                player.guard=false;
-                player.attackT=0;
-
-                if(specialCatfishCharge(player)){
-                  btn.classList.remove('pressed');
-                  return;
-                }
-              }
-            }else{
-              input.purpleGuardCount=0;
-            }
-          }
-
           // ウリエルさん：通常ガード長押しの計測開始。
           if(player.type==='orange' && !player.throwState && !player.urielGuardHoldStart){
             player.urielGuardHoldStart=performance.now();
@@ -8495,25 +8458,40 @@ function drawBackground(dt){
         ctx.lineCap='round';
         ctx.lineJoin='round';
 
-        // 丸い頭。発光は控えめ。
-        ctx.globalCompositeOperation='source-over';
-        ctx.globalAlpha=.72;
-        const head=ctx.createRadialGradient(15,-17,2,15,-17,15);
-        head.addColorStop(0,'rgba(220,250,255,.94)');
-        head.addColorStop(.30,'rgba(92,205,255,.88)');
-        head.addColorStop(1,'rgba(24,135,228,.15)');
+        // 丸い頭。ここだけはしっかり発光させ、回転の先端が一目で分かるようにする。
+        ctx.globalCompositeOperation='lighter';
+        ctx.globalAlpha=.96;
+        const head=ctx.createRadialGradient(15,-17,1,15,-17,17);
+        head.addColorStop(0,'rgba(255,255,255,1)');
+        head.addColorStop(.22,'rgba(220,251,255,.98)');
+        head.addColorStop(.52,'rgba(89,215,255,.93)');
+        head.addColorStop(.78,'rgba(35,155,235,.62)');
+        head.addColorStop(1,'rgba(18,126,221,0)');
         ctx.fillStyle=head;
-        ctx.shadowColor='rgba(94,220,255,.45)';
-        ctx.shadowBlur=9;
+        ctx.shadowColor='rgba(170,244,255,.95)';
+        ctx.shadowBlur=22;
         ctx.beginPath();
-        ctx.arc(15,-17,14,0,Math.PI*2);
+        ctx.arc(15,-17,17,0,Math.PI*2);
         ctx.fill();
 
+        // 先端の中心に白い発光核
+        ctx.globalAlpha=.94;
+        ctx.fillStyle='rgba(255,255,255,.95)';
+        ctx.shadowColor='#ffffff';
+        ctx.shadowBlur=16;
+        ctx.beginPath();
+        ctx.arc(15,-17,6.5,0,Math.PI*2);
+        ctx.fill();
+
+        // 本流以降は発光を落とすため通常合成へ戻す。
+        ctx.globalCompositeOperation='source-over';
+
         // 頭から続く太い本流
-        ctx.globalAlpha=.76;
-        ctx.strokeStyle='rgba(44,165,238,.88)';
+        ctx.globalAlpha=.84;
+        ctx.strokeStyle='rgba(65,190,248,.92)';
         ctx.lineWidth=12;
-        ctx.shadowBlur=7;
+        ctx.shadowColor='rgba(100,220,255,.55)';
+        ctx.shadowBlur=10;
         ctx.beginPath();
         ctx.moveTo(13,-17);
         ctx.bezierCurveTo(-2,-23,-20,-13,-25,2);
