@@ -430,7 +430,7 @@
     ],
     kawazu:[
       '水圧ラッシュ：パンチ連打',
-      'クロスラッシュ：前 ＋ パンチ（背後→反対→背後からアッパー）',
+      'クロスラッシュ：前 ＋ パンチ（パンチ→パンチ→キック→キック→両サイドアッパー）',
       'ミラージュキック：前 ＋ キック',
       'スピンキックカッター：後ろ ＋ キック（カッター3連発）'
     ],
@@ -3193,7 +3193,7 @@
       'インフェルノウェーブ：下 ＋ キック'
     ],
     samael:['方向 ＋ パンチ：ポイズンゲート（指定方向から毒弾）','舌：ヴェノムタン（舌先から毒弾）','前 → 下 → 後ろ ＋ キック：デッドリー・アクア'],
-      kawazu:['パンチ連打：水圧ラッシュ','前 ＋ パンチ：クロスラッシュ','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
+      kawazu:['パンチ連打：水圧ラッシュ','前 ＋ パンチ：クロスラッシュ（P→P→K→K→左右アッパー）','前 ＋ キック：ミラージュキック','後ろ ＋ キック：スピンキックカッター（カッター3連発）']
     };
     return map[type] || ['専用必殺技：練習対象外'];
   }
@@ -4502,57 +4502,99 @@
     const target=f.isPlayer?enemy:player;
     if(!target)return false;
 
+    // 5段＋左右同時アッパーまで入るので少し長めに。
     f.specialType='kawazuCrossRush';
-    f.specialT=.78;
+    f.specialT=1.20;
     f.attack='punch';
     f.attackVariant='mid';
-    f.attackT=.78;
+    f.attackT=1.20;
     f.vx=0;f.vy*=.15;
 
-    const dashToSide=(side,finalHit=false)=>{
+    const firstSide=f.face>0?1:-1;
+    let hitCount=0;
+
+    const leaveGhost=(x,y,angle=0,life=.16)=>{
+      kawazuGhosts.push({x,y,t:life,life,angle});
+    };
+
+    const dashHit=(side,kind='punch',damage=2.6,knock=42,vy=-12)=>{
       if(gameOver||!target||f.specialType!=='kawazuCrossRush')return;
 
-      // 移動前の位置に薄い残像を残す。
-      kawazuGhosts.push({x:f.x,y:f.y,t:.18,life:.18,angle:0});
+      leaveGhost(f.x,f.y,0,.16);
 
-      // 相手の左右をすり抜け、必ず相手側へ向き直る。
       const margin=82;
       f.x=Math.max(58,Math.min(innerWidth-58,target.x+side*margin));
-      f.y=Math.max(72,Math.min(innerHeight-72,target.y+(finalHit?-6:4)));
+      f.y=Math.max(72,Math.min(innerHeight-72,target.y+4));
       f.face=target.x>=f.x?1:-1;
-      f.attack='punch';
-      f.attackVariant=finalHit?'up':'mid';
+      f.attack=kind==='kick'?'kick':'punch';
+      f.attackVariant=kind==='kick'?'mid':'mid';
 
-      // 移動先にも短い残光。
-      kawazuGhosts.push({x:f.x-f.face*34,y:f.y,t:.15,life:.15,angle:0});
+      leaveGhost(f.x-f.face*35,f.y,0,.14);
 
-      const close=Math.abs(target.x-f.x)<125&&Math.abs(target.y-f.y)<86;
+      const close=Math.abs(target.x-f.x)<128&&Math.abs(target.y-f.y)<88;
       if(close){
+        hitCount++;
         if(target.guard){
           spawnImpact(target.x,target.y,'guard');
-          target.vx+=f.face*(finalHit?70:38);
+          target.vx+=f.face*36;
         }else{
-          damageHit(
-            f,target,
-            (finalHit?4.8:3.0)*f.damageMul,
-            (finalHit?145:55)*f.face,
-            finalHit?-235:-18
-          );
+          damageHit(f,target,damage*f.damageMul,knock*f.face,vy);
           spawnImpact(target.x,target.y,'hit');
         }
       }
     };
 
-    // 1回目：相手の背後へ抜けてパンチ
-    const firstSide=f.face>0?1:-1;
-    setTimeout(()=>dashToSide(firstSide,false),95);
-    // 2回目：反対側へ抜けてパンチ
-    setTimeout(()=>dashToSide(-firstSide,false),265);
-    // 3回目：もう一度反対へ抜けてアッパー
-    setTimeout(()=>dashToSide(firstSide,true),435);
+    const dualUppercut=()=>{
+      if(gameOver||!target||f.specialType!=='kawazuCrossRush')return;
+
+      // 左右両側にほぼ同時にカワズさんが見える残像を出す。
+      const margin=86;
+      const leftX=Math.max(58,target.x-margin);
+      const rightX=Math.min(innerWidth-58,target.x+margin);
+      const y=Math.max(72,Math.min(innerHeight-72,target.y-4));
+
+      // 本体は片側へ。反対側には寿命を少し長めにした濃い残像。
+      const finalSide=firstSide;
+      f.x=finalSide>0?rightX:leftX;
+      f.y=y;
+      f.face=target.x>=f.x?1:-1;
+      f.attack='punch';
+      f.attackVariant='up';
+
+      // 「2人に見える」ため、両サイドに同じ角度の残像を同時発生。
+      leaveGhost(leftX,y,0,.24);
+      leaveGhost(rightX,y,0,.24);
+      leaveGhost(leftX+(target.x-leftX)*.28,y-5,0,.13);
+      leaveGhost(rightX+(target.x-rightX)*.28,y-5,0,.13);
+
+      // 両側から挟むような白い衝撃。
+      spawnImpact(target.x-24,target.y+4,'guard');
+      spawnImpact(target.x+24,target.y+4,'guard');
+
+      const close=Math.abs(target.x-f.x)<140&&Math.abs(target.y-f.y)<96;
+      if(close){
+        if(target.guard){
+          spawnImpact(target.x,target.y,'guard');
+          target.vx*=.35;
+          target.vy-=55;
+        }else{
+          damageHit(f,target,5.4*f.damageMul,0,-285);
+          spawnImpact(target.x,target.y,'hit');
+        }
+      }
+    };
+
+    // パンチ → パンチ → キック → キック
+    setTimeout(()=>dashHit(firstSide,'punch',2.6,46,-12),80);
+    setTimeout(()=>dashHit(-firstSide,'punch',2.6,46,-12),220);
+    setTimeout(()=>dashHit(firstSide,'kick',3.0,58,-18),360);
+    setTimeout(()=>dashHit(-firstSide,'kick',3.0,58,-18),500);
+
+    // 最後：左右からほぼ同時にアッパー。
+    setTimeout(()=>dualUppercut(),680);
 
     comboEl.textContent='クロスラッシュ!';
-    setTimeout(()=>{if(comboEl.textContent==='クロスラッシュ!')comboEl.textContent='';},720);
+    setTimeout(()=>{if(comboEl.textContent==='クロスラッシュ!')comboEl.textContent='';},1080);
     clearCommand();
     return true;
   }
