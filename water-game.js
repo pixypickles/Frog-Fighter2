@@ -455,6 +455,38 @@
   }
   document.querySelectorAll('#selectScreen .fighter-card').forEach(applySelectCardCommands);
 
+  function normalizeFighterRoster(){
+    const grid=document.querySelector('#selectScreen .fighter-grid');
+    if(!grid)return;
+
+    // 天使系 → 悪魔系 → その他。
+    // 悪魔系の最後3人は必ず「ベルゼブブ → サマエル → サタナエル」。
+    const order=[
+      'green','blue','yellow','orange','remiel','jihal','kokabiel','sariel','seraphiel',
+      'black','purple','flauros','beelzebub','samael','satanael',
+      'kawazu','piranha','crayfish'
+    ];
+
+    order.forEach(type=>{
+      const card=grid.querySelector(`.fighter-card[data-fighter="${type}"]`);
+      if(card)grid.appendChild(card);
+    });
+
+    // ベルゼブブさんは古いHTML/CSSが残っていても、この色へ強制。
+    const beel=grid.querySelector('.fighter-card[data-fighter="beelzebub"] .fighter-emoji');
+    if(beel){
+      beel.classList.add('beelzebub-frog');
+      beel.style.setProperty('--frog-body','#17121d');
+      beel.style.setProperty('--frog-eye-bump','#35ff00');
+      beel.style.setProperty('--frog-iris','#38452f');
+      beel.style.setProperty('--frog-mouth','#08733d');
+      beel.style.setProperty('--frog-cheek','#9d4d64');
+      beel.style.setProperty('--frog-eye-area','#ffffff');
+    }
+  }
+
+  normalizeFighterRoster();
+
   function isStoryCleared(){
     try{return localStorage.getItem('kaeru_story_cleared')==='1';}
     catch(e){return false;}
@@ -486,6 +518,7 @@
   function unlockStoryBosses(){
     try{localStorage.setItem('kaeru_story_cleared','1');}catch(e){}
     refreshStoryClearUnlock();
+    normalizeFighterRoster();
   }
 
   function isBeelzebubUnlocked(){ return true; }
@@ -559,6 +592,8 @@
       }
     }
 
+    normalizeFighterRoster();
+
     if(!kawazuOpponent && opponentSelect){
       const opt=document.createElement('option');
       opt.id='kawazuOpponent'; opt.value='kawazu'; opt.textContent='カワズさん';
@@ -594,6 +629,7 @@
   }
 
   refreshBossUnlock();
+  normalizeFighterRoster();
 
   function refreshStoryAvailability(){
     const btn=document.getElementById('storyButton');

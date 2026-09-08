@@ -3677,3 +3677,15 @@ body.portrait-play #portraitOverlay{
     margin-top:-4vh;
   }
 }
+
+
+/* v2.0.15: ベルゼブブさんのキャラ選択色を参照画像に固定 */
+#selectScreen .fighter-card[data-fighter="beelzebub"] .beelzebub-frog,
+#selectScreen .fighter-card[data-fighter="beelzebub"] .fighter-emoji {
+  --frog-body: #17121d !important;
+  --frog-eye-bump: #35ff00 !important;
+  --frog-iris: #38452f !important;
+  --frog-mouth: #08733d !important;
+  --frog-cheek: #9d4d64 !important;
+  --frog-eye-area: #ffffff !important;
+}
