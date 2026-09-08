@@ -7392,7 +7392,7 @@ function drawBackground(dt){
       // 水中格闘2 共通飛び道具：シャボンガードに触れると自動反射。
       water2Shots.forEach(q=>{
         q.age=(q.age||0)+dt;
-        q.spin=(q.spin||0)+dt*(q.style==='spinCutterBlade'?18:(q.style==='aquaSpin'?10:4));
+        q.spin=(q.spin||0)+dt*(q.style==='spinCutterBlade'?22:(q.style==='aquaSpin'?10:4));
         if(q.curve){ q.vy += q.curve*dt; }
         if(q.style==='iceChargeOrb'){ q.trail=q.trail||[]; q.trail.push({x:q.x,y:q.y,t:.75}); if(q.trail.length>22)q.trail.shift(); q.trail.forEach(v=>v.t-=dt); q.trail=q.trail.filter(v=>v.t>0); }
         q.x+=q.vx*dt;
@@ -8486,76 +8486,61 @@ function drawBackground(dt){
         ctx.fillStyle='rgba(255,230,255,.75)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.33,q.r*.22,q.r*.11,-.6,0,Math.PI*2);ctx.fill();
       }else if(q.style==='spinCutterBlade'){
         // カワズさん専用：
-        // 「視力検査のC」に見えないよう、先頭は丸い水の塊、後ろへ行くほど細くなる流線型。
+        // 生き物っぽいC字形は廃止。十字の水圧光そのものを高速回転させる。
         ctx.rotate(q.spin||0);
-        ctx.lineCap='round';
-        ctx.lineJoin='round';
-
-        // 丸い頭。ここだけはしっかり発光させ、回転の先端が一目で分かるようにする。
         ctx.globalCompositeOperation='lighter';
-        ctx.globalAlpha=.96;
-        const head=ctx.createRadialGradient(15,-17,1,15,-17,17);
-        head.addColorStop(0,'rgba(255,255,255,1)');
-        head.addColorStop(.22,'rgba(220,251,255,.98)');
-        head.addColorStop(.52,'rgba(89,215,255,.93)');
-        head.addColorStop(.78,'rgba(35,155,235,.62)');
-        head.addColorStop(1,'rgba(18,126,221,0)');
-        ctx.fillStyle=head;
-        ctx.shadowColor='rgba(170,244,255,.95)';
-        ctx.shadowBlur=22;
-        ctx.beginPath();
-        ctx.arc(15,-17,17,0,Math.PI*2);
-        ctx.fill();
+        ctx.lineCap='round';
 
-        // 先端の中心に白い発光核
-        ctx.globalAlpha=.94;
-        ctx.fillStyle='rgba(255,255,255,.95)';
-        ctx.shadowColor='#ffffff';
-        ctx.shadowBlur=16;
-        ctx.beginPath();
-        ctx.arc(15,-17,6.5,0,Math.PI*2);
-        ctx.fill();
+        // 4方向の太い光。中心から先端へ少し細くなる。
+        for(let i=0;i<4;i++){
+          ctx.save();
+          ctx.rotate(i*Math.PI/2);
 
-        // 本流以降は発光を落とすため通常合成へ戻す。
-        ctx.globalCompositeOperation='source-over';
+          // 外側の淡い水色グロー
+          ctx.globalAlpha=.42;
+          ctx.strokeStyle='rgba(85,205,255,.78)';
+          ctx.lineWidth=13;
+          ctx.shadowColor='rgba(150,240,255,.95)';
+          ctx.shadowBlur=18;
+          ctx.beginPath();
+          ctx.moveTo(4,0);
+          ctx.lineTo(27,0);
+          ctx.stroke();
 
-        // 頭から続く太い本流
-        ctx.globalAlpha=.84;
-        ctx.strokeStyle='rgba(65,190,248,.92)';
-        ctx.lineWidth=12;
-        ctx.shadowColor='rgba(100,220,255,.55)';
-        ctx.shadowBlur=10;
-        ctx.beginPath();
-        ctx.moveTo(13,-17);
-        ctx.bezierCurveTo(-2,-23,-20,-13,-25,2);
-        ctx.stroke();
+          // 内側の白い芯
+          ctx.globalAlpha=.88;
+          ctx.strokeStyle='rgba(245,255,255,.95)';
+          ctx.lineWidth=5.5;
+          ctx.shadowColor='#ffffff';
+          ctx.shadowBlur=10;
+          ctx.beginPath();
+          ctx.moveTo(7,0);
+          ctx.lineTo(26,0);
+          ctx.stroke();
 
-        // 中間：少し細く
-        ctx.globalAlpha=.62;
-        ctx.strokeStyle='rgba(44,165,238,.78)';
-        ctx.lineWidth=8;
-        ctx.shadowBlur=5;
-        ctx.beginPath();
-        ctx.moveTo(-24,1);
-        ctx.bezierCurveTo(-28,12,-23,22,-13,27);
-        ctx.stroke();
+          // 先端の小さな丸い光
+          ctx.globalAlpha=.95;
+          ctx.fillStyle='rgba(255,255,255,.98)';
+          ctx.shadowColor='rgba(190,250,255,1)';
+          ctx.shadowBlur=16;
+          ctx.beginPath();
+          ctx.arc(28,0,5.5,0,Math.PI*2);
+          ctx.fill();
 
-        // しっぽ：細く、光も弱く
-        ctx.globalAlpha=.42;
-        ctx.strokeStyle='rgba(54,157,226,.65)';
-        ctx.lineWidth=4;
-        ctx.shadowBlur=2;
-        ctx.beginPath();
-        ctx.moveTo(-13,27);
-        ctx.bezierCurveTo(-5,31,3,31,10,27);
-        ctx.stroke();
+          ctx.restore();
+        }
 
-        // 頭の内側だけ小さな白ハイライト
-        ctx.globalAlpha=.55;
-        ctx.fillStyle='rgba(255,255,255,.88)';
-        ctx.shadowBlur=0;
+        // 中央の発光核
+        ctx.globalAlpha=.92;
+        const core=ctx.createRadialGradient(0,0,1,0,0,12);
+        core.addColorStop(0,'rgba(255,255,255,1)');
+        core.addColorStop(.35,'rgba(190,245,255,.95)');
+        core.addColorStop(1,'rgba(60,170,245,0)');
+        ctx.fillStyle=core;
+        ctx.shadowColor='#bff7ff';
+        ctx.shadowBlur=18;
         ctx.beginPath();
-        ctx.ellipse(11,-21,4.5,2.5,-.5,0,Math.PI*2);
+        ctx.arc(0,0,12,0,Math.PI*2);
         ctx.fill();
       }else if(q.style==='spinBlade'){
         // 水圧カッターを縦方向に潰した、薄い高速刃。
