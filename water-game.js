@@ -1431,7 +1431,7 @@
         const elapsed=Math.max(0,.72-this.specialT),step=Math.min(4,Math.floor(elapsed/.14));
         const jumps=[0,58,122,190,255],visualX=this.remielKickStartX+this.face*jumps[step];
         ctx.translate(visualX-this.x,0);
-        if(elapsed%.14<.025)ctx.globalAlpha=.38;
+        if(elapsed%.14<.025)ctx.globalAlpha=.72;
       }
       const pal=fighterPalette(this.type);
 
@@ -2041,7 +2041,7 @@
           }else{
             // 分裂後は実体を通常描画し、幻影だけ追加。
             const settle=Math.min(1,((mir.age||0)-splitTime)/.10);
-            drawRemielCopy(mir.offsetY,.82*settle*Math.min(1,mir.t/.22));
+            drawRemielCopy(mir.offsetY,.94*settle*Math.min(1,mir.t/.22));
             drawRemielGhostTongue(mir.offsetY);
           }
         }
