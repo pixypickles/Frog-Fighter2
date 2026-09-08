@@ -495,15 +495,15 @@
 
     // hiddenだけでは後段CSSに負ける端末があるため、displayも明示的に制御。
     if(beelzebubCard){
-      beelzebubCard.hidden=!unlocked;
-      beelzebubCard.style.display=unlocked?'':'none';
-      beelzebubCard.setAttribute('aria-hidden',unlocked?'false':'true');
+      beelzebubCard.hidden=false;
+      beelzebubCard.style.display='';
+      beelzebubCard.setAttribute('aria-hidden','false');
     }
 
     if(beelzebubOpponent){
-      beelzebubOpponent.hidden=!unlocked;
-      beelzebubOpponent.disabled=!unlocked;
-      beelzebubOpponent.style.display=unlocked?'':'none';
+      beelzebubOpponent.hidden=false;
+      beelzebubOpponent.disabled=false;
+      beelzebubOpponent.style.display='';
     }
 
     if(bossTeaser){
