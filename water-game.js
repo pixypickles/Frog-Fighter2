@@ -3907,25 +3907,9 @@
     f.lilithDropStart=performance.now();
     f.lilithDropHitAt=0;
     f.lilithDropHitDone=false;
+    f.lilithDropHitCooldown=0;
     f.vx=f.face*520;
     f.vy*=.15;
-
-    setTimeout(()=>{
-      if(gameOver||!target||f.specialType!=='lilithDropKick'||f.lilithDropHitDone)return;
-      const dx=(target.x-f.x)*f.face;
-      if(dx>-28&&dx<120&&Math.abs(target.y-f.y)<82){
-        f.lilithDropHitDone=true;
-        f.lilithDropHitAt=performance.now();
-        f.vx*=.22;
-        if(target.guard){
-          spawnImpact(target.x,target.y,'guard');
-          target.vx+=f.face*55;
-        }else{
-          damageHit(f,target,8.2*f.damageMul,245*f.face,-38);
-          spawnImpact(target.x,target.y,'hit');
-        }
-      }
-    },135);
 
     comboEl.textContent='ドロップキック!';
     setTimeout(()=>{if(comboEl.textContent==='ドロップキック!')comboEl.textContent='';},620);
@@ -6430,6 +6414,37 @@
       }
     }
 
+    if(f.specialType==='lilithDropKick'){
+      const other=f.isPlayer?enemy:player;
+      // 横移動している間ずっと両足側に攻撃判定を持たせる。
+      // 一度ヒット／ガードしたら同じ技中の再ヒットはしない。
+      if(other && !f.lilithDropHitDone){
+        const dir=f.face||1;
+        const elapsed=(performance.now()-(f.lilithDropStart||performance.now()))/1000;
+        // 開始直後から終了直前まで有効。足先は進行方向へ少し長め。
+        if(elapsed>=.03 && f.specialT>.08){
+          const footX=f.x+dir*56;
+          const footY=f.y+2;
+          const hitX=Math.abs(other.x-footX)<other.radius+44;
+          const hitY=Math.abs(other.y-footY)<other.radius+46;
+          // 相手が身体の真後ろにいる場合は当てない。
+          const forward=(other.x-f.x)*dir>-18;
+          if(hitX && hitY && forward){
+            f.lilithDropHitDone=true;
+            f.lilithDropHitAt=performance.now();
+            f.vx*=.22;
+            if(other.guard){
+              spawnImpact(other.x,other.y,'guard');
+              other.vx+=dir*55;
+            }else{
+              damageHit(f,other,8.2*f.damageMul,245*dir,-38);
+              spawnImpact(other.x,other.y,'hit');
+            }
+          }
+        }
+      }
+    }
+
     if(f.specialType==='lilithBackSpin'){
       const other=f.isPlayer?enemy:player;
       const elapsed=(performance.now()-(f.lilithSpinStartTime||performance.now()))/1000;
@@ -8474,58 +8489,63 @@ function drawBackground(dt){
         ctx.strokeStyle='rgba(205,116,255,.78)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,q.r+2,0,Math.PI*2);ctx.stroke();
         ctx.fillStyle='rgba(255,230,255,.75)';ctx.beginPath();ctx.ellipse(-q.r*.28,-q.r*.33,q.r*.22,q.r*.11,-.6,0,Math.PI*2);ctx.fill();
       }else if(q.style==='spinCutterBlade'){
-        // カワズさん専用：矢印っぽい形は廃止。
-        // 参考画像のような、太く丸い「C字／フック状」の水圧光を高速回転させる。
+        // カワズさん専用：
+        // 「視力検査のC」に見えないよう、先頭は丸い水の塊、後ろへ行くほど細くなる流線型。
         ctx.rotate(q.spin||0);
         ctx.lineCap='round';
         ctx.lineJoin='round';
 
-        // 外側の大きな水色フック
-        ctx.globalAlpha=.34;
-        ctx.strokeStyle='#5cc8ff';
-        ctx.lineWidth=17;
-        ctx.shadowColor='#86efff';
-        ctx.shadowBlur=22;
-        ctx.beginPath();
-        ctx.moveTo(-20,13);
-        ctx.bezierCurveTo(-30,-3,-22,-23,-3,-27);
-        ctx.bezierCurveTo(15,-31,29,-19,30,-2);
-        ctx.bezierCurveTo(31,10,27,19,21,27);
-        ctx.stroke();
-
-        // 中央の濃い青い芯。先端は尖らせず、丸いまま。
-        ctx.globalAlpha=.76;
-        ctx.strokeStyle='#27a5ef';
-        ctx.lineWidth=10;
-        ctx.shadowColor='#63dcff';
-        ctx.shadowBlur=14;
-        ctx.beginPath();
-        ctx.moveTo(-18,11);
-        ctx.bezierCurveTo(-25,-4,-18,-18,-2,-21);
-        ctx.bezierCurveTo(13,-24,23,-14,24,-1);
-        ctx.bezierCurveTo(25,8,22,15,17,21);
-        ctx.stroke();
-
-        // 内側に短い巻き込みの光。水が丸まりながら回転している感じ。
-        ctx.globalAlpha=.58;
-        ctx.strokeStyle='#dffcff';
-        ctx.lineWidth=4.2;
-        ctx.shadowColor='#ffffff';
-        ctx.shadowBlur=12;
-        ctx.beginPath();
-        ctx.moveTo(-13,8);
-        ctx.bezierCurveTo(-18,-2,-12,-11,-2,-13);
-        ctx.bezierCurveTo(5,-14,10,-10,12,-6);
-        ctx.stroke();
-
-        // 先端の白いハイライト
+        // 丸い頭。発光は控えめ。
+        ctx.globalCompositeOperation='source-over';
         ctx.globalAlpha=.72;
-        ctx.strokeStyle='#ffffff';
-        ctx.lineWidth=3;
+        const head=ctx.createRadialGradient(15,-17,2,15,-17,15);
+        head.addColorStop(0,'rgba(220,250,255,.94)');
+        head.addColorStop(.30,'rgba(92,205,255,.88)');
+        head.addColorStop(1,'rgba(24,135,228,.15)');
+        ctx.fillStyle=head;
+        ctx.shadowColor='rgba(94,220,255,.45)';
+        ctx.shadowBlur=9;
         ctx.beginPath();
-        ctx.moveTo(-18,8);
-        ctx.bezierCurveTo(-23,-4,-17,-15,-6,-19);
+        ctx.arc(15,-17,14,0,Math.PI*2);
+        ctx.fill();
+
+        // 頭から続く太い本流
+        ctx.globalAlpha=.76;
+        ctx.strokeStyle='rgba(44,165,238,.88)';
+        ctx.lineWidth=12;
+        ctx.shadowBlur=7;
+        ctx.beginPath();
+        ctx.moveTo(13,-17);
+        ctx.bezierCurveTo(-2,-23,-20,-13,-25,2);
         ctx.stroke();
+
+        // 中間：少し細く
+        ctx.globalAlpha=.62;
+        ctx.strokeStyle='rgba(44,165,238,.78)';
+        ctx.lineWidth=8;
+        ctx.shadowBlur=5;
+        ctx.beginPath();
+        ctx.moveTo(-24,1);
+        ctx.bezierCurveTo(-28,12,-23,22,-13,27);
+        ctx.stroke();
+
+        // しっぽ：細く、光も弱く
+        ctx.globalAlpha=.42;
+        ctx.strokeStyle='rgba(54,157,226,.65)';
+        ctx.lineWidth=4;
+        ctx.shadowBlur=2;
+        ctx.beginPath();
+        ctx.moveTo(-13,27);
+        ctx.bezierCurveTo(-5,31,3,31,10,27);
+        ctx.stroke();
+
+        // 頭の内側だけ小さな白ハイライト
+        ctx.globalAlpha=.55;
+        ctx.fillStyle='rgba(255,255,255,.88)';
+        ctx.shadowBlur=0;
+        ctx.beginPath();
+        ctx.ellipse(11,-21,4.5,2.5,-.5,0,Math.PI*2);
+        ctx.fill();
       }else if(q.style==='spinBlade'){
         // 水圧カッターを縦方向に潰した、薄い高速刃。
         ctx.rotate(q.spin||0);ctx.scale(1.35,.48);
