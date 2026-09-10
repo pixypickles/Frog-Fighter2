@@ -472,6 +472,12 @@
       if(card)grid.appendChild(card);
     });
 
+    // ルシファーさん：目の周りは対戦画面と同じ青系へ統一。
+    const lucifer=grid.querySelector('.fighter-card[data-fighter="black"] .fighter-emoji');
+    if(lucifer){
+      lucifer.style.setProperty('--frog-eye-bump','#2798e8');
+    }
+
     // ベルゼブブさんは古いHTML/CSSが残っていても、この色へ強制。
     const beel=grid.querySelector('.fighter-card[data-fighter="beelzebub"] .fighter-emoji');
     if(beel){
@@ -913,7 +919,7 @@
         limb:'#333b46',
         light:'#7fdff2',
         belly:'#bdeff7',
-        eyeBump:'#8de9f7'
+        eyeBump:'#2798e8'
       };
     }
     if(type==='purple'){
@@ -5105,26 +5111,30 @@
     setTimeout(()=>{
       if(gameOver || !f) return;
       const speed=opts.speed||285;
-      const angle=(opts.angle||0)*Math.PI/180;
-      const shot={
-        owner:f, x:f.x+dir*(opts.offsetX||58), y:f.y+(opts.offsetY||0),
-        vx:dir*Math.cos(angle)*speed, vy:Math.sin(angle)*speed,
-        r:opts.r||13,
-        // v0.4.2: 弾は速度差で不公平にならないよう、通常は時間切れで消さない。
-        // maxAge は画面外に出られない等の異常時だけ使う長い安全寿命。
-        age:0, maxAge:opts.maxAge||18, t:1, life:1,
-        damage:opts.damage||4.0, name, color:opts.color||'aqua',
-        reflected:0, hit:false, spin:0,
-        style:opts.style||opts.color||'aqua',
-        poisonDuration:opts.poisonDuration||0,
-        curve:opts.curve||0,
-        // カープ水圧カッターの上/下で刃の絵も反転させる。
-        arcFlip: opts.arcFlip || ((opts.curve||0) < 0 ? -1 : 1),
-        wobble:opts.wobble||0,
-        baseVy:Math.sin(angle)*speed,
-        maxReflect:opts.maxReflect||5
-      };
-      water2Shots.push(shot);
+      // angles を渡すと同時に複数方向へ発射できる。セラフィックショットは3方向。
+      const shotAngles=Array.isArray(opts.angles)&&opts.angles.length ? opts.angles : [opts.angle||0];
+      shotAngles.forEach(angleDeg=>{
+        const angle=angleDeg*Math.PI/180;
+        const shot={
+          owner:f, x:f.x+dir*(opts.offsetX||58), y:f.y+(opts.offsetY||0),
+          vx:dir*Math.cos(angle)*speed, vy:Math.sin(angle)*speed,
+          r:opts.r||13,
+          // v0.4.2: 弾は速度差で不公平にならないよう、通常は時間切れで消さない。
+          // maxAge は画面外に出られない等の異常時だけ使う長い安全寿命。
+          age:0, maxAge:opts.maxAge||18, t:1, life:1,
+          damage:opts.damage||4.0, name, color:opts.color||'aqua',
+          reflected:0, hit:false, spin:0,
+          style:opts.style||opts.color||'aqua',
+          poisonDuration:opts.poisonDuration||0,
+          curve:opts.curve||0,
+          // カープ水圧カッターの上/下で刃の絵も反転させる。
+          arcFlip: opts.arcFlip || ((opts.curve||0) < 0 ? -1 : 1),
+          wobble:opts.wobble||0,
+          baseVy:Math.sin(angle)*speed,
+          maxReflect:opts.maxReflect||5
+        };
+        water2Shots.push(shot);
+      });
       comboEl.textContent=name+'!';
       setTimeout(()=>{if(comboEl.textContent===name+'!')comboEl.textContent='';},520);
     },charge*1000);
@@ -5272,7 +5282,7 @@
           clearCommand();return specialSeraphicRay(f);
         }
         if(water2HeldDir(f,'back')){
-          clearCommand();return specialWater2Shot(f,{name:'セラフィックショット',attack:'punch',color:'seraphic',style:'seraphicShot',speed:310,damage:5.8,r:15,charge:.36,maxReflect:5});
+          clearCommand();return specialWater2Shot(f,{name:'セラフィックショット',attack:'punch',color:'seraphic',style:'seraphicShot',speed:310,damage:5.8,r:15,charge:.36,maxReflect:5,angles:[-18,0,18]});
         }
       }
     }
@@ -6224,7 +6234,7 @@
       if(enemy.type==='remiel' && enemy.specialT<=0){const roll=Math.random();if(!remielMirages.some(m=>m.owner===enemy)&&roll<dt*.10){remielMakeMirage(enemy,Math.random()<.5?'up':'down');return;}if(dist>190&&roll<dt*.28){specialRemielFrostShot(enemy);return;}if(dist<150&&roll<dt*.18){specialMirageKick(enemy);return;}if(dist<115&&roll<dt*.10){specialAquaParry(enemy,false);return;}}
       if(enemy.type==='seraphiel' && enemy.specialT<=0){
         const roll=Math.random();
-        if(dist>220 && roll<dt*.22){specialWater2Shot(enemy,{name:'セラフィックショット',attack:'punch',color:'seraphic',style:'seraphicShot',speed:310,damage:5.8,r:15,charge:.36,maxReflect:5});return;}
+        if(dist>220 && roll<dt*.22){specialWater2Shot(enemy,{name:'セラフィックショット',attack:'punch',color:'seraphic',style:'seraphicShot',speed:310,damage:5.8,r:15,charge:.36,maxReflect:5,angles:[-18,0,18]});return;}
         if(dist>180 && roll<dt*.10){specialSeraphicRay(enemy);return;}
         if(dist<135 && roll<dt*.24){specialSeraphicKick(enemy);return;}
         if(dist<110 && roll<dt*.12){specialSeraphicUpper(enemy);return;}
